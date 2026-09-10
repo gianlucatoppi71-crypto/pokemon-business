@@ -26,9 +26,24 @@ function initInventory(){
 function renderInventory(){
   let html = `
     <h2>Inventory</h2>
-    <button onclick="addItem()">Add New Item</button>
+    <button onclick="showAddForm()">Add New Item</button>
     <button onclick="saveInventory()">Save Data</button>
     <button onclick="loadInventory()">Load Data</button>
+
+    <div id="addForm" class="hidden">
+      <h3>Add Item</h3>
+      <input id="newName" placeholder="Name">
+      <input id="newCategory" placeholder="Category">
+      <input id="newSupplier" placeholder="Supplier">
+      <input id="newBuy" type="number" step="0.01" placeholder="Buy cost">
+      <input id="newSell" type="number" step="0.01" placeholder="Sell price">
+      <input id="newQty" type="number" placeholder="Quantity">
+      <input id="newImg" placeholder="Image URL">
+
+      <button onclick="addItem()">Save Item</button>
+      <button onclick="hideAddForm()">Cancel</button>
+    </div>
+
     <div id="inventoryList"></div>
   `;
 
@@ -61,8 +76,28 @@ function renderInventory(){
   });
 }
 
+function showAddForm(){
+  document.getElementById("addForm").classList.remove("hidden");
+}
+
+function hideAddForm(){
+  document.getElementById("addForm").classList.add("hidden");
+}
+
 function addItem(){
-  alert("Add item form coming next");
+  let item = {
+    name: document.getElementById("newName").value,
+    category: document.getElementById("newCategory").value,
+    supplier: document.getElementById("newSupplier").value,
+    buy: parseFloat(document.getElementById("newBuy").value),
+    sell: parseFloat(document.getElementById("newSell").value),
+    qty: parseInt(document.getElementById("newQty").value),
+    img: document.getElementById("newImg").value
+  };
+
+  inventoryData.push(item);
+  hideAddForm();
+  renderInventory();
 }
 
 function editItem(index){
@@ -76,7 +111,7 @@ function deleteItem(index){
 
 function copyItem(index){
   let original = inventoryData[index];
-  let copy = JSON.parse(JSON.stringify(original)); // deep clone
+  let copy = JSON.parse(JSON.stringify(original));
   copy.name = original.name + " (Copy)";
   inventoryData.push(copy);
   renderInventory();
