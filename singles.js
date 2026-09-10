@@ -1,6 +1,6 @@
 function initSingles(){
   document.getElementById('singles').innerHTML = `
     <h2>Singles</h2>
-    <p>Singles page loaded.</p>
+    <p>Manage your single cards here.</p>
   `;
 }
