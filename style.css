@@ -1,0 +1,8 @@
+body { font-family: Arial; margin:0; background:#fafafa; }
+header { background:#222; color:#fff; padding:10px; }
+nav button { margin-right:8px; padding:6px 12px; cursor:pointer; }
+
+.view { padding:10px; }
+.hidden { display:none; }
+
+.summary-box { border:1px solid #ccc; padding:10px; margin:10px 0; background:#fff; }
