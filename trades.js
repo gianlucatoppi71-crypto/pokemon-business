@@ -1,6 +1,6 @@
-function initTrades(){
-  document.getElementById('trades').innerHTML = `
-    <h2>Trades</h2>
-    <p>Track your trades here.</p>
+function initSuppliers(){
+  document.getElementById('suppliers').innerHTML = `
+    <h2>Suppliers</h2>
+    <p>Manage your suppliers here.</p>
   `;
 }
