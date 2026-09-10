@@ -36,18 +36,18 @@
 <script src="chart.js"></script>
 
 <script>
-  function showView(id){
-    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-  }
+function showView(id){
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
 
-  window.onload = function(){
-    initInventory();
-    initSingles();
-    initTrades();
-    initSuppliers();
-    initSummary();
-  };
+window.onload = function(){
+  initInventory();
+  initSingles();
+  initTrades();
+  initSuppliers();
+  initSummary();
+};
 </script>
 
 </body>
