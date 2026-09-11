@@ -1,97 +1,26 @@
 function initInventory(){
-  const div = document.getElementById("inventoryContainer");
+  const div = document.getElementById("inventory");
   div.innerHTML = `
     <h2>Inventory</h2>
-    <button onclick="addItem()">Add Product</button>
+    <button onclick="addItem()">Add Item</button>
     <div id="invList"></div>
   `;
   renderInventory();
 }
 
 function addItem(){
-  const name = prompt("Product name:");
-  const type = prompt("Type (Booster, Single, ETB, Accessory):");
-  const cost = prompt("Cost (£):");
-  const resale = prompt("Resale (£):");
-  const stock = prompt("Stock quantity:");
-  const image = prompt("Image URL:");
-
-  inventory.push({
-    name,
-    type,
-    cost,
-    resale,
-    stock,
-    image
-  });
-
+  const name = prompt("Item name:");
+  const qty = prompt("Quantity:");
+  inventory.push({name, qty});
   renderInventory();
-}
-
-function editItem(index){
-  const item = inventory[index];
-
-  const name = prompt("Product name:", item.name);
-  const type = prompt("Type:", item.type);
-  const cost = prompt("Cost (£):", item.cost);
-  const resale = prompt("Resale (£):", item.resale);
-  const stock = prompt("Stock quantity:", item.stock);
-  const image = prompt("Image URL:", item.image);
-
-  inventory[index] = { name, type, cost, resale, stock, image };
-  renderInventory();
-}
-
-function copyItem(index){
-  const item = inventory[index];
-  inventory.push({ ...item });
-  renderInventory();
-}
-
-function deleteItem(index){
-  if(confirm("Delete this item?")){
-    inventory.splice(index, 1);
-    renderInventory();
-  }
 }
 
 function renderInventory(){
   const list = document.getElementById("invList");
-
-  list.innerHTML = inventory.map((item, index) => `
-    <div class="productCard">
-
-      <img src="${item.image}" class="productImg">
-
-      <div class="productInfo">
-        <h3>${item.name}</h3>
-        <p><strong>Type:</strong> ${item.type}</p>
-        <p><strong>Cost:</strong> £${item.cost}</p>
-        <p><strong>Resale:</strong> £${item.resale}</p>
-        <p><strong>Profit:</strong> £${item.resale - item.cost}</p>
-        <p><strong>Stock:</strong> ${item.stock}</p>
-      </div>
-
-      <div class="menuWrapper">
-        <button class="menuBtn">⋮</button>
-        <div class="menuPopup">
-          <div onclick="editItem(${index})">✏️ Edit</div>
-          <div onclick="copyItem(${index})">📄 Copy</div>
-          <div onclick="deleteItem(${index})">❌ Delete</div>
-        </div>
-      </div>
-
+  list.innerHTML = inventory.map(i => `
+    <div class="itemCard">
+      <h3>${i.name}</h3>
+      <p>Qty: ${i.qty}</p>
     </div>
   `).join("");
-
-  activateMenus();
-}
-
-function activateMenus(){
-  document.querySelectorAll(".menuBtn").forEach(btn => {
-    btn.onclick = () => {
-      const popup = btn.nextElementSibling;
-      popup.classList.toggle("showMenu");
-    };
-  });
 }

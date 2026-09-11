@@ -9,43 +9,24 @@
 <body>
 
 <header>
-  <div class="header-inner">
-    <h1>Gianluca Pokémon Business</h1>
-    <nav class="topnav">
-      <button onclick="showView('inventory')">Inventory</button>
-      <button onclick="showView('singles')">Singles</button>
-      <button onclick="showView('trades')">Trades</button>
-      <button onclick="showView('suppliers')">Suppliers</button>
-      <button onclick="showView('summary')">Summary</button>
-      <button onclick="showView('sales')">Sales</button>
-    </nav>
-  </div>
+  <h1>Gianluca Pokémon Business</h1>
+  <nav>
+    <button onclick="showView('inventory')">Inventory</button>
+    <button onclick="showView('singles')">Singles</button>
+    <button onclick="showView('trades')">Trades</button>
+    <button onclick="showView('suppliers')">Suppliers</button>
+    <button onclick="showView('summary')">Summary</button>
+    <button onclick="showView('sales')">Sales</button>
+  </nav>
 </header>
 
 <main>
-  <section id="inventory" class="view">
-    <div class="container" id="inventoryContainer"></div>
-  </section>
-
-  <section id="singles" class="view hidden">
-    <div class="container" id="singlesContainer"></div>
-  </section>
-
-  <section id="trades" class="view hidden">
-    <div class="container" id="tradesContainer"></div>
-  </section>
-
-  <section id="suppliers" class="view hidden">
-    <div class="container" id="suppliersContainer"></div>
-  </section>
-
-  <section id="summary" class="view hidden">
-    <div class="container" id="summaryContainer"></div>
-  </section>
-
-  <section id="sales" class="view hidden">
-    <div class="container" id="salesContainer"></div>
-  </section>
+  <section id="inventory" class="view"></section>
+  <section id="singles" class="view hidden"></section>
+  <section id="trades" class="view hidden"></section>
+  <section id="suppliers" class="view hidden"></section>
+  <section id="summary" class="view hidden"></section>
+  <section id="sales" class="view hidden"></section>
 </main>
 
 <script src="data.js"></script>
