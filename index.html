@@ -16,6 +16,7 @@
     <button onclick="showView('trades')">Trades</button>
     <button onclick="showView('suppliers')">Suppliers</button>
     <button onclick="showView('summary')">Summary</button>
+    <button onclick="showView('sales')">Sales</button> <!-- NEW PAGE -->
   </nav>
 </header>
 
@@ -25,8 +26,10 @@
   <section id="trades" class="view hidden"></section>
   <section id="suppliers" class="view hidden"></section>
   <section id="summary" class="view hidden"></section>
+  <section id="sales" class="view hidden"></section> <!-- NEW PAGE -->
 </main>
 
+<!-- Scripts -->
 <script src="data.js"></script>
 <script src="inventory.js"></script>
 <script src="singles.js"></script>
@@ -34,6 +37,7 @@
 <script src="suppliers.js"></script>
 <script src="summary.js"></script>
 <script src="chart.js"></script>
+<script src="sales.js"></script> <!-- NEW PAGE -->
 
 <script>
 function showView(id){
@@ -47,6 +51,7 @@ window.onload = function(){
   initTrades();
   initSuppliers();
   initSummary();
+  initSales(); // NEW PAGE
 };
 </script>
 
