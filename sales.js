@@ -1,116 +1,93 @@
-let salesData = [];
-
-function initSales(){
-  renderSales();
+/* Global layout */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #fafafa;
 }
 
-function renderSales(){
-  document.getElementById("sales").innerHTML = `
-    <h2>Sales</h2>
-
-    <button onclick="showSaleForm()">Add Sale</button>
-    <button onclick="exportSalesCSV()">Export Excel (CSV)</button>
-    <button onclick="exportSalesDOC()">Export Word (DOC)</button>
-
-    <div id="saleForm" class="hidden">
-      <h3>Add Sale</h3>
-
-      <input id="saleDate" type="date">
-      <input id="saleItem" placeholder="Item name">
-      <input id="salePrice" type="number" step="0.01" placeholder="Sale price">
-      <input id="salePayment" placeholder="Payment method (eBay, PayPal, Cash)">
-      <input id="saleCost" type="number" step="0.01" placeholder="Cost">
-
-      <button onclick="addSale()">Save Sale</button>
-      <button onclick="hideSaleForm()">Cancel</button>
-    </div>
-
-    <table class="salesTable">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Item</th>
-          <th>Sale Price</th>
-          <th>Payment Method</th>
-          <th>Cost</th>
-          <th>Profit</th>
-        </tr>
-      </thead>
-      <tbody id="salesRows"></tbody>
-    </table>
-  `;
-
-  updateSalesTable();
+header {
+  background: #222;
+  color: #fff;
+  padding: 10px;
 }
 
-function showSaleForm(){
-  document.getElementById("saleForm").classList.remove("hidden");
+nav button {
+  margin-right: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
 }
 
-function hideSaleForm(){
-  document.getElementById("saleForm").classList.add("hidden");
+.view {
+  padding: 10px;
 }
 
-function addSale(){
-  let date = document.getElementById("saleDate").value;
-  let item = document.getElementById("saleItem").value;
-  let price = parseFloat(document.getElementById("salePrice").value);
-  let payment = document.getElementById("salePayment").value;
-  let cost = parseFloat(document.getElementById("saleCost").value);
-  let profit = price - cost;
-
-  salesData.push({ date, item, price, payment, cost, profit });
-
-  hideSaleForm();
-  updateSalesTable();
+/* Hide sections */
+.hidden {
+  display: none;
 }
 
-function updateSalesTable(){
-  let rows = document.getElementById("salesRows");
-  rows.innerHTML = "";
-
-  salesData.forEach(sale => {
-    rows.innerHTML += `
-      <tr>
-        <td>${sale.date}</td>
-        <td>${sale.item}</td>
-        <td>£${sale.price.toFixed(2)}</td>
-        <td>${sale.payment}</td>
-        <td>£${sale.cost.toFixed(2)}</td>
-        <td>£${sale.profit.toFixed(2)}</td>
-      </tr>
-    `;
-  });
+/* Inventory item cards */
+.itemCard {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 6px;
 }
 
-function exportSalesCSV(){
-  let csv = "Date,Item,Sale Price,Payment Method,Cost,Profit\n";
-
-  salesData.forEach(s => {
-    csv += `${s.date},${s.item},${s.price},${s.payment},${s.cost},${s.profit}\n`;
-  });
-
-  let blob = new Blob([csv], { type: "text/csv" });
-  let url = URL.createObjectURL(blob);
-
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = "sales_record.csv";
-  a.click();
+.itemImg {
+  width: 160px;
+  margin: 10px 0;
+  border-radius: 4px;
 }
 
-function exportSalesDOC(){
-  let doc = "Sales Record\n\n";
+.itemCard button {
+  margin-right: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
 
-  salesData.forEach(s => {
-    doc += `Date: ${s.date}\nItem: ${s.item}\nSale Price: £${s.price}\nPayment: ${s.payment}\nCost: £${s.cost}\nProfit: £${s.profit}\n\n`;
-  });
+/* Add Item form */
+#addForm {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 6px;
+}
 
-  let blob = new Blob([doc], { type: "application/msword" });
-  let url = URL.createObjectURL(blob);
+#addForm input {
+  display: block;
+  margin: 6px 0;
+  padding: 6px;
+  width: 250px;
+}
 
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = "sales_record.doc";
-  a.click();
+/* SALES PAGE */
+.salesTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.salesTable th,
+.salesTable td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  background: #fff;
+}
+
+#saleForm {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 6px;
+}
+
+#saleForm input {
+  display: block;
+  margin: 6px 0;
+  padding: 6px;
+  width: 250px;
 }
