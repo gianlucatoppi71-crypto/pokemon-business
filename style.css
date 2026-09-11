@@ -1,133 +1,42 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f3f4f6;
-  color: #222;
+.menuWrapper {
+  position: relative;
+  margin-left: auto;
 }
 
-header {
-  background: #111827;
-  color: #fff;
-  padding: 12px 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.header-inner {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 26px;
-}
-
-.topnav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.topnav button {
-  background: #2563eb;
+.menuBtn {
+  background: #374151;
   color: white;
   border: none;
+  padding: 6px 10px;
   border-radius: 6px;
-  padding: 8px 14px;
-  font-size: 14px;
   cursor: pointer;
+  font-size: 18px;
 }
 
-.topnav button:hover {
-  background: #1d4ed8;
-}
-
-main {
-  padding: 20px 10px;
-}
-
-.view {
-  padding: 10px 0;
-}
-
-.hidden {
+.menuPopup {
+  position: absolute;
+  right: 0;
+  top: 35px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   display: none;
+  min-width: 120px;
+  z-index: 10;
 }
 
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-}
-
-.container h2 {
-  margin-top: 0;
-  font-size: 22px;
-  border-bottom: 2px solid #e5e7eb;
-  padding-bottom: 8px;
-  margin-bottom: 16px;
-}
-
-button {
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 7px 12px;
-  font-size: 14px;
+.menuPopup div {
+  padding: 8px 12px;
   cursor: pointer;
-}
-
-button:hover {
-  background: #1d4ed8;
-}
-
-.itemCard {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  padding: 14px;
-  margin: 12px 0;
-  border-radius: 8px;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.itemCard h3 {
-  margin: 0 0 6px 0;
-  font-size: 16px;
-}
-
-.itemCard p {
-  margin: 0;
-  font-size: 14px;
-  color: #4b5563;
-}
-
-.itemCard:hover {
-  transform: scale(1.01);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.salesTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
   font-size: 14px;
 }
 
-.salesTable th,
-.salesTable td {
-  border: 1px solid #e5e7eb;
-  padding: 8px;
-  text-align: left;
-}
-
-.salesTable th {
+.menuPopup div:hover {
   background: #f3f4f6;
-  font-weight: 600;
 }
+
+.showMenu {
+  display: block;
+}
+
