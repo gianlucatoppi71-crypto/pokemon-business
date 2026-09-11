@@ -1,1 +1,5 @@
-// Data storage will go here later
+let inventory = [];
+let singles = [];
+let trades = [];
+let suppliers = [];
+let sales = [];
