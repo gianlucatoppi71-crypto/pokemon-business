@@ -1,12 +1,11 @@
-// LOAD SAVED INVENTORY
+// LOAD INVENTORY
 let savedInventory = localStorage.getItem("inventoryData");
-if(savedInventory){
+if (savedInventory) {
   inventory = JSON.parse(savedInventory);
 } else {
   inventory = [];
 }
 
-// SAVE INVENTORY
 function saveInventory(){
   localStorage.setItem("inventoryData", JSON.stringify(inventory));
 }
@@ -24,12 +23,26 @@ function initInventory(){
 function addItem(){
   const name = prompt("Product name:");
   const type = prompt("Type:");
-  const cost = parseFloat(prompt("Cost (£):"));
-  const resale = parseFloat(prompt("Resale (£):"));
-  const stock = parseInt(prompt("Stock:"), 10);
+  const cost = parseFloat(prompt("Cost per item (£):"));
+  const stock = parseInt(prompt("How many in stock:"), 10);
+  const resale = parseFloat(prompt("Selling price (£):"));
+  const sold = parseInt(prompt("How many sold:", 10));
   const image = prompt("Image URL:");
 
-  inventory.push({ name, type, cost, resale, stock, image });
+  const profit = (resale - cost) * sold;
+  const stockLeft = stock - sold;
+
+  inventory.push({
+    name,
+    type,
+    cost,
+    stock,
+    resale,
+    sold,
+    profit,
+    stockLeft,
+    image
+  });
 
   saveInventory();
   renderInventory();
@@ -40,12 +53,26 @@ function editItem(index){
 
   const name = prompt("Product name:", item.name);
   const type = prompt("Type:", item.type);
-  const cost = parseFloat(prompt("Cost (£):", item.cost));
-  const resale = parseFloat(prompt("Resale (£):", item.resale));
-  const stock = parseInt(prompt("Stock:", item.stock), 10);
+  const cost = parseFloat(prompt("Cost per item (£):", item.cost));
+  const stock = parseInt(prompt("How many in stock:", item.stock), 10);
+  const resale = parseFloat(prompt("Selling price (£):", item.resale));
+  const sold = parseInt(prompt("How many sold:", item.sold), 10);
   const image = prompt("Image URL:", item.image);
 
-  inventory[index] = { name, type, cost, resale, stock, image };
+  const profit = (resale - cost) * sold;
+  const stockLeft = stock - sold;
+
+  inventory[index] = {
+    name,
+    type,
+    cost,
+    stock,
+    resale,
+    sold,
+    profit,
+    stockLeft,
+    image
+  };
 
   saveInventory();
   renderInventory();
@@ -75,10 +102,12 @@ function renderInventory(){
       <div class="productInfo">
         <h3>${item.name}</h3>
         <p>Type: ${item.type}</p>
-        <p>Cost: £${item.cost}</p>
-        <p>Resale: £${item.resale}</p>
-        <p>Profit: £${item.resale - item.cost}</p>
+        <p>Cost per item: £${item.cost.toFixed(2)}</p>
         <p>Stock: ${item.stock}</p>
+        <p>Selling price: £${item.resale.toFixed(2)}</p>
+        <p>Sold: ${item.sold}</p>
+        <p>Stock left: ${item.stockLeft}</p>
+        <p>Profit: £${item.profit.toFixed(2)}</p>
       </div>
 
       <div class="menuWrapper">
