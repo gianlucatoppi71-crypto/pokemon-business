@@ -218,3 +218,120 @@ button:hover {
 .taxLink:hover {
   background: #1d4ed8;
 }
+/* ============================
+   INVENTORY CARDS
+   ============================ */
+
+.productCard {
+  display: flex;
+  gap: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 18px;
+  margin: 18px 0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.productCard:hover {
+  transform: scale(1.01);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+}
+
+.productImg {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.productInfo h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.productInfo p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* ============================
+   INVENTORY MENU BUTTON
+   ============================ */
+
+.menuWrapper {
+  position: relative;
+  margin-left: auto;
+}
+
+.menuBtn {
+  background: #374151;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.menuPopup {
+  position: absolute;
+  right: 0;
+  top: 35px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: none;
+  min-width: 120px;
+  z-index: 10;
+}
+
+.menuPopup div {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.menuPopup div:hover {
+  background: #f3f4f6;
+}
+
+.showMenu {
+  display: block;
+}
+
+/* ============================
+   TAX BOX
+   ============================ */
+
+.taxBox {
+  margin-top: 25px;
+  padding: 20px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.taxBox h3 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.taxLink {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #2563eb;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.taxLink:hover {
+  background: #1d4ed8;
+}
