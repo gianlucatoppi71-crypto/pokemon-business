@@ -1,76 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Gianluca Pokémon Business</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gianluca Pokémon Business</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <div class="header-inner">
-    <h1>Gianluca Pokémon Business</h1>
-    <nav class="topnav">
-      <button onclick="showView('inventory')">Inventory</button>
-      <button onclick="showView('singles')">Singles</button>
-      <button onclick="showView('trades')">Trades</button>
-      <button onclick="showView('suppliers')">Suppliers</button>
-      <button onclick="showView('summary')">Summary</button>
-      <button onclick="showView('sales')">Sales</button>
-    </nav>
-  </div>
-</header>
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <h2 class="logo">Pokémon Business</h2>
 
-<main>
-  <section id="inventory" class="view">
-    <div class="container" id="inventoryContainer"></div>
-  </section>
+        <button class="nav-btn" onclick="loadPage('inventory')">Inventory</button>
+        <button class="nav-btn" onclick="loadPage('sales')">Sales</button>
+        <button class="nav-btn" onclick="loadPage('singles')">Singles</button>
+        <button class="nav-btn" onclick="loadPage('trades')">Trades</button>
+        <button class="nav-btn" onclick="loadPage('suppliers')">Suppliers</button>
+        <button class="nav-btn" onclick="loadPage('summary')">Summary</button>
+    </div>
 
-  <section id="singles" class="view hidden">
-    <div class="container" id="singlesContainer"></div>
-  </section>
+    <!-- MAIN CONTENT -->
+    <div id="content">
+        <h1>Welcome to Gianluca Pokémon Business</h1>
+        <p>Select a section from the sidebar.</p>
+    </div>
 
-  <section id="trades" class="view hidden">
-    <div class="container" id="tradesContainer"></div>
-  </section>
+    <!-- SCRIPTS -->
+    <script src="data.js"></script>
+    <script src="inventory.js"></script>
+    <script src="sales.js"></script>
+    <script src="singles.js"></script>
+    <script src="trades.js"></script>
+    <script src="suppliers.js"></script>
+    <script src="summary.js"></script>
 
-  <section id="suppliers" class="view hidden">
-    <div class="container" id="suppliersContainer"></div>
-  </section>
-
-  <section id="summary" class="view hidden">
-    <div class="container" id="summaryContainer"></div>
-  </section>
-
-  <section id="sales" class="view hidden">
-    <div class="container" id="salesContainer"></div>
-  </section>
-</main>
-
-<script src="data.js"></script>
-<script src="inventory.js"></script>
-<script src="singles.js"></script>
-<script src="trades.js"></script>
-<script src="suppliers.js"></script>
-<script src="summary.js"></script>
-<script src="sales.js"></script>
-
-<script>
-function showView(id){
-  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-}
-
-window.onload = function(){
-  initInventory();
-  initSingles();
-  initTrades();
-  initSuppliers();
-  initSummary();
-  initSales();
-};
-</script>
+    <script>
+        function loadPage(page) {
+            if (page === "inventory") loadInventory();
+            if (page === "sales") loadSales();
+            if (page === "singles") loadSingles();
+            if (page === "trades") loadTrades();
+            if (page === "suppliers") loadSuppliers();
+            if (page === "summary") loadSummary();
+        }
+    </script>
 
 </body>
 </html>
