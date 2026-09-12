@@ -1,15 +1,12 @@
+// LOAD SAVED INVENTORY
 let savedInventory = localStorage.getItem("inventoryData");
 if(savedInventory){
   inventory = JSON.parse(savedInventory);
 } else {
   inventory = [];
 }
-// Load saved inventory
-let savedInventory = localStorage.getItem("inventoryData");
-if(savedInventory){
-  inventory = JSON.parse(savedInventory);
-}
 
+// SAVE INVENTORY
 function saveInventory(){
   localStorage.setItem("inventoryData", JSON.stringify(inventory));
 }
@@ -26,10 +23,10 @@ function initInventory(){
 
 function addItem(){
   const name = prompt("Product name:");
-  const type = prompt("Type (Booster, Single, ETB, Accessory):");
+  const type = prompt("Type:");
   const cost = parseFloat(prompt("Cost (£):"));
   const resale = parseFloat(prompt("Resale (£):"));
-  const stock = parseInt(prompt("Stock quantity:"), 10);
+  const stock = parseInt(prompt("Stock:"), 10);
   const image = prompt("Image URL:");
 
   inventory.push({ name, type, cost, resale, stock, image });
@@ -45,7 +42,7 @@ function editItem(index){
   const type = prompt("Type:", item.type);
   const cost = parseFloat(prompt("Cost (£):", item.cost));
   const resale = parseFloat(prompt("Resale (£):", item.resale));
-  const stock = parseInt(prompt("Stock quantity:", item.stock), 10);
+  const stock = parseInt(prompt("Stock:", item.stock), 10);
   const image = prompt("Image URL:", item.image);
 
   inventory[index] = { name, type, cost, resale, stock, image };
@@ -55,8 +52,7 @@ function editItem(index){
 }
 
 function copyItem(index){
-  const item = inventory[index];
-  inventory.push({ ...item });
+  inventory.push({ ...inventory[index] });
   saveInventory();
   renderInventory();
 }
@@ -74,23 +70,23 @@ function renderInventory(){
 
   list.innerHTML = inventory.map((item, index) => `
     <div class="productCard">
-      <img src="${item.image}" class="productImg" alt="Product image">
+      <img src="${item.image}" class="productImg">
 
       <div class="productInfo">
         <h3>${item.name}</h3>
-        <p><strong>Type:</strong> ${item.type}</p>
-        <p><strong>Cost:</strong> £${item.cost.toFixed(2)}</p>
-        <p><strong>Resale:</strong> £${item.resale.toFixed(2)}</p>
-        <p><strong>Profit:</strong> £${(item.resale - item.cost).toFixed(2)}</p>
-        <p><strong>Stock:</strong> ${item.stock}</p>
+        <p>Type: ${item.type}</p>
+        <p>Cost: £${item.cost}</p>
+        <p>Resale: £${item.resale}</p>
+        <p>Profit: £${item.resale - item.cost}</p>
+        <p>Stock: ${item.stock}</p>
       </div>
 
       <div class="menuWrapper">
         <button class="menuBtn">⋮</button>
         <div class="menuPopup">
-          <div onclick="editItem(${index})">✏️ Edit</div>
-          <div onclick="copyItem(${index})">📄 Copy</div>
-          <div onclick="deleteItem(${index})">❌ Delete</div>
+          <div onclick="editItem(${index})">Edit</div>
+          <div onclick="copyItem(${index})">Copy</div>
+          <div onclick="deleteItem(${index})">Delete</div>
         </div>
       </div>
     </div>
@@ -102,8 +98,7 @@ function renderInventory(){
 function activateMenus(){
   document.querySelectorAll(".menuBtn").forEach(btn => {
     btn.onclick = () => {
-      const popup = btn.nextElementSibling;
-      popup.classList.toggle("showMenu");
+      btn.nextElementSibling.classList.toggle("showMenu");
     };
   });
 }
