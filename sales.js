@@ -45,11 +45,6 @@ function addSale(){
   const qty = parseInt(prompt("Quantity sold:"), 10);
   const date = new Date().toLocaleDateString();
 
-  if (!item || isNaN(cost) || isNaN(price) || isNaN(qty)) {
-    alert("Invalid input.");
-    return;
-  }
-
   const profit = (price - cost) * qty;
 
   sales.push({ item, cost, price, qty, profit, date, promo: false });
@@ -64,11 +59,6 @@ function addPromo(){
   const cost = parseFloat(prompt("Cost (£):"));
   const reason = prompt("Reason:");
   const date = new Date().toLocaleDateString();
-
-  if (!item || isNaN(cost)) {
-    alert("Invalid input.");
-    return;
-  }
 
   sales.push({
     item,
@@ -121,11 +111,6 @@ function editSale(index){
   const qty = parseInt(prompt("Quantity sold:", s.qty), 10);
   const date = s.date;
 
-  if (!item || isNaN(cost) || isNaN(price) || isNaN(qty)) {
-    alert("Invalid input.");
-    return;
-  }
-
   const profit = (price - cost) * qty;
 
   sales[index] = { item, cost, price, qty, profit, date, promo: false };
@@ -164,6 +149,5 @@ function renderTaxSummary(){
     <p>Total Sales: £${totalSales.toFixed(2)}</p>
     <p>Total Cost: £${totalCost.toFixed(2)}</p>
     <p>Total Profit: £${totalProfit.toFixed(2)}</p>
-    <p>HMRC info: remember to declare profits and promo expenses.</p>
   `;
 }
