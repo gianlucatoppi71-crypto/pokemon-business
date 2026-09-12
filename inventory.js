@@ -1,4 +1,4 @@
-/* ========== INVENTORY PAGE (WITH EDIT + DELETE + COPY) ========== */
+/* ========== INVENTORY PAGE (WITH EDIT + DELETE + COPY + CATEGORY DROPDOWN) ========== */
 
 function loadInventory() {
     const content = document.getElementById("content");
@@ -13,7 +13,35 @@ function loadInventory() {
             <input id="inv-name" type="text">
 
             <label>Category</label>
-            <input id="inv-category" type="text">
+            <select id="inv-category">
+                <option value="">Select category...</option>
+
+                <!-- Main Pokémon Product Types -->
+                <option value="Booster Box">Booster Box</option>
+                <option value="Booster Pack">Booster Pack</option>
+                <option value="Elite Trainer Box">Elite Trainer Box</option>
+                <option value="Blister">Blister</option>
+                <option value="Single Card">Single Card</option>
+                <option value="Promo">Promo</option>
+                <option value="Tin">Tin</option>
+                <option value="Collection Box">Collection Box</option>
+                <option value="Deck">Deck</option>
+                <option value="Bundle">Bundle</option>
+                <option value="Mystery Box">Mystery Box</option>
+
+                <!-- Japanese Products -->
+                <option value="Japanese Box">Japanese Box</option>
+                <option value="Japanese Pack">Japanese Pack</option>
+
+                <!-- Accessories -->
+                <option value="Sleeves">Sleeves</option>
+                <option value="Binder">Binder</option>
+                <option value="Toploaders">Toploaders</option>
+                <option value="Accessory">Accessory (General)</option>
+
+                <!-- Misc -->
+                <option value="Other">Other</option>
+            </select>
 
             <label>Cost Price (£)</label>
             <input id="inv-cost" type="number" step="0.01">
@@ -139,4 +167,3 @@ function editInventoryItem(index) {
     saveDataToStorage();
     loadInventory();
 }
-
