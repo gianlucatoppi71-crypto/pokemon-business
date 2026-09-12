@@ -26,7 +26,7 @@ function addItem(){
   const cost = parseFloat(prompt("Cost per item (£):"));
   const stock = parseInt(prompt("How many in stock:"), 10);
   const resale = parseFloat(prompt("Selling price (£):"));
-  const sold = parseInt(prompt("How many sold:", 10));
+  const sold = parseInt(prompt("How many sold:"), 10);
   const image = prompt("Image URL:");
 
   const profit = (resale - cost) * sold;
