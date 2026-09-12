@@ -1,4 +1,4 @@
-// Load saved inventory from localStorage
+// Load saved inventory
 let savedInventory = localStorage.getItem("inventoryData");
 if(savedInventory){
   inventory = JSON.parse(savedInventory);
@@ -21,19 +21,12 @@ function initInventory(){
 function addItem(){
   const name = prompt("Product name:");
   const type = prompt("Type (Booster, Single, ETB, Accessory):");
-  const cost = prompt("Cost (£):");
-  const resale = prompt("Resale (£):");
-  const stock = prompt("Stock quantity:");
+  const cost = parseFloat(prompt("Cost (£):"));
+  const resale = parseFloat(prompt("Resale (£):"));
+  const stock = parseInt(prompt("Stock quantity:"), 10);
   const image = prompt("Image URL:");
 
-  inventory.push({
-    name,
-    type,
-    cost,
-    resale,
-    stock,
-    image
-  });
+  inventory.push({ name, type, cost, resale, stock, image });
 
   saveInventory();
   renderInventory();
@@ -44,9 +37,9 @@ function editItem(index){
 
   const name = prompt("Product name:", item.name);
   const type = prompt("Type:", item.type);
-  const cost = prompt("Cost (£):", item.cost);
-  const resale = prompt("Resale (£):", item.resale);
-  const stock = prompt("Stock quantity:", item.stock);
+  const cost = parseFloat(prompt("Cost (£):", item.cost));
+  const resale = parseFloat(prompt("Resale (£):", item.resale));
+  const stock = parseInt(prompt("Stock quantity:", item.stock), 10);
   const image = prompt("Image URL:", item.image);
 
   inventory[index] = { name, type, cost, resale, stock, image };
@@ -75,15 +68,14 @@ function renderInventory(){
 
   list.innerHTML = inventory.map((item, index) => `
     <div class="productCard">
-
-      <img src="${item.image}" class="productImg">
+      <img src="${item.image}" class="productImg" alt="Product image">
 
       <div class="productInfo">
         <h3>${item.name}</h3>
         <p><strong>Type:</strong> ${item.type}</p>
-        <p><strong>Cost:</strong> £${item.cost}</p>
-        <p><strong>Resale:</strong> £${item.resale}</p>
-        <p><strong>Profit:</strong> £${item.resale - item.cost}</p>
+        <p><strong>Cost:</strong> £${item.cost.toFixed(2)}</p>
+        <p><strong>Resale:</strong> £${item.resale.toFixed(2)}</p>
+        <p><strong>Profit:</strong> £${(item.resale - item.cost).toFixed(2)}</p>
         <p><strong>Stock:</strong> ${item.stock}</p>
       </div>
 
@@ -95,7 +87,6 @@ function renderInventory(){
           <div onclick="deleteItem(${index})">❌ Delete</div>
         </div>
       </div>
-
     </div>
   `).join("");
 
