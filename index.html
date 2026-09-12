@@ -9,51 +9,52 @@
 <body>
 
 <header>
-  <h1>Gianluca Pokémon Business</h1>
-  <nav>
-    <button onclick="showView('inventory')">Inventory</button>
-    <button onclick="showView('sales')">Sales</button>
-    <button onclick="showView('singles')">Singles</button>
-    <button onclick="showView('trades')">Trades</button>
-    <button onclick="showView('suppliers')">Suppliers</button>
-    <button onclick="showView('summary')">Summary</button>
-  </nav>
+  <div class="header-inner">
+    <h1>Gianluca Pokémon Business</h1>
+    <nav class="topnav">
+      <button onclick="showView('inventory')">Inventory</button>
+      <button onclick="showView('singles')">Singles</button>
+      <button onclick="showView('trades')">Trades</button>
+      <button onclick="showView('suppliers')">Suppliers</button>
+      <button onclick="showView('summary')">Summary</button>
+      <button onclick="showView('sales')">Sales</button>
+    </nav>
+  </div>
 </header>
 
 <main>
   <section id="inventory" class="view">
-    <div id="inventoryContainer"></div>
-  </section>
-
-  <section id="sales" class="view hidden">
-    <div id="salesContainer"></div>
+    <div class="container" id="inventoryContainer"></div>
   </section>
 
   <section id="singles" class="view hidden">
-    <div id="singlesContainer"></div>
+    <div class="container" id="singlesContainer"></div>
   </section>
 
   <section id="trades" class="view hidden">
-    <div id="tradesContainer"></div>
+    <div class="container" id="tradesContainer"></div>
   </section>
 
   <section id="suppliers" class="view hidden">
-    <div id="suppliersContainer"></div>
+    <div class="container" id="suppliersContainer"></div>
   </section>
 
   <section id="summary" class="view hidden">
-    <div id="summaryContainer"></div>
+    <div class="container" id="summaryContainer"></div>
+  </section>
+
+  <section id="sales" class="view hidden">
+    <div class="container" id="salesContainer"></div>
   </section>
 </main>
 
-<!-- FIXED SCRIPT TAGS -->
 <script src="data.js"></script>
 <script src="inventory.js"></script>
-<script src="sales.js"></script>
 <script src="singles.js"></script>
 <script src="trades.js"></script>
 <script src="suppliers.js"></script>
 <script src="summary.js"></script>
+<script src="sales.js"></script>
 
 <script>
 function showView(id){
@@ -63,11 +64,11 @@ function showView(id){
 
 window.onload = function(){
   initInventory();
-  initSales();
   initSingles();
   initTrades();
   initSuppliers();
   initSummary();
+  initSales();
 };
 </script>
 
