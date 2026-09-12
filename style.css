@@ -126,6 +126,83 @@ button:hover {
   padding: 8px;
   text-align: left;
 }
+.productCard {
+  display: flex;
+  gap: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 18px;
+  margin: 18px 0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.productCard:hover {
+  transform: scale(1.01);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+}
+
+.productImg {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.productInfo h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.productInfo p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.menuWrapper {
+  position: relative;
+  margin-left: auto;
+}
+
+.menuBtn {
+  background: #374151;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.menuPopup {
+  position: absolute;
+  right: 0;
+  top: 35px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: none;
+  min-width: 120px;
+  z-index: 10;
+}
+
+.menuPopup div {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.menuPopup div:hover {
+  background: #f3f4f6;
+}
+
+.showMenu {
+  display: block;
+}
 
 .salesTable th {
   background: #f3f4f6;
