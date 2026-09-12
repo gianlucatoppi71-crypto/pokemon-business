@@ -24,6 +24,26 @@ function addSale(){
   sales.push({item, price, date});
   renderSales();
 }
+function addPromo(){
+  const item = prompt("Promotional item name:");
+  const cost = parseFloat(prompt("Cost (£):"));
+  const reason = prompt("Reason for promotion (advertising, influencer, shop promotion):");
+  const date = new Date().toLocaleDateString();
+
+  sales.push({
+    item,
+    cost,
+    price: 0,
+    profit: -cost,
+    date,
+    promo: true,
+    reason
+  });
+
+  saveSales();
+  renderSales();
+  renderTaxSummary();
+}
 
 function renderSales(){
   const list = document.getElementById("salesList");
