@@ -1,3 +1,9 @@
+let savedInventory = localStorage.getItem("inventoryData");
+if(savedInventory){
+  inventory = JSON.parse(savedInventory);
+} else {
+  inventory = [];
+}
 // Load saved inventory
 let savedInventory = localStorage.getItem("inventoryData");
 if(savedInventory){
