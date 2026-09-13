@@ -1,111 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Flux TCG Collector App</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Flux TCG Collector App</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div id="sidebar">
-  <h2>Flux TCG</h2>
-  <button onclick="showPage('inventory')">Inventory</button>
-  <button onclick="showPage('sales')">Sales</button>
-  <button onclick="showPage('summary')">Summary</button>
-  <button onclick="showPage('suppliers')">Suppliers</button>
-  <button onclick="showPage('trades')">Trades</button>
+  <div id="sidebar">
+    <h2>Flux TCG</h2>
+    <button onclick="showPage('inventory')">Inventory</button>
+    <button onclick="showPage('sales')">Sales</button>
+    <button onclick="showPage('summary')">Summary</button>
+    <button onclick="showPage('suppliers')">Suppliers</button>
+    <button onclick="showPage('trades')">Trades</button>
 
-  <h3>Tax Summary</h3>
-  <div id="taxSummary"></div>
-</div>
-
-<div id="main">
-
-  <!-- INVENTORY PAGE -->
-  <div id="inventoryPage" class="page">
-    <h2>Inventory</h2>
-    <div id="inventoryList"></div>
+    <h3>Tax Summary</h3>
+    <div id="taxSummary"></div>
   </div>
 
-  <!-- SALES PAGE -->
-  <div id="salesPage" class="page" style="display:none;">
-    <h2>Sales</h2>
-    <div id="salesList"></div>
+  <div id="main">
+
+    <!-- INVENTORY PAGE -->
+    <div id="inventoryPage" class="page">
+      <h2>Inventory</h2>
+
+      <form id="inventoryForm" class="form">
+        <input id="invName" placeholder="Name">
+        <input id="invCategory" placeholder="Category">
+        <input id="invSupplier" placeholder="Supplier">
+        <input id="invBuyPrice" type="number" step="0.01" placeholder="Buy price">
+        <input id="invSellPrice" type="number" step="0.01" placeholder="Sell price">
+        <input id="invQuantity" type="number" placeholder="Quantity">
+        <input id="invMarketPrice" type="number" step="0.01" placeholder="UK market price">
+        <input id="invImage" placeholder="Image URL">
+        <input id="invNotes" placeholder="Notes">
+        <button type="submit">Save item</button>
+      </form>
+
+      <div id="inventoryList"></div>
+    </div>
+
+    <!-- SALES PAGE -->
+    <div id="salesPage" class="page" style="display:none;">
+      <h2>Sales</h2>
+      <div id="salesList"></div>
+    </div>
+
+    <!-- SUMMARY PAGE -->
+    <div id="summaryPage" class="page" style="display:none;">
+      <h2>Business Analytics</h2>
+
+      <div id="summaryStats"></div>
+
+      <h3>Profit by Category</h3>
+      <canvas id="categoryChart"></canvas>
+
+      <h3>Monthly Profit</h3>
+      <canvas id="monthlyChart"></canvas>
+
+      <h3>Best-selling items</h3>
+      <div id="bestSelling"></div>
+    </div>
+
+    <!-- SUPPLIERS PAGE -->
+    <div id="suppliersPage" class="page" style="display:none;">
+      <h2>Suppliers</h2>
+      <div id="suppliersList"></div>
+    </div>
+
+    <!-- TRADES PAGE -->
+    <div id="tradesPage" class="page" style="display:none;">
+      <h2>Trades</h2>
+      <div id="tradesList"></div>
+    </div>
+
   </div>
 
-  <!-- SUMMARY PAGE -->
-  <div id="summaryPage" class="page" style="display:none;">
-    <h2>Business Analytics</h2>
+  <script src="data.js"></script>
+  <script src="inventory.js"></script>
+  <script src="sales.js"></script>
+  <script src="summary.js"></script>
+  <script src="suppliers.js"></script>
+  <script src="trades.js"></script>
+  <script src="tax.js"></script>
 
-    <div id="summaryStats"></div>
+  <script>
+    function showPage(page) {
+      document.getElementById('inventoryPage').style.display =
+        page === 'inventory' ? 'block' : 'none';
 
-    <h3>Profit by Category</h3>
-    <canvas id="categoryChart"></canvas>
+      document.getElementById('salesPage').style.display =
+        page === 'sales' ? 'block' : 'none';
 
-    <h3>Monthly Profit</h3>
-    <canvas id="monthlyChart"></canvas>
+      document.getElementById('summaryPage').style.display =
+        page === 'summary' ? 'block' : 'none';
 
-    <h3>Best-selling items</h3>
-    <div id="bestSelling"></div>
-  </div>
+      document.getElementById('suppliersPage').style.display =
+        page === 'suppliers' ? 'block' : 'none';
 
-  <!-- SUPPLIERS PAGE -->
-  <div id="suppliersPage" class="page" style="display:none;">
-    <h2>Suppliers</h2>
-    <div id="suppliersList"></div>
-  </div>
+      document.getElementById('tradesPage').style.display =
+        page === 'trades' ? 'block' : 'none';
 
-  <!-- TRADES PAGE -->
-  <div id="tradesPage" class="page" style="display:none;">
-    <h2>Trades</h2>
-    <div id="tradesList"></div>
-  </div>
+      if (page === 'summary') renderSummary();
+      if (page === 'suppliers') renderSuppliers();
+      if (page === 'trades') renderTrades();
+    }
 
-</div>
-
-<!-- ========================= -->
-<!--  JAVASCRIPT FILES LOADED  -->
-<!-- ========================= -->
-
-<script src="data.js"></script>
-<script src="inventory.js"></script>
-<script src="sales.js"></script>
-<script src="summary.js"></script>
-<script src="suppliers.js"></script>
-<script src="trades.js"></script>
-
-<!-- NEW TAX SYSTEM -->
-<script src="tax.js"></script>
-
-<script>
-  function showPage(page) {
-    document.getElementById('inventoryPage').style.display =
-      page === 'inventory' ? 'block' : 'none';
-
-    document.getElementById('salesPage').style.display =
-      page === 'sales' ? 'block' : 'none';
-
-    document.getElementById('summaryPage').style.display =
-      page === 'summary' ? 'block' : 'none';
-
-    document.getElementById('suppliersPage').style.display =
-      page === 'suppliers' ? 'block' : 'none';
-
-    document.getElementById('tradesPage').style.display =
-      page === 'trades' ? 'block' : 'none';
-
-    if (page === 'summary') renderSummary();
-    if (page === 'suppliers') renderSuppliers();
-    if (page === 'trades') renderTrades();
-  }
-
-  // INITIAL LOAD
-  showPage('inventory');
-  renderInventory();
-  renderSalesInventory();
-  renderTaxSummary();
-</script>
+    showPage('inventory');
+    renderInventory();
+    renderSalesInventory();
+    renderTaxSummary();
+  </script>
 
 </body>
 </html>
