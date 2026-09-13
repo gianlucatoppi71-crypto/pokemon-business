@@ -1,26 +1,37 @@
 function initSales(){
-  const div = document.getElementById("salesContainer");
+  const div = document.getElementById("sales");
   div.innerHTML = `
     <h2>Sales</h2>
     <button onclick="addSale()">Add Sale</button>
-    <div id="salesList"></div>
+    <table class="salesTable">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Price</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="salesList"></tbody>
+    </table>
   `;
   renderSales();
 }
 
 function addSale(){
   const item = prompt("Item sold:");
-  const price = prompt("Sale price:");
-  sales.push({item, price});
+  const price = prompt("Price:");
+  const date = new Date().toLocaleDateString();
+  sales.push({item, price, date});
   renderSales();
 }
 
 function renderSales(){
   const list = document.getElementById("salesList");
   list.innerHTML = sales.map(s => `
-    <div class="itemCard">
-      <h3>${s.item}</h3>
-      <p>£${s.price}</p>
-    </div>
+    <tr>
+      <td>${s.item}</td>
+      <td>£${s.price}</td>
+      <td>${s.date}</td>
+    </tr>
   `).join("");
 }

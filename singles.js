@@ -1,5 +1,5 @@
 function initSingles(){
-  const div = document.getElementById("singlesContainer");
+  const div = document.getElementById("singles");
   div.innerHTML = `
     <h2>Singles</h2>
     <button onclick="addSingle()">Add Single</button>

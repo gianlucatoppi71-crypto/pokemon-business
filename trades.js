@@ -1,5 +1,5 @@
 function initTrades(){
-  const div = document.getElementById("tradesContainer");
+  const div = document.getElementById("trades");
   div.innerHTML = `
     <h2>Trades</h2>
     <button onclick="addTrade()">Add Trade</button>
