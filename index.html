@@ -1,117 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Flux TCG Collector App</title>
+  <title>Gianluca Pokémon Business</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <div id="sidebar">
-    <h2>Flux TCG</h2>
-    <button onclick="showPage('inventory')">Inventory</button>
-    <button onclick="showPage('sales')">Sales</button>
-    <button onclick="showPage('summary')">Summary</button>
-    <button onclick="showPage('suppliers')">Suppliers</button>
-    <button onclick="showPage('trades')">Trades</button>
-
-    <h3>Tax Summary</h3>
-    <div id="taxSummary"></div>
+<header>
+  <div class="header-inner">
+    <h1>Gianluca Pokémon Business</h1>
+    <nav class="topnav">
+      <button onclick="showView('inventory')">Inventory</button>
+      <button onclick="showView('singles')">Singles</button>
+      <button onclick="showView('trades')">Trades</button>
+      <button onclick="showView('suppliers')">Suppliers</button>
+      <button onclick="showView('summary')">Summary</button>
+      <button onclick="showView('sales')">Sales</button>
+    </nav>
   </div>
+</header>
 
-  <div id="main">
+<main>
+  <section id="inventory" class="view">
+    <div class="container" id="inventoryContainer"></div>
+  </section>
 
-    <!-- INVENTORY PAGE -->
-    <div id="inventoryPage" class="page">
-      <h2>Inventory</h2>
+  <section id="singles" class="view hidden">
+    <div class="container" id="singlesContainer"></div>
+  </section>
 
-      <form id="inventoryForm" class="form">
-        <input id="invName" placeholder="Name">
-        <input id="invCategory" placeholder="Category">
-        <input id="invSupplier" placeholder="Supplier">
-        <input id="invBuyPrice" type="number" step="0.01" placeholder="Buy price">
-        <input id="invSellPrice" type="number" step="0.01" placeholder="Sell price">
-        <input id="invQuantity" type="number" placeholder="Quantity">
-        <input id="invMarketPrice" type="number" step="0.01" placeholder="UK market price">
-        <input id="invImage" placeholder="Image URL">
-        <input id="invNotes" placeholder="Notes">
-        <button type="submit">Save item</button>
-      </form>
+  <section id="trades" class="view hidden">
+    <div class="container" id="tradesContainer"></div>
+  </section>
 
-      <div id="inventoryList"></div>
-    </div>
+  <section id="suppliers" class="view hidden">
+    <div class="container" id="suppliersContainer"></div>
+  </section>
 
-    <!-- SALES PAGE -->
-    <div id="salesPage" class="page" style="display:none;">
-      <h2>Sales</h2>
-      <div id="salesList"></div>
-    </div>
+  <section id="summary" class="view hidden">
+    <div class="container" id="summaryContainer"></div>
+  </section>
 
-    <!-- SUMMARY PAGE -->
-    <div id="summaryPage" class="page" style="display:none;">
-      <h2>Business Analytics</h2>
+  <section id="sales" class="view hidden">
+    <div class="container" id="salesContainer"></div>
+  </section>
+</main>
 
-      <div id="summaryStats"></div>
+<script src="data.js"></script>
+<script src="inventory.js"></script>
+<script src="singles.js"></script>
+<script src="trades.js"></script>
+<script src="suppliers.js"></script>
+<script src="summary.js"></script>
+<script src="sales.js"></script>
 
-      <h3>Profit by Category</h3>
-      <canvas id="categoryChart"></canvas>
+<script>
+function showView(id){
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
 
-      <h3>Monthly Profit</h3>
-      <canvas id="monthlyChart"></canvas>
-
-      <h3>Best-selling items</h3>
-      <div id="bestSelling"></div>
-    </div>
-
-    <!-- SUPPLIERS PAGE -->
-    <div id="suppliersPage" class="page" style="display:none;">
-      <h2>Suppliers</h2>
-      <div id="suppliersList"></div>
-    </div>
-
-    <!-- TRADES PAGE -->
-    <div id="tradesPage" class="page" style="display:none;">
-      <h2>Trades</h2>
-      <div id="tradesList"></div>
-    </div>
-
-  </div>
-
-  <script src="data.js"></script>
-  <script src="inventory.js"></script>
-  <script src="sales.js"></script>
-  <script src="summary.js"></script>
-  <script src="suppliers.js"></script>
-  <script src="trades.js"></script>
-  <script src="tax.js"></script>
-
-  <script>
-    function showPage(page) {
-      document.getElementById('inventoryPage').style.display =
-        page === 'inventory' ? 'block' : 'none';
-
-      document.getElementById('salesPage').style.display =
-        page === 'sales' ? 'block' : 'none';
-
-      document.getElementById('summaryPage').style.display =
-        page === 'summary' ? 'block' : 'none';
-
-      document.getElementById('suppliersPage').style.display =
-        page === 'suppliers' ? 'block' : 'none';
-
-      document.getElementById('tradesPage').style.display =
-        page === 'trades' ? 'block' : 'none';
-
-      if (page === 'summary') renderSummary();
-      if (page === 'suppliers') renderSuppliers();
-      if (page === 'trades') renderTrades();
-    }
-
-    showPage('inventory');
-    renderInventory();
-    renderSalesInventory();
-    renderTaxSummary();
-  </script>
+window.onload = function(){
+  initInventory();
+  initSingles();
+  initTrades();
+  initSuppliers();
+  initSummary();
+  initSales();
+};
+</script>
 
 </body>
 </html>

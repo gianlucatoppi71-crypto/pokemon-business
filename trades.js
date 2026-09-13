@@ -1,29 +1,26 @@
-function renderTrades() {
-  loadData();
+function initTrades(){
+  const div = document.getElementById("trades");
+  div.innerHTML = `
+    <h2>Trades</h2>
+    <button onclick="addTrade()">Add Trade</button>
+    <div id="tradeList"></div>
+  `;
+  renderTrades();
+}
 
-  const list = document.getElementById('tradesList');
-  if (!list) return;
+function addTrade(){
+  const card = prompt("Card traded:");
+  const value = prompt("Value:");
+  trades.push({card, value});
+  renderTrades();
+}
 
-  list.innerHTML = '';
-
-  if (!Array.isArray(tradesData) || tradesData.length === 0) {
-    list.innerHTML = '<p>No trades yet.</p>';
-    return;
-  }
-
-  tradesData.forEach(t => {
-    const div = document.createElement('div');
-    div.className = 'item-card';
-
-    div.innerHTML = `
-      <h3>${t.title || 'Trade'}</h3>
-      <div class="item-meta">
-        With: ${t.partner || '—'}<br>
-        Value: £${Number(t.value || 0).toFixed(2)}<br>
-        Notes: ${t.notes || '—'}
-      </div>
-    `;
-
-    list.appendChild(div);
-  });
+function renderTrades(){
+  const list = document.getElementById("tradeList");
+  list.innerHTML = trades.map(t => `
+    <div class="itemCard">
+      <h3>${t.card}</h3>
+      <p>Value: £${t.value}</p>
+    </div>
+  `).join("");
 }
