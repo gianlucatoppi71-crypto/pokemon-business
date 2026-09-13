@@ -1,5 +1,3 @@
-let inventory = [];   // REQUIRED
-
 function initInventory(){
   const div = document.getElementById("inventory");
   div.innerHTML = `
