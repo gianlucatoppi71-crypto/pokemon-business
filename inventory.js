@@ -1,7 +1,6 @@
-// INVENTORY PAGE LOGIC
+let editingIndex = null;
 
-let editingIndex = null; // null = adding, number = editing
-
+// RENDER INVENTORY
 function renderInventory() {
   loadData();
 
@@ -46,22 +45,11 @@ function renderInventory() {
         Notes: ${item.notes || '—'}
       </div>
 
-      <div style="margin-top:8px;">
-        <button class="sell-button" onclick="sellItem(${index})">
-          Sell from Sales page
-        </button>
-        <button class="sell-button" style="background:#ffa500;"
-                onclick="editItem(${index})">
-          Edit
-        </button>
-        <button class="sell-button" style="background:#888;"
-                onclick="copyItem(${index})">
-          Copy
-        </button>
-        <button class="sell-button" style="background:red; color:white;"
-                onclick="deleteItem(${index})">
-          Delete
-        </button>
+      <div style="margin-top:10px;">
+        <button class="sell-button" onclick="sellItem(${index})">Sell</button>
+        <button class="sell-button" style="background:#ffa500;" onclick="editItem(${index})">Edit</button>
+        <button class="sell-button" style="background:#888;" onclick="copyItem(${index})">Copy</button>
+        <button class="sell-button" style="background:red; color:white;" onclick="deleteItem(${index})">Delete</button>
       </div>
     `;
 
@@ -87,10 +75,8 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
   };
 
   if (editingIndex === null) {
-    // add new
     inventoryData.push(item);
   } else {
-    // update existing
     inventoryData[editingIndex] = item;
     editingIndex = null;
   }
@@ -106,8 +92,6 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
 // EDIT ITEM
 function editItem(index) {
   const item = inventoryData[index];
-  if (!item) return;
-
   editingIndex = index;
 
   document.getElementById('invName').value = item.name;
@@ -118,13 +102,12 @@ function editItem(index) {
   document.getElementById('invQuantity').value = item.quantity;
   document.getElementById('invMarketPrice').value = item.marketPrice;
   document.getElementById('invImage').value = item.image;
-  document.getElementById('invNotes').value = item.notes || '';
+  document.getElementById('invNotes').value = item.notes;
 }
 
 // COPY ITEM
 function copyItem(index) {
   const item = inventoryData[index];
-  if (!item) return;
 
   const copy = {
     ...item,
@@ -148,11 +131,10 @@ function deleteItem(index) {
   renderTaxSummary();
 }
 
-// SELL ITEM (MOVE TO SALES PAGE)
+// SELL ITEM
 function sellItem(index) {
   const item = inventoryData[index];
-  if (!item) return;
-  if (item.quantity <= 0) return;
+  if (!item || item.quantity <= 0) return;
 
   const { profitPerUnit } = calculateItemProfit(item);
 
@@ -166,9 +148,7 @@ function sellItem(index) {
   });
 
   item.quantity -= 1;
-  if (item.quantity <= 0) {
-    inventoryData.splice(index, 1);
-  }
+  if (item.quantity <= 0) inventoryData.splice(index, 1);
 
   saveData();
   renderInventory();
