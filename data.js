@@ -1,26 +1,29 @@
-// Central data storage
+// CENTRAL DATA STORAGE FOR INVENTORY + SALES
 
 let inventoryData = [];
 let salesData = [];
 
-// Load from localStorage
+// LOAD DATA FROM LOCALSTORAGE
 function loadData() {
   const inv = localStorage.getItem('inventoryData');
   const sales = localStorage.getItem('salesData');
+
   inventoryData = inv ? JSON.parse(inv) : [];
   salesData = sales ? JSON.parse(sales) : [];
 }
 
+// SAVE DATA TO LOCALSTORAGE
 function saveData() {
   localStorage.setItem('inventoryData', JSON.stringify(inventoryData));
   localStorage.setItem('salesData', JSON.stringify(salesData));
 }
 
-// Tax + profit helpers
 
+// PROFIT CALCULATIONS FOR EACH ITEM
 function calculateItemProfit(item) {
   const profitPerUnit = item.sellPrice - item.buyPrice;
   const totalProfit = profitPerUnit * item.quantity;
+
   const marginPercent = item.sellPrice > 0
     ? (profitPerUnit / item.sellPrice) * 100
     : 0;
@@ -32,23 +35,33 @@ function calculateItemProfit(item) {
   };
 }
 
+
+// TOTAL PROFIT (INVENTORY + SALES)
 function calculateTotalProfit() {
-  return inventoryData.reduce((sum, item) => {
+  const inventoryProfit = inventoryData.reduce((sum, item) => {
     const { totalProfit } = calculateItemProfit(item);
     return sum + totalProfit;
-  }, 0) + salesData.reduce((sum, sale) => sum + sale.profit, 0);
+  }, 0);
+
+  const salesProfit = salesData.reduce((sum, sale) => {
+    return sum + sale.profit;
+  }, 0);
+
+  return inventoryProfit + salesProfit;
 }
 
-// Very simplified UK tax estimate (for guidance only)
+
+// FULL UK TAX ESTIMATE (SOLE TRADER)
+// Includes:
+// - £1,000 trading allowance
+// - 20% income tax (basic rate)
+// - 9% NIC (simplified estimate)
 function estimateUkTax(totalProfit) {
-  const tradingAllowance = 1000; // £1,000 allowance
+  const tradingAllowance = 1000;
   const taxableProfit = Math.max(0, totalProfit - tradingAllowance);
 
-  // Assume basic rate 20% on taxable profit
-  const incomeTax = taxableProfit * 0.20;
-
-  // Rough NIC estimate (not exact): 9% on taxable profit
-  const nic = taxableProfit * 0.09;
+  const incomeTax = taxableProfit * 0.20; // 20% basic rate
+  const nic = taxableProfit * 0.09;       // simplified NIC estimate
 
   const totalTax = incomeTax + nic;
   const netProfit = totalProfit - totalTax;
@@ -63,8 +76,11 @@ function estimateUkTax(totalProfit) {
   };
 }
 
+
+// RENDER TAX SUMMARY IN SIDEBAR
 function renderTaxSummary() {
   loadData();
+
   const totalProfit = calculateTotalProfit();
   const tax = estimateUkTax(totalProfit);
 
@@ -75,13 +91,14 @@ function renderTaxSummary() {
     Total profit: £${totalProfit.toFixed(2)}<br>
     Trading allowance: £${tax.tradingAllowance.toFixed(2)}<br>
     Taxable profit: £${tax.taxableProfit.toFixed(2)}<br>
-    Estimated income tax (20%): £${tax.incomeTax.toFixed(2)}<br>
-    Estimated NIC (9%): £${tax.nic.toFixed(2)}<br>
-    Estimated total tax: £${tax.totalTax.toFixed(2)}<br>
-    Estimated net profit after tax: £${tax.netProfit.toFixed(2)}<br>
-    <small>Approximate only. Real UK tax depends on total income and HMRC rules.</small>
+    Income tax (20%): £${tax.incomeTax.toFixed(2)}<br>
+    NIC (9%): £${tax.nic.toFixed(2)}<br>
+    Total estimated tax: £${tax.totalTax.toFixed(2)}<br>
+    Net profit after tax: £${tax.netProfit.toFixed(2)}<br>
+    <small>Estimates only — final tax depends on HMRC rules.</small>
   `;
 }
 
-// Initial load
+
+// INITIAL LOAD
 loadData();
