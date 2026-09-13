@@ -42,9 +42,12 @@ function renderInventory() {
         <span><strong>Margin:</strong> ${marginPercent.toFixed(1)}%</span>
       </div>
 
-      <button class="sell-button" onclick="sellItem(${index})">
-        Sell from Sales page
-      </button>
+      <div class="item-actions">
+        <button onclick="sellItem(${index})">Sell</button>
+        <button onclick="editItem(${index})">Edit</button>
+        <button onclick="copyItem(${index})">Copy</button>
+        <button onclick="deleteItem(${index})">Delete</button>
+      </div>
     `;
 
     list.appendChild(div);
@@ -52,7 +55,7 @@ function renderInventory() {
 }
 
 
-// FIXED SELL FUNCTION — FULL SALE RECORD
+// SELL ITEM — FULL SALE RECORD
 function sellItem(index) {
   loadData();
 
@@ -90,6 +93,75 @@ function sellItem(index) {
   saveData();
   renderInventory();
   renderSalesInventory();
+  renderTaxSummary();
+}
+
+
+// DELETE ITEM
+function deleteItem(index) {
+  loadData();
+  inventoryData.splice(index, 1);
+  saveData();
+  renderInventory();
+  renderTaxSummary();
+}
+
+
+// COPY ITEM
+function copyItem(index) {
+  loadData();
+
+  const item = inventoryData[index];
+  const newItem = { ...item, id: crypto.randomUUID() };
+
+  inventoryData.push(newItem);
+  saveData();
+  renderInventory();
+  renderTaxSummary();
+}
+
+
+// EDIT ITEM
+function editItem(index) {
+  loadData();
+
+  const item = inventoryData[index];
+
+  const newName = prompt("New name:", item.name);
+  if (newName === null) return;
+
+  const newCategory = prompt("New category:", item.category);
+  if (newCategory === null) return;
+
+  const newSupplier = prompt("New supplier:", item.supplier);
+  if (newSupplier === null) return;
+
+  const newBuy = prompt("New buy price:", item.buyPrice);
+  if (newBuy === null) return;
+
+  const newSell = prompt("New sell price:", item.sellPrice);
+  if (newSell === null) return;
+
+  const newQty = prompt("New quantity:", item.quantity);
+  if (newQty === null) return;
+
+  const newMarket = prompt("New market price:", item.marketPrice);
+  if (newMarket === null) return;
+
+  const newNotes = prompt("New notes:", item.notes);
+  if (newNotes === null) return;
+
+  item.name = newName;
+  item.category = newCategory;
+  item.supplier = newSupplier;
+  item.buyPrice = parseFloat(newBuy);
+  item.sellPrice = parseFloat(newSell);
+  item.quantity = parseInt(newQty);
+  item.marketPrice = parseFloat(newMarket);
+  item.notes = newNotes;
+
+  saveData();
+  renderInventory();
   renderTaxSummary();
 }
 
