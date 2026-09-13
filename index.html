@@ -36,7 +36,22 @@
 
       <form id="inventoryForm">
         <input type="text" id="invName" placeholder="Product name" required>
-        <input type="text" id="invCategory" placeholder="Category" required>
+
+        <!-- CATEGORY DROPDOWN -->
+        <select id="invCategory" required>
+          <option value="">Select category</option>
+          <option value="Pokemon Singles">Pokémon Singles</option>
+          <option value="Sealed Booster Pack">Sealed Booster Pack</option>
+          <option value="Sealed Booster Box">Sealed Booster Box</option>
+          <option value="Elite Trainer Box">Elite Trainer Box</option>
+          <option value="Collection Box">Collection Box</option>
+          <option value="Promo Card">Promo Card</option>
+          <option value="Graded Card">Graded Card</option>
+          <option value="Japanese Product">Japanese Product</option>
+          <option value="Accessories">Accessories (Sleeves, Binders, etc.)</option>
+          <option value="Other">Other</option>
+        </select>
+
         <input type="text" id="invSupplier" placeholder="Supplier" required>
 
         <input type="number" step="0.01" id="invBuyPrice" placeholder="Buy price (£)" required>
