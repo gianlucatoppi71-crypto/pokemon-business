@@ -1,135 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css">
-
-  <!-- CHARTS LIBRARY -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<title>Flux TCG Collector App</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="app">
+<div id="sidebar">
+  <h2>Flux TCG</h2>
+  <button onclick="showPage('inventory')">Inventory</button>
+  <button onclick="showPage('sales')">Sales</button>
+  <button onclick="showPage('summary')">Summary</button>
+  <button onclick="showPage('suppliers')">Suppliers</button>
+  <button onclick="showPage('trades')">Trades</button>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <h2>Flux TCG</h2>
-
-    <nav>
-      <button onclick="showPage('inventory')">Inventory</button>
-      <button onclick="showPage('sales')">Sales</button>
-      <button onclick="showPage('summary')">Summary</button>
-      <button onclick="showPage('suppliers')">Suppliers</button>
-      <button onclick="showPage('trades')">Trades</button>
-    </nav>
-
-    <div class="tax-info">
-      <h3>Tax Summary</h3>
-      <div id="taxSummary"></div>
-    </div>
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <main class="main">
-
-    <!-- INVENTORY PAGE -->
-    <section id="inventoryPage" class="page">
-      <h1>Inventory</h1>
-
-      <form id="inventoryForm">
-        <input type="text" id="invName" placeholder="Product name" required>
-
-        <select id="invCategory" required>
-          <option value="">Select category</option>
-          <option value="Pokemon Singles">Pokémon Singles</option>
-          <option value="Sealed Booster Pack">Sealed Booster Pack</option>
-          <option value="Sealed Booster Box">Sealed Booster Box</option>
-          <option value="Elite Trainer Box">Elite Trainer Box</option>
-          <option value="Collection Box">Collection Box</option>
-          <option value="Promo Card">Promo Card</option>
-          <option value="Graded Card">Graded Card</option>
-          <option value="Japanese Product">Japanese Product</option>
-          <option value="Accessories">Accessories</option>
-          <option value="Other">Other</option>
-        </select>
-
-        <input type="text" id="invSupplier" placeholder="Supplier" required>
-
-        <input type="number" step="0.01" id="invBuyPrice" placeholder="Buy price (£)" required>
-        <input type="number" step="0.01" id="invSellPrice" placeholder="Sell price (£)" required>
-        <input type="number" id="invQuantity" placeholder="Quantity" required>
-
-        <input type="number" step="0.01" id="invMarketPrice" placeholder="UK market price (£)" required>
-
-        <input type="text" id="invImage" placeholder="Image URL" required>
-
-        <textarea id="invNotes" placeholder="Notes / strategy"></textarea>
-
-        <button type="submit">Add to inventory</button>
-      </form>
-
-      <div id="inventoryList"></div>
-    </section>
-
-    <!-- SALES PAGE -->
-    <section id="salesPage" class="page" style="display:none">
-      <h1>Sales</h1>
-      <div id="salesInventoryList"></div>
-    </section>
-
-    <!-- ADVANCED SUMMARY PAGE -->
-    <section id="summaryPage" class="page" style="display:none">
-      <h1>Business Analytics</h1>
-
-      <div class="summary-grid">
-        <div class="summary-box">
-          <div class="summary-title">Inventory Value</div>
-          <div id="summaryInventoryValue" class="summary-value">£0.00</div>
-        </div>
-
-        <div class="summary-box">
-          <div class="summary-title">Total Sales</div>
-          <div id="summaryTotalSales" class="summary-value">£0.00</div>
-        </div>
-
-        <div class="summary-box">
-          <div class="summary-title">Sales Profit</div>
-          <div id="summarySalesProfit" class="summary-value">£0.00</div>
-        </div>
-
-        <div class="summary-box">
-          <div class="summary-title">Singles Profit</div>
-          <div id="summarySinglesProfit" class="summary-value">£0.00</div>
-        </div>
-
-        <div class="summary-box">
-          <div class="summary-title">Trades Balance</div>
-          <div id="summaryTradesBalance" class="summary-value">£0.00</div>
-        </div>
-      </div>
-
-      <h2>Profit by Category</h2>
-      <canvas id="categoryChart"></canvas>
-
-      <h2>Monthly Profit</h2>
-      <canvas id="monthlyChart"></canvas>
-
-      <h2>Best‑selling items</h2>
-      <ul id="bestSellingList"></ul>
-
-      <h2>ROI by item</h2>
-      <canvas id="roiChart"></canvas>
-    </section>
-
-    <!-- SUPPLIERS PAGE -->
-    <section id="suppliersPage" class="page" style="display:none"></section>
-
-    <!-- TRADES PAGE -->
-    <section id="tradesPage" class="page" style="display:none"></section>
-
-  </main>
+  <h3>Tax Summary</h3>
+  <div id="taxSummary"></div>
 </div>
+
+<div id="main">
+
+  <!-- INVENTORY PAGE -->
+  <div id="inventoryPage" class="page">
+    <h2>Inventory</h2>
+    <div id="inventoryList"></div>
+  </div>
+
+  <!-- SALES PAGE -->
+  <div id="salesPage" class="page" style="display:none;">
+    <h2>Sales</h2>
+    <div id="salesList"></div>
+  </div>
+
+  <!-- SUMMARY PAGE -->
+  <div id="summaryPage" class="page" style="display:none;">
+    <h2>Business Analytics</h2>
+
+    <div id="summaryStats"></div>
+
+    <h3>Profit by Category</h3>
+    <canvas id="categoryChart"></canvas>
+
+    <h3>Monthly Profit</h3>
+    <canvas id="monthlyChart"></canvas>
+
+    <h3>Best-selling items</h3>
+    <div id="bestSelling"></div>
+  </div>
+
+  <!-- SUPPLIERS PAGE -->
+  <div id="suppliersPage" class="page" style="display:none;">
+    <h2>Suppliers</h2>
+    <div id="suppliersList"></div>
+  </div>
+
+  <!-- TRADES PAGE -->
+  <div id="tradesPage" class="page" style="display:none;">
+    <h2>Trades</h2>
+    <div id="tradesList"></div>
+  </div>
+
+</div>
+
+<!-- ========================= -->
+<!--  JAVASCRIPT FILES LOADED  -->
+<!-- ========================= -->
 
 <script src="data.js"></script>
 <script src="inventory.js"></script>
@@ -137,6 +74,9 @@
 <script src="summary.js"></script>
 <script src="suppliers.js"></script>
 <script src="trades.js"></script>
+
+<!-- NEW TAX SYSTEM -->
+<script src="tax.js"></script>
 
 <script>
   function showPage(page) {
@@ -160,6 +100,7 @@
     if (page === 'trades') renderTrades();
   }
 
+  // INITIAL LOAD
   showPage('inventory');
   renderInventory();
   renderSalesInventory();
