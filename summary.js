@@ -1,5 +1,5 @@
 function initSummary(){
-  const div = document.getElementById("summary");
+  const div = document.getElementById("summaryContainer");
   div.innerHTML = `
     <h2>Summary</h2>
     <p>Total Inventory Items: ${inventory.length}</p>

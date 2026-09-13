@@ -1,5 +1,5 @@
 function initSuppliers(){
-  const div = document.getElementById("suppliers");
+  const div = document.getElementById("suppliersContainer");
   div.innerHTML = `
     <h2>Suppliers</h2>
     <button onclick="addSupplier()">Add Supplier</button>
@@ -10,7 +10,7 @@ function initSuppliers(){
 
 function addSupplier(){
   const name = prompt("Supplier name:");
-  const contact = prompt("Contact:");
+  const contact = prompt("Contact info:");
   suppliers.push({name, contact});
   renderSuppliers();
 }
@@ -24,3 +24,4 @@ function renderSuppliers(){
     </div>
   `).join("");
 }
+

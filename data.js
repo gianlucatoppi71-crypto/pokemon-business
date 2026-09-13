@@ -1,3 +1,4 @@
+// Shared data storage
 let inventory = [];
 let singles = [];
 let trades = [];

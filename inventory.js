@@ -1,5 +1,5 @@
 function initInventory(){
-  const div = document.getElementById("inventory");
+  const div = document.getElementById("inventoryContainer");
   div.innerHTML = `
     <h2>Inventory</h2>
     <button onclick="addItem()">Add Item</button>
