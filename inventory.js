@@ -1,4 +1,35 @@
+// INVENTORY PAGE LOGIC — FINAL STABLE VERSION
+
 let editingIndex = null;
+
+// SAFETY: ensure item has all fields
+function normalizeItem(item) {
+  return {
+    id: item.id || crypto.randomUUID(),
+    name: item.name || "",
+    category: item.category || "",
+    supplier: item.supplier || "",
+    buyPrice: Number(item.buyPrice || 0),
+    sellPrice: Number(item.sellPrice || 0),
+    quantity: Number(item.quantity || 0),
+    marketPrice: Number(item.marketPrice || 0),
+    image: item.image || "",
+    notes: item.notes || ""
+  };
+}
+
+// SAFETY: calculate profit without crashing
+function calculateItemProfit(item) {
+  const buy = Number(item.buyPrice || 0);
+  const sell = Number(item.sellPrice || 0);
+  const qty = Number(item.quantity || 0);
+
+  const profitPerUnit = sell - buy;
+  const totalProfit = profitPerUnit * qty;
+  const marginPercent = buy > 0 ? (profitPerUnit / buy) * 100 : 0;
+
+  return { profitPerUnit, totalProfit, marginPercent };
+}
 
 // RENDER INVENTORY
 function renderInventory() {
@@ -9,10 +40,14 @@ function renderInventory() {
 
   list.innerHTML = '';
 
+  if (!Array.isArray(inventoryData)) inventoryData = [];
+
   if (inventoryData.length === 0) {
     list.innerHTML = '<p>No inventory yet. Add a product above.</p>';
     return;
   }
+
+  inventoryData = inventoryData.map(normalizeItem);
 
   inventoryData.forEach((item, index) => {
     const { profitPerUnit, totalProfit, marginPercent } = calculateItemProfit(item);
@@ -61,18 +96,18 @@ function renderInventory() {
 document.getElementById('inventoryForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
-  const item = {
+  const item = normalizeItem({
     id: editingIndex === null ? crypto.randomUUID() : inventoryData[editingIndex].id,
     name: document.getElementById('invName').value,
     category: document.getElementById('invCategory').value,
     supplier: document.getElementById('invSupplier').value,
-    buyPrice: Number(document.getElementById('invBuyPrice').value),
-    sellPrice: Number(document.getElementById('invSellPrice').value),
-    quantity: Number(document.getElementById('invQuantity').value),
-    marketPrice: Number(document.getElementById('invMarketPrice').value),
+    buyPrice: document.getElementById('invBuyPrice').value,
+    sellPrice: document.getElementById('invSellPrice').value,
+    quantity: document.getElementById('invQuantity').value,
+    marketPrice: document.getElementById('invMarketPrice').value,
     image: document.getElementById('invImage').value,
-    notes: document.getElementById('invNotes').value || ''
-  };
+    notes: document.getElementById('invNotes').value
+  });
 
   if (editingIndex === null) {
     inventoryData.push(item);
@@ -91,7 +126,7 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
 
 // EDIT ITEM
 function editItem(index) {
-  const item = inventoryData[index];
+  const item = normalizeItem(inventoryData[index]);
   editingIndex = index;
 
   document.getElementById('invName').value = item.name;
@@ -107,13 +142,13 @@ function editItem(index) {
 
 // COPY ITEM
 function copyItem(index) {
-  const item = inventoryData[index];
+  const item = normalizeItem(inventoryData[index]);
 
-  const copy = {
+  const copy = normalizeItem({
     ...item,
     id: crypto.randomUUID(),
     name: item.name + ' (copy)'
-  };
+  });
 
   inventoryData.push(copy);
   saveData();
@@ -133,8 +168,8 @@ function deleteItem(index) {
 
 // SELL ITEM
 function sellItem(index) {
-  const item = inventoryData[index];
-  if (!item || item.quantity <= 0) return;
+  const item = normalizeItem(inventoryData[index]);
+  if (item.quantity <= 0) return;
 
   const { profitPerUnit } = calculateItemProfit(item);
 
@@ -148,7 +183,12 @@ function sellItem(index) {
   });
 
   item.quantity -= 1;
-  if (item.quantity <= 0) inventoryData.splice(index, 1);
+
+  if (item.quantity <= 0) {
+    inventoryData.splice(index, 1);
+  } else {
+    inventoryData[index] = item;
+  }
 
   saveData();
   renderInventory();
