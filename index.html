@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Gianluca Pokémon Business</title>
+  <title>Flux TCG Collector App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,6 +12,7 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <h2>Flux TCG</h2>
+
     <nav>
       <button onclick="showPage('inventory')">Inventory</button>
       <button onclick="showPage('sales')">Sales</button>
@@ -34,11 +35,18 @@
         <input type="text" id="invName" placeholder="Product name" required>
         <input type="text" id="invCategory" placeholder="Category" required>
         <input type="text" id="invSupplier" placeholder="Supplier" required>
+
         <input type="number" step="0.01" id="invBuyPrice" placeholder="Buy price (£)" required>
         <input type="number" step="0.01" id="invSellPrice" placeholder="Sell price (£)" required>
         <input type="number" id="invQuantity" placeholder="Quantity" required>
+
         <input type="number" step="0.01" id="invMarketPrice" placeholder="UK market price (£)" required>
+
+        <!-- PRODUCT IMAGE -->
+        <input type="text" id="invImage" placeholder="Image URL (card picture)" required>
+
         <textarea id="invNotes" placeholder="Notes / strategy"></textarea>
+
         <button type="submit">Add to inventory</button>
       </form>
 
