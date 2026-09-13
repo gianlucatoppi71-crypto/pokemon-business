@@ -10,7 +10,12 @@
 
 <header>
   <div class="header-inner">
+
+    <!-- YOUR LOGO -->
+    <img src="logo.png" class="app-logo" alt="App Logo">
+
     <h1>Gianluca Pokémon Business</h1>
+
     <nav class="topnav">
       <button onclick="showView('inventory')">Inventory</button>
       <button onclick="showView('singles')">Singles</button>
@@ -18,11 +23,14 @@
       <button onclick="showView('suppliers')">Suppliers</button>
       <button onclick="showView('summary')">Summary</button>
       <button onclick="showView('sales')">Sales</button>
+      <button onclick="showView('portfolio')">Portfolio</button>
     </nav>
+
   </div>
 </header>
 
 <main>
+
   <section id="inventory" class="view">
     <div class="container" id="inventoryContainer"></div>
   </section>
@@ -46,8 +54,15 @@
   <section id="sales" class="view hidden">
     <div class="container" id="salesContainer"></div>
   </section>
+
+  <!-- NEW PORTFOLIO PAGE -->
+  <section id="portfolio" class="view hidden">
+    <div class="container" id="portfolioContainer"></div>
+  </section>
+
 </main>
 
+<!-- SCRIPTS -->
 <script src="data.js"></script>
 <script src="inventory.js"></script>
 <script src="singles.js"></script>
@@ -55,6 +70,7 @@
 <script src="suppliers.js"></script>
 <script src="summary.js"></script>
 <script src="sales.js"></script>
+<script src="portfolio.js"></script>
 
 <script>
 function showView(id){
@@ -69,6 +85,7 @@ window.onload = function(){
   initSuppliers();
   initSummary();
   initSales();
+  initPortfolio();
 };
 </script>
 
