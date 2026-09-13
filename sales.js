@@ -1,104 +1,33 @@
-/* ========== SALES PAGE ========== */
+function renderSalesInventory() {
+  loadData();
 
-function loadSales() {
-    const content = document.getElementById("content");
+  const list = document.getElementById('salesInventoryList');
+  if (!list) return;
 
-    content.innerHTML = `
-        <h1>Sales</h1>
+  list.innerHTML = '';
 
-        <div class="card">
-            <h2>Add Sale</h2>
+  if (salesData.length === 0) {
+    list.innerHTML = '<p>No sales recorded yet.</p>';
+    return;
+  }
 
-            <label>Date</label>
-            <input id="sale-date" type="date">
+  salesData.forEach((sale) => {
+    const div = document.createElement('div');
+    div.className = 'item-card';
 
-            <label>Item Name</label>
-            <input id="sale-item" type="text">
-
-            <label>Sale Price (£)</label>
-            <input id="sale-price" type="number" step="0.01">
-
-            <label>Cost (£)</label>
-            <input id="sale-cost" type="number" step="0.01">
-
-            <label>Payment Method</label>
-            <select id="sale-payment">
-                <option value="eBay">eBay</option>
-                <option value="PayPal">PayPal</option>
-                <option value="Cash">Cash</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-            </select>
-
-            <button class="action-btn" onclick="addSale()">Add Sale</button>
-        </div>
-
-        <h2>Sales History</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Item</th>
-                    <th>Sale (£)</th>
-                    <th>Cost (£)</th>
-                    <th>Profit (£)</th>
-                    <th>Payment</th>
-                </tr>
-            </thead>
-            <tbody id="sales-table"></tbody>
-        </table>
+    div.innerHTML = `
+      <div class="item-header">
+        <h3>${sale.name}</h3>
+        <span class="item-meta">${new Date(sale.date).toLocaleString()}</span>
+      </div>
+      <div class="item-meta">
+        Sold price: £${sale.sellPrice.toFixed(2)}
+      </div>
+      <div class="item-profit">
+        <span style="color:lime">Profit: £${sale.profit.toFixed(2)}</span>
+      </div>
     `;
 
-    renderSalesTable();
-}
-
-/* ========== ADD SALE ========== */
-
-function addSale() {
-    const date = document.getElementById("sale-date").value;
-    const item = document.getElementById("sale-item").value.trim();
-    const price = parseFloat(document.getElementById("sale-price").value);
-    const cost = parseFloat(document.getElementById("sale-cost").value);
-    const payment = document.getElementById("sale-payment").value;
-
-    if (!date || !item || isNaN(price) || isNaN(cost)) {
-        alert("Please fill all fields correctly.");
-        return;
-    }
-
-    const profit = price - cost;
-
-    pokemonBusinessData.sales.push({
-        date,
-        item,
-        price,
-        cost,
-        profit,
-        payment
-    });
-
-    saveDataToStorage();
-    loadSales();
-}
-
-/* ========== RENDER SALES TABLE ========== */
-
-function renderSalesTable() {
-    const table = document.getElementById("sales-table");
-    table.innerHTML = "";
-
-    pokemonBusinessData.sales.forEach(sale => {
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${sale.date}</td>
-            <td>${sale.item}</td>
-            <td>£${sale.price.toFixed(2)}</td>
-            <td>£${sale.cost.toFixed(2)}</td>
-            <td>£${sale.profit.toFixed(2)}</td>
-            <td>${sale.payment}</td>
-        `;
-
-        table.appendChild(row);
-    });
+    list.appendChild(div);
+  });
 }
