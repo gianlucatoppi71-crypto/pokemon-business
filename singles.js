@@ -1,26 +1,85 @@
-function initSingles(){
-  const div = document.getElementById("singles");
-  div.innerHTML = `
-    <h2>Singles</h2>
-    <button onclick="addSingle()">Add Single</button>
-    <div id="singleList"></div>
-  `;
-  renderSingles();
+/* ========== SINGLES PAGE ========== */
+
+function loadSingles() {
+    const content = document.getElementById("content");
+
+    content.innerHTML = `
+        <h1>Singles Calculator</h1>
+
+        <div class="card">
+            <h2>Add Single Card</h2>
+
+            <label>Card Name</label>
+            <input id="single-name" type="text">
+
+            <label>Buy Price (£)</label>
+            <input id="single-buy" type="number" step="0.01">
+
+            <label>Sell Price (£)</label>
+            <input id="single-sell" type="number" step="0.01">
+
+            <button class="action-btn" onclick="addSingle()">Add Single</button>
+        </div>
+
+        <h2>Singles List</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Card</th>
+                    <th>Buy (£)</th>
+                    <th>Sell (£)</th>
+                    <th>Profit (£)</th>
+                </tr>
+            </thead>
+            <tbody id="singles-table"></tbody>
+        </table>
+    `;
+
+    renderSinglesTable();
 }
 
-function addSingle(){
-  const name = prompt("Card name:");
-  const price = prompt("Price:");
-  singles.push({name, price});
-  renderSingles();
+/* ========== ADD SINGLE ========== */
+
+function addSingle() {
+    const name = document.getElementById("single-name").value.trim();
+    const buy = parseFloat(document.getElementById("single-buy").value);
+    const sell = parseFloat(document.getElementById("single-sell").value);
+
+    if (!name || isNaN(buy) || isNaN(sell)) {
+        alert("Please fill all fields correctly.");
+        return;
+    }
+
+    const profit = sell - buy;
+
+    pokemonBusinessData.singles.push({
+        name,
+        buy,
+        sell,
+        profit
+    });
+
+    saveDataToStorage();
+    loadSingles();
 }
 
-function renderSingles(){
-  const list = document.getElementById("singleList");
-  list.innerHTML = singles.map(s => `
-    <div class="itemCard">
-      <h3>${s.name}</h3>
-      <p>£${s.price}</p>
-    </div>
-  `).join("");
+/* ========== RENDER TABLE ========== */
+
+function renderSinglesTable() {
+    const table = document.getElementById("singles-table");
+    table.innerHTML = "";
+
+    pokemonBusinessData.singles.forEach(card => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${card.name}</td>
+            <td>£${card.buy.toFixed(2)}</td>
+            <td>£${card.sell.toFixed(2)}</td>
+            <td>£${card.profit.toFixed(2)}</td>
+        `;
+
+        table.appendChild(row);
+    });
 }
