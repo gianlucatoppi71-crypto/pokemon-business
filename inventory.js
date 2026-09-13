@@ -1,3 +1,5 @@
+// INVENTORY PAGE LOGIC
+
 function renderInventory() {
   loadData();
 
@@ -22,26 +24,38 @@ function renderInventory() {
         <h3>${item.name}</h3>
         <span class="item-meta">${item.category} • ${item.supplier}</span>
       </div>
+
+      <!-- PRODUCT IMAGE -->
+      <img src="${item.image}" alt="${item.name}" 
+           style="width:120px; border:1px solid #333; margin:10px 0;">
+
       <div class="item-meta">
         Qty: ${item.quantity}<br>
         Buy: £${item.buyPrice.toFixed(2)} • Sell: £${item.sellPrice.toFixed(2)}<br>
         UK market: £${item.marketPrice.toFixed(2)}
       </div>
+
       <div class="item-profit">
         <span style="color:gold">Profit per unit: £${profitPerUnit.toFixed(2)}</span>
         <span style="color:lime">Total profit: £${totalProfit.toFixed(2)}</span>
         <span>Margin: ${marginPercent.toFixed(1)}%</span>
       </div>
+
       <div class="item-meta">
         Notes: ${item.notes || '—'}
       </div>
-      <button class="sell-button" onclick="sellItem(${index})">Sell from Sales page</button>
+
+      <button class="sell-button" onclick="sellItem(${index})">
+        Sell from Sales page
+      </button>
     `;
 
     list.appendChild(div);
   });
 }
 
+
+// ADD ITEM TO INVENTORY
 document.getElementById('inventoryForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -54,6 +68,7 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
     sellPrice: Number(document.getElementById('invSellPrice').value),
     quantity: Number(document.getElementById('invQuantity').value),
     marketPrice: Number(document.getElementById('invMarketPrice').value),
+    image: document.getElementById('invImage').value,   // IMAGE SUPPORT
     notes: document.getElementById('invNotes').value || ''
   };
 
@@ -66,28 +81,30 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
   e.target.reset();
 });
 
-// Called when user clicks "Sell from Sales page"
+
+// SELL ITEM (MOVE TO SALES PAGE)
 function sellItem(index) {
   const item = inventoryData[index];
   if (!item) return;
 
-  // Move ONE unit to salesData
   if (item.quantity <= 0) return;
 
   const { profitPerUnit } = calculateItemProfit(item);
 
+  // Add sale entry
   salesData.push({
     id: crypto.randomUUID(),
     name: item.name,
     sellPrice: item.sellPrice,
     profit: profitPerUnit,
+    image: item.image,   // IMAGE SUPPORT
     date: new Date().toISOString()
   });
 
-  // Reduce quantity in inventory
+  // Reduce inventory quantity
   item.quantity -= 1;
 
-  // If quantity reaches 0, remove item
+  // Remove item if quantity hits zero
   if (item.quantity <= 0) {
     inventoryData.splice(index, 1);
   }
