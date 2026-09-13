@@ -17,6 +17,7 @@
       <button onclick="showPage('inventory')">Inventory</button>
       <button onclick="showPage('sales')">Sales</button>
       <button onclick="showPage('summary')">Summary</button>
+      <button onclick="showPage('suppliers')">Suppliers</button>
     </nav>
 
     <div class="tax-info">
@@ -65,6 +66,11 @@
       <!-- summary.js will fill this -->
     </section>
 
+    <!-- SUPPLIERS PAGE -->
+    <section id="suppliersPage" class="page" style="display:none">
+      <!-- suppliers.js will fill this -->
+    </section>
+
   </main>
 </div>
 
@@ -72,6 +78,7 @@
 <script src="inventory.js"></script>
 <script src="sales.js"></script>
 <script src="summary.js"></script>
+<script src="suppliers.js"></script>
 
 <script>
   function showPage(page) {
@@ -84,8 +91,15 @@
     document.getElementById('summaryPage').style.display =
       page === 'summary' ? 'block' : 'none';
 
+    document.getElementById('suppliersPage').style.display =
+      page === 'suppliers' ? 'block' : 'none';
+
     if (page === 'summary') {
       renderSummary();
+    }
+
+    if (page === 'suppliers') {
+      renderSuppliers();
     }
   }
 
