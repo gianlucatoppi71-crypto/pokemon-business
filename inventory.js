@@ -25,7 +25,6 @@ function renderInventory() {
         <span class="item-meta">${item.category} • ${item.supplier}</span>
       </div>
 
-      <!-- PRODUCT IMAGE -->
       <img src="${item.image}" alt="${item.name}" 
            style="width:120px; border:1px solid #333; margin:10px 0;">
 
@@ -43,6 +42,13 @@ function renderInventory() {
 
       <div class="item-meta">
         Notes: ${item.notes || '—'}
+      </div>
+
+      <!-- ⭐ ACTION BUTTONS -->
+      <div class="item-actions">
+        <button class="inv-btn edit" onclick="editItem(${index})">Edit</button>
+        <button class="inv-btn copy" onclick="copyItem(${index})">Copy</button>
+        <button class="inv-btn delete" onclick="deleteItem(${index})">Delete</button>
       </div>
 
       <button class="sell-button" onclick="sellItem(${index})">
@@ -68,11 +74,19 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
     sellPrice: Number(document.getElementById('invSellPrice').value),
     quantity: Number(document.getElementById('invQuantity').value),
     marketPrice: Number(document.getElementById('invMarketPrice').value),
-    image: document.getElementById('invImage').value,   // IMAGE SUPPORT
+    image: document.getElementById('invImage').value,
     notes: document.getElementById('invNotes').value || ''
   };
 
-  inventoryData.push(item);
+  const editIndex = localStorage.getItem("editIndex");
+
+  if (editIndex !== null) {
+    inventoryData[editIndex] = item;
+    localStorage.removeItem("editIndex");
+  } else {
+    inventoryData.push(item);
+  }
+
   saveData();
   renderInventory();
   renderSalesInventory();
@@ -80,6 +94,51 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
 
   e.target.reset();
 });
+
+
+// ⭐ DELETE ITEM
+function deleteItem(index) {
+  inventoryData.splice(index, 1);
+  saveData();
+  renderInventory();
+  renderSalesInventory();
+  renderTaxSummary();
+}
+
+
+// ⭐ COPY ITEM
+function copyItem(index) {
+  const item = inventoryData[index];
+  const newItem = {
+    ...item,
+    id: crypto.randomUUID(),
+    name: item.name + " (copy)"
+  };
+
+  inventoryData.push(newItem);
+  saveData();
+  renderInventory();
+  renderSalesInventory();
+  renderTaxSummary();
+}
+
+
+// ⭐ EDIT ITEM (LOAD INTO FORM)
+function editItem(index) {
+  const item = inventoryData[index];
+
+  document.getElementById('invName').value = item.name;
+  document.getElementById('invCategory').value = item.category;
+  document.getElementById('invSupplier').value = item.supplier;
+  document.getElementById('invBuyPrice').value = item.buyPrice;
+  document.getElementById('invSellPrice').value = item.sellPrice;
+  document.getElementById('invQuantity').value = item.quantity;
+  document.getElementById('invMarketPrice').value = item.marketPrice;
+  document.getElementById('invImage').value = item.image;
+  document.getElementById('invNotes').value = item.notes;
+
+  localStorage.setItem("editIndex", index);
+}
 
 
 // SELL ITEM (MOVE TO SALES PAGE)
@@ -91,20 +150,17 @@ function sellItem(index) {
 
   const { profitPerUnit } = calculateItemProfit(item);
 
-  // Add sale entry
   salesData.push({
     id: crypto.randomUUID(),
     name: item.name,
     sellPrice: item.sellPrice,
     profit: profitPerUnit,
-    image: item.image,   // IMAGE SUPPORT
+    image: item.image,
     date: new Date().toISOString()
   });
 
-  // Reduce inventory quantity
   item.quantity -= 1;
 
-  // Remove item if quantity hits zero
   if (item.quantity <= 0) {
     inventoryData.splice(index, 1);
   }
