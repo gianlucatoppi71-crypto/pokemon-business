@@ -137,3 +137,46 @@ button:hover {
   margin-bottom: 8px;
   border: 1px solid #ffd700;
 }
+/* GOLD GRADIENT */
+.gold-gradient {
+  background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+  color: #000;
+}
+
+/* CARD GRADIENT BORDER */
+.itemCard {
+  background-color: #111;
+  border: 1px solid transparent;
+  border-image: linear-gradient(135deg, #ffd700, #b8860b) 1;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.itemCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.55);
+}
+
+/* BUTTON GRADIENT */
+button {
+  background: linear-gradient(135deg, #222 0%, #333 100%);
+  border: 1px solid #ffd700;
+  color: #ffd700;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+  color: #000;
+  transform: translateY(-2px);
+}
+
+/* HEADER BORDER GRADIENT */
+header {
+  background-color: #111;
+  padding: 15px 20px;
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg, #ffd700, #b8860b) 1;
+}
