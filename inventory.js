@@ -1,3 +1,5 @@
+let inventory = [];   // ⭐ REQUIRED or the whole app goes white
+
 function initInventory(){
   const div = document.getElementById("inventory");
   div.innerHTML = `
