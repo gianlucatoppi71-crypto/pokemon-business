@@ -165,3 +165,17 @@ body {
 .sell-button:hover {
   background: #00e600;
 }
+/* --- SALES PAGE STYLING --- */
+
+.sale-card {
+  border: 1px solid #444;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  background: #1a1a1a;
+}
+
+.sale-meta, .sale-prices, .sale-profit {
+  margin: 8px 0;
+  line-height: 1.4;
+}
