@@ -44,7 +44,7 @@ function renderInventory() {
         Notes: ${item.notes || '—'}
       </div>
 
-      <!-- ⭐ ACTION BUTTONS -->
+      <!-- ACTION BUTTONS -->
       <div class="item-actions">
         <button class="inv-btn edit" onclick="editItem(${index})">Edit</button>
         <button class="inv-btn copy" onclick="copyItem(${index})">Copy</button>
@@ -96,7 +96,7 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
 });
 
 
-// ⭐ DELETE ITEM
+// DELETE ITEM
 function deleteItem(index) {
   inventoryData.splice(index, 1);
   saveData();
@@ -106,7 +106,7 @@ function deleteItem(index) {
 }
 
 
-// ⭐ COPY ITEM
+// COPY ITEM
 function copyItem(index) {
   const item = inventoryData[index];
   const newItem = {
@@ -123,7 +123,7 @@ function copyItem(index) {
 }
 
 
-// ⭐ EDIT ITEM (LOAD INTO FORM)
+// EDIT ITEM (LOAD INTO FORM)
 function editItem(index) {
   const item = inventoryData[index];
 
@@ -141,7 +141,7 @@ function editItem(index) {
 }
 
 
-// SELL ITEM (MOVE TO SALES PAGE)
+// SELL ITEM (FULL RECORD)
 function sellItem(index) {
   const item = inventoryData[index];
   if (!item) return;
@@ -150,14 +150,23 @@ function sellItem(index) {
 
   const { profitPerUnit } = calculateItemProfit(item);
 
-  salesData.push({
+  const saleRecord = {
     id: crypto.randomUUID(),
     name: item.name,
+    category: item.category,
+    supplier: item.supplier,
+    buyPrice: item.buyPrice,
     sellPrice: item.sellPrice,
-    profit: profitPerUnit,
+    marketPrice: item.marketPrice,
+    quantitySold: 1,
+    profitPerUnit: profitPerUnit,
+    totalProfit: profitPerUnit,
     image: item.image,
+    notes: item.notes,
     date: new Date().toISOString()
-  });
+  };
+
+  salesData.push(saleRecord);
 
   item.quantity -= 1;
 
