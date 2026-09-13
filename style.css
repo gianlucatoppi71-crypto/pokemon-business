@@ -1,60 +1,56 @@
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #000;
-  color: #ffd700;
+  margin: 0;
+  background: #f3f4f6;
+  color: #222;
 }
 
-/* HEADER + LOGO */
 header {
-  background-color: #111;
-  padding: 15px 20px;
-  border-bottom: 2px solid #ffd700;
+  background: #111827;
+  color: #fff;
+  padding: 12px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 .header-inner {
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
-  align-items: center;
-  gap: 15px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.app-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  border: 1px solid #ffd700;
-  object-fit: cover;
-}
-
-h1 {
+header h1 {
   margin: 0;
-  color: #ffd700;
-  font-size: 22px;
+  font-size: 26px;
 }
 
-/* NAVIGATION */
 .topnav {
-  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .topnav button {
-  background-color: #222;
-  color: #ffd700;
-  border: 1px solid #ffd700;
-  padding: 8px 12px;
-  margin-left: 6px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 14px;
   cursor: pointer;
-  border-radius: 4px;
-  font-size: 13px;
 }
 
 .topnav button:hover {
-  background-color: #333;
+  background: #1d4ed8;
 }
 
-/* MAIN LAYOUT */
+main {
+  padding: 20px 10px;
+}
+
 .view {
-  padding: 20px;
+  padding: 10px 0;
 }
 
 .hidden {
@@ -62,142 +58,76 @@ h1 {
 }
 
 .container {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
-/* COLLECTOR-STYLE CARD */
+.container h2 {
+  margin-top: 0;
+  font-size: 22px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
 .itemCard {
-  background-color: #111;
-  border: 1px solid #ffd700;
-  padding: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 14px;
+  margin: 12px 0;
   border-radius: 8px;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .itemCard h3 {
   margin: 0 0 6px 0;
   font-size: 16px;
-  color: #ffd700;
 }
 
 .itemCard p {
   margin: 0;
-  font-size: 13px;
-}
-
-/* BUTTONS */
-button {
-  background-color: #222;
-  color: #ffd700;
-  border: 1px solid #ffd700;
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 13px;
-}
-
-button:hover {
-  background-color: #333;
-}
-/* FORM CARD */
-.formCard {
-  background-color: #111;
-  border: 1px solid #ffd700;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.formCard input {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
-  background-color: #222;
-  border: 1px solid #ffd700;
-  color: #ffd700;
-  border-radius: 4px;
-}
-
-/* GRID LIST */
-.gridList {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-}
-
-/* CARD IMAGE */
-.cardImg {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  border: 1px solid #ffd700;
-}
-/* GOLD GRADIENT */
-.gold-gradient {
-  background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
-  color: #000;
-}
-
-/* CARD GRADIENT BORDER */
-.itemCard {
-  background-color: #111;
-  border: 1px solid transparent;
-  border-image: linear-gradient(135deg, #ffd700, #b8860b) 1;
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 14px;
+  color: #4b5563;
 }
 
 .itemCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 0 18px rgba(255, 215, 0, 0.55);
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-/* BUTTON GRADIENT */
-button {
-  background: linear-gradient(135deg, #222 0%, #333 100%);
-  border: 1px solid #ffd700;
-  color: #ffd700;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-button:hover {
-  background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
-  color: #000;
-  transform: translateY(-2px);
-}
-
-/* HEADER BORDER GRADIENT */
-header {
-  background-color: #111;
-  padding: 15px 20px;
-  border-bottom: 3px solid transparent;
-  border-image: linear-gradient(90deg, #ffd700, #b8860b) 1;
-}
-.popup {
-  position: fixed;
-  top: 0;
-  left: 0;
+.salesTable {
   width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 14px;
 }
 
-.popupCard {
-  background-color: #111;
-  border: 1px solid #ffd700;
-  padding: 20px;
-  border-radius: 10px;
-  width: 300px;
-  text-align: center;
+.salesTable th,
+.salesTable td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: left;
+}
+
+.salesTable th {
+  background: #f3f4f6;
+  font-weight: 600;
 }

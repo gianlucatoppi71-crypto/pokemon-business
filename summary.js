@@ -1,36 +1,11 @@
 function initSummary(){
-  const div = document.getElementById("summaryContainer");
-
+  const div = document.getElementById("summary");
   div.innerHTML = `
     <h2>Summary</h2>
-
-    <div class="gridList">
-
-      <div class="itemCard">
-        <h3>Inventory Items</h3>
-        <p>${inventory.length}</p>
-      </div>
-
-      <div class="itemCard">
-        <h3>Singles</h3>
-        <p>${singles.length}</p>
-      </div>
-
-      <div class="itemCard">
-        <h3>Trades</h3>
-        <p>${trades.length}</p>
-      </div>
-
-      <div class="itemCard">
-        <h3>Suppliers</h3>
-        <p>${suppliers.length}</p>
-      </div>
-
-      <div class="itemCard">
-        <h3>Sales</h3>
-        <p>${sales.length}</p>
-      </div>
-
-    </div>
+    <p>Total Inventory Items: ${inventory.length}</p>
+    <p>Total Singles: ${singles.length}</p>
+    <p>Total Trades: ${trades.length}</p>
+    <p>Total Suppliers: ${suppliers.length}</p>
+    <p>Total Sales: ${sales.length}</p>
   `;
 }

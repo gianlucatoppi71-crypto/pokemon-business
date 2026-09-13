@@ -1,53 +1,37 @@
 function initSales(){
-  const div = document.getElementById("salesContainer");
-
+  const div = document.getElementById("sales");
   div.innerHTML = `
     <h2>Sales</h2>
-
-    <div class="formCard">
-      <h3>Add Sale</h3>
-
-      <input id="saleItem" type="text" placeholder="Item sold">
-      <input id="salePrice" type="number" placeholder="Sale price (£)">
-      <input id="saleBuyer" type="text" placeholder="Buyer (optional)">
-      <input id="saleImg" type="text" placeholder="Image URL (optional)">
-      <button onclick="addSale()">Add</button>
-    </div>
-
-    <div id="salesList" class="gridList"></div>
+    <button onclick="addSale()">Add Sale</button>
+    <table class="salesTable">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Price</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="salesList"></tbody>
+    </table>
   `;
-
   renderSales();
 }
 
 function addSale(){
-  const s = {
-    item: document.getElementById("saleItem").value,
-    price: document.getElementById("salePrice").value,
-    buyer: document.getElementById("saleBuyer").value,
-    img: document.getElementById("saleImg").value
-  };
-
-  if(!s.item){
-    alert("Item name is required");
-    return;
-  }
-
-  sales.push(s);
+  const item = prompt("Item sold:");
+  const price = prompt("Price:");
+  const date = new Date().toLocaleDateString();
+  sales.push({item, price, date});
   renderSales();
-
-  document.querySelectorAll(".formCard input").forEach(i => i.value = "");
 }
 
 function renderSales(){
   const list = document.getElementById("salesList");
-
   list.innerHTML = sales.map(s => `
-    <div class="itemCard">
-      ${s.img ? `<img src="${s.img}" class="cardImg">` : ""}
-      <h3>${s.item}</h3>
-      <p>Price: £${s.price || "0"}</p>
-      <p>Buyer: ${s.buyer || "-"}</p>
-    </div>
+    <tr>
+      <td>${s.item}</td>
+      <td>£${s.price}</td>
+      <td>${s.date}</td>
+    </tr>
   `).join("");
 }
