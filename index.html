@@ -16,6 +16,7 @@
     <nav>
       <button onclick="showPage('inventory')">Inventory</button>
       <button onclick="showPage('sales')">Sales</button>
+      <button onclick="showPage('summary')">Summary</button>
     </nav>
 
     <div class="tax-info">
@@ -59,19 +60,33 @@
       <div id="salesInventoryList"></div>
     </section>
 
+    <!-- SUMMARY PAGE -->
+    <section id="summaryPage" class="page" style="display:none">
+      <!-- summary.js will fill this -->
+    </section>
+
   </main>
 </div>
 
 <script src="data.js"></script>
 <script src="inventory.js"></script>
 <script src="sales.js"></script>
+<script src="summary.js"></script>
 
 <script>
   function showPage(page) {
     document.getElementById('inventoryPage').style.display =
       page === 'inventory' ? 'block' : 'none';
+
     document.getElementById('salesPage').style.display =
       page === 'sales' ? 'block' : 'none';
+
+    document.getElementById('summaryPage').style.display =
+      page === 'summary' ? 'block' : 'none';
+
+    if (page === 'summary') {
+      renderSummary();
+    }
   }
 
   // Load everything on startup
