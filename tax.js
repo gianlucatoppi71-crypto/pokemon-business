@@ -2,16 +2,13 @@
 //  TAX SUMMARY SYSTEM (FINAL)
 // ===============================
 
-// User‑editable salary (default £37,000)
 let userSalary = 37000;
 
-// Allow user to change salary
 function setSalary(newSalary) {
   userSalary = Number(newSalary || 0);
   renderTaxSummary();
 }
 
-// Convert profit into different time periods
 function convertProfit(profit, mode) {
   switch (mode) {
     case "daily": return profit / 365;
@@ -22,7 +19,6 @@ function convertProfit(profit, mode) {
   }
 }
 
-// Current mode (daily / weekly / monthly / yearly)
 let taxMode = "yearly";
 
 function setTaxMode(mode) {
@@ -30,45 +26,31 @@ function setTaxMode(mode) {
   renderTaxSummary();
 }
 
-// MAIN TAX SUMMARY FUNCTION
 function renderTaxSummary() {
   loadData();
 
   if (!Array.isArray(salesData)) salesData = [];
 
-  // Normalize sales
-  salesData = salesData.map(sale => ({
-    price: Number(sale.price || 0),
-    cost: Number(sale.cost || 0),
-    profit: Number(sale.profit || (sale.price - sale.cost) || 0)
+  const normalizedSales = salesData.map(s => ({
+    price: Number(s.price || s.sellPrice || 0),
+    cost: Number(s.cost || 0),
+    profit: Number(s.profit || (Number(s.price || 0) - Number(s.cost || 0)) || 0)
   }));
 
-  // Total business profit
-  const totalProfit = salesData.reduce((sum, s) => sum + s.profit, 0);
-
-  // Apply time conversion
+  const totalProfit = normalizedSales.reduce((sum, s) => sum + s.profit, 0);
   const convertedProfit = convertProfit(totalProfit, taxMode);
 
-  // Trading allowance
   const tradingAllowance = 1000;
-
-  // Taxable business profit
   const taxableProfit = Math.max(0, totalProfit - tradingAllowance);
 
-  // Income tax (20%)
   const incomeTax = taxableProfit * 0.20;
 
-  // Class 4 NI (9%) — only applies if total income > £12,570
   const totalIncome = userSalary + totalProfit;
   const ni = totalIncome > 12570 ? taxableProfit * 0.09 : 0;
 
-  // Total estimated tax
   const totalTax = incomeTax + ni;
-
-  // Net profit after tax
   const netProfit = totalProfit - totalTax;
 
-  // Render
   const box = document.getElementById("taxSummary");
   if (!box) return;
 
