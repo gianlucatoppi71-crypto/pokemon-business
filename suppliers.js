@@ -1,80 +1,92 @@
-/* ========== SUPPLIERS PAGE ========== */
+// SUPPLIERS PAGE LOGIC
 
+let suppliersData = [];
+
+// Load suppliers from localStorage
 function loadSuppliers() {
-    const content = document.getElementById("content");
+  const saved = localStorage.getItem('suppliersData');
+  suppliersData = saved ? JSON.parse(saved) : [];
+}
 
-    content.innerHTML = `
-        <h1>Suppliers</h1>
+// Save suppliers to localStorage
+function saveSuppliers() {
+  localStorage.setItem('suppliersData', JSON.stringify(suppliersData));
+}
 
-        <div class="card">
-            <h2>Add Supplier</h2>
+// Render suppliers list
+function renderSuppliers() {
+  loadSuppliers();
 
-            <label>Supplier Name</label>
-            <input id="sup-name" type="text">
+  const container = document.getElementById('suppliersPage');
+  if (!container) return;
 
-            <label>Contact Info</label>
-            <input id="sup-contact" type="text">
+  container.innerHTML = `
+    <h1>Suppliers</h1>
 
-            <label>Notes</label>
-            <input id="sup-notes" type="text">
+    <form id="supplierForm">
+      <input type="text" id="supName" placeholder="Supplier name" required>
+      <input type="text" id="supWebsite" placeholder="Website URL">
+      <textarea id="supNotes" placeholder="Notes"></textarea>
+      <button type="submit">Add Supplier</button>
+    </form>
 
-            <button class="action-btn" onclick="addSupplier()">Add Supplier</button>
-        </div>
+    <div id="suppliersList"></div>
+  `;
 
-        <h2>Supplier List</h2>
+  const list = document.getElementById('suppliersList');
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Contact</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody id="suppliers-table"></tbody>
-        </table>
+  if (suppliersData.length === 0) {
+    list.innerHTML = '<p>No suppliers added yet.</p>';
+    return;
+  }
+
+  suppliersData.forEach((sup, index) => {
+    const div = document.createElement('div');
+    div.className = 'item-card';
+
+    div.innerHTML = `
+      <div class="item-header">
+        <h3>${sup.name}</h3>
+      </div>
+
+      <div class="item-meta">
+        Website: ${
+          sup.website
+            ? `<a href="${sup.website}" target="_blank">${sup.website}</a>`
+            : '—'
+        }<br>
+        Notes: ${sup.notes || '—'}
+      </div>
+
+      <button class="sell-button" onclick="deleteSupplier(${index})"
+        style="background:red; color:white;">
+        Delete Supplier
+      </button>
     `;
 
-    renderSuppliersTable();
+    list.appendChild(div);
+  });
+
+  // Add supplier form logic
+  document.getElementById('supplierForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const newSupplier = {
+      id: crypto.randomUUID(),
+      name: document.getElementById('supName').value,
+      website: document.getElementById('supWebsite').value,
+      notes: document.getElementById('supNotes').value || ''
+    };
+
+    suppliersData.push(newSupplier);
+    saveSuppliers();
+    renderSuppliers();
+  });
 }
 
-/* ========== ADD SUPPLIER ========== */
-
-function addSupplier() {
-    const name = document.getElementById("sup-name").value.trim();
-    const contact = document.getElementById("sup-contact").value.trim();
-    const notes = document.getElementById("sup-notes").value.trim();
-
-    if (!name || !contact) {
-        alert("Supplier name and contact are required.");
-        return;
-    }
-
-    pokemonBusinessData.suppliers.push({
-        name,
-        contact,
-        notes
-    });
-
-    saveDataToStorage();
-    loadSuppliers();
-}
-
-/* ========== RENDER SUPPLIERS TABLE ========== */
-
-function renderSuppliersTable() {
-    const table = document.getElementById("suppliers-table");
-    table.innerHTML = "";
-
-    pokemonBusinessData.suppliers.forEach(sup => {
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${sup.name}</td>
-            <td>${sup.contact}</td>
-            <td>${sup.notes || ""}</td>
-        `;
-
-        table.appendChild(row);
-    });
+// Delete supplier
+function deleteSupplier(index) {
+  suppliersData.splice(index, 1);
+  saveSuppliers();
+  renderSuppliers();
 }
