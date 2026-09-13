@@ -55,7 +55,7 @@ function renderInventory() {
 }
 
 
-// SELL ITEM — FULL SALE RECORD
+// SELL ITEM — FULL SALE RECORD (FIXED)
 function sellItem(index) {
   loadData();
 
