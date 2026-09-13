@@ -1,4 +1,4 @@
-let inventory = [];   // ⭐ REQUIRED or the whole app goes white
+let inventory = [];   // REQUIRED
 
 function initInventory(){
   const div = document.getElementById("inventory");
