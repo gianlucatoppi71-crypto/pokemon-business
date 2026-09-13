@@ -5,30 +5,54 @@ body {
   color: #ffd700;
 }
 
+/* HEADER + LOGO */
 header {
   background-color: #111;
-  padding: 20px;
+  padding: 15px 20px;
   border-bottom: 2px solid #ffd700;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.app-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid #ffd700;
+  object-fit: cover;
 }
 
 h1 {
   margin: 0;
   color: #ffd700;
+  font-size: 22px;
+}
+
+/* NAVIGATION */
+.topnav {
+  margin-left: auto;
 }
 
 .topnav button {
   background-color: #222;
   color: #ffd700;
   border: 1px solid #ffd700;
-  padding: 10px 15px;
-  margin-right: 10px;
+  padding: 8px 12px;
+  margin-left: 6px;
   cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
 }
 
 .topnav button:hover {
   background-color: #333;
 }
 
+/* MAIN LAYOUT */
 .view {
   padding: 20px;
 }
@@ -38,23 +62,41 @@ h1 {
 }
 
 .container {
-  margin-top: 20px;
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
 }
 
+/* COLLECTOR-STYLE CARD */
 .itemCard {
   background-color: #111;
   border: 1px solid #ffd700;
-  padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 5px;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
 }
 
+.itemCard h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: #ffd700;
+}
+
+.itemCard p {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* BUTTONS */
 button {
   background-color: #222;
   color: #ffd700;
   border: 1px solid #ffd700;
-  padding: 10px 15px;
+  padding: 8px 12px;
   cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
 }
 
 button:hover {
