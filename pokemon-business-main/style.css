@@ -1,0 +1,62 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #000;
+  color: #ffd700;
+}
+
+header {
+  background-color: #111;
+  padding: 20px;
+  border-bottom: 2px solid #ffd700;
+}
+
+h1 {
+  margin: 0;
+  color: #ffd700;
+}
+
+.topnav button {
+  background-color: #222;
+  color: #ffd700;
+  border: 1px solid #ffd700;
+  padding: 10px 15px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.topnav button:hover {
+  background-color: #333;
+}
+
+.view {
+  padding: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+.container {
+  margin-top: 20px;
+}
+
+.itemCard {
+  background-color: #111;
+  border: 1px solid #ffd700;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #222;
+  color: #ffd700;
+  border: 1px solid #ffd700;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #333;
+}
