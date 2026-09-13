@@ -18,6 +18,7 @@
       <button onclick="showPage('sales')">Sales</button>
       <button onclick="showPage('summary')">Summary</button>
       <button onclick="showPage('suppliers')">Suppliers</button>
+      <button onclick="showPage('trades')">Trades</button>
     </nav>
 
     <div class="tax-info">
@@ -71,6 +72,11 @@
       <!-- suppliers.js will fill this -->
     </section>
 
+    <!-- TRADES PAGE -->
+    <section id="tradesPage" class="page" style="display:none">
+      <!-- trades.js will fill this -->
+    </section>
+
   </main>
 </div>
 
@@ -79,6 +85,7 @@
 <script src="sales.js"></script>
 <script src="summary.js"></script>
 <script src="suppliers.js"></script>
+<script src="trades.js"></script>
 
 <script>
   function showPage(page) {
@@ -94,13 +101,12 @@
     document.getElementById('suppliersPage').style.display =
       page === 'suppliers' ? 'block' : 'none';
 
-    if (page === 'summary') {
-      renderSummary();
-    }
+    document.getElementById('tradesPage').style.display =
+      page === 'trades' ? 'block' : 'none';
 
-    if (page === 'suppliers') {
-      renderSuppliers();
-    }
+    if (page === 'summary') renderSummary();
+    if (page === 'suppliers') renderSuppliers();
+    if (page === 'trades') renderTrades();
   }
 
   // Load everything on startup
