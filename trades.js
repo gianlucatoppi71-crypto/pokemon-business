@@ -1,85 +1,96 @@
-/* ========== TRADES PAGE ========== */
+// TRADES PAGE LOGIC
 
+let tradesData = [];
+
+// Load trades from localStorage
 function loadTrades() {
-    const content = document.getElementById("content");
+  const saved = localStorage.getItem('tradesData');
+  tradesData = saved ? JSON.parse(saved) : [];
+}
 
-    content.innerHTML = `
-        <h1>Trades</h1>
+// Save trades to localStorage
+function saveTrades() {
+  localStorage.setItem('tradesData', JSON.stringify(tradesData));
+}
 
-        <div class="card">
-            <h2>Add Trade</h2>
+// Render trades page
+function renderTrades() {
+  loadTrades();
 
-            <label>You Give (£)</label>
-            <input id="trade-give" type="number" step="0.01">
+  const container = document.getElementById('tradesPage');
+  if (!container) return;
 
-            <label>You Receive (£)</label>
-            <input id="trade-receive" type="number" step="0.01">
+  container.innerHTML = `
+    <h1>Trades</h1>
 
-            <label>Notes</label>
-            <input id="trade-notes" type="text">
+    <form id="tradeForm">
+      <input type="number" step="0.01" id="tradeGive" placeholder="You Give (£)" required>
+      <input type="number" step="0.01" id="tradeReceive" placeholder="You Receive (£)" required>
+      <textarea id="tradeNotes" placeholder="Notes"></textarea>
+      <button type="submit">Add Trade</button>
+    </form>
 
-            <button class="action-btn" onclick="addTrade()">Add Trade</button>
-        </div>
+    <div id="tradesList"></div>
+  `;
 
-        <h2>Trade History</h2>
+  const list = document.getElementById('tradesList');
 
-        <table>
-            <thead>
-                <tr>
-                    <th>You Give (£)</th>
-                    <th>You Receive (£)</th>
-                    <th>Balance (£)</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody id="trades-table"></tbody>
-        </table>
+  if (tradesData.length === 0) {
+    list.innerHTML = '<p>No trades recorded yet.</p>';
+    return;
+  }
+
+  tradesData.forEach((trade, index) => {
+    const balance = trade.receive - trade.give;
+
+    const div = document.createElement('div');
+    div.className = 'item-card';
+
+    div.innerHTML = `
+      <div class="item-header">
+        <h3>Trade #${index + 1}</h3>
+        <span class="item-meta">${new Date(trade.date).toLocaleString()}</span>
+      </div>
+
+      <div class="item-meta">
+        You Give: £${trade.give.toFixed(2)}<br>
+        You Receive: £${trade.receive.toFixed(2)}<br>
+        Balance: <span style="color:${balance >= 0 ? 'lime' : 'red'};">
+          £${balance.toFixed(2)}
+        </span><br>
+        Notes: ${trade.notes || '—'}
+      </div>
+
+      <button class="sell-button" onclick="deleteTrade(${index})"
+        style="background:red; color:white;">
+        Delete Trade
+      </button>
     `;
 
-    renderTradesTable();
+    list.appendChild(div);
+  });
+
+  // Add trade form logic
+  document.getElementById('tradeForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const newTrade = {
+      id: crypto.randomUUID(),
+      give: Number(document.getElementById('tradeGive').value),
+      receive: Number(document.getElementById('tradeReceive').value),
+      notes: document.getElementById('tradeNotes').value || '',
+      date: new Date().toISOString()
+    };
+
+    tradesData.push(newTrade);
+    saveTrades();
+    renderTrades();
+  });
 }
 
-/* ========== ADD TRADE ========== */
-
-function addTrade() {
-    const give = parseFloat(document.getElementById("trade-give").value);
-    const receive = parseFloat(document.getElementById("trade-receive").value);
-    const notes = document.getElementById("trade-notes").value.trim();
-
-    if (isNaN(give) || isNaN(receive)) {
-        alert("Please fill all fields correctly.");
-        return;
-    }
-
-    const balance = receive - give;
-
-    pokemonBusinessData.trades.push({
-        give,
-        receive,
-        balance,
-        notes
-    });
-
-    saveDataToStorage();
-    loadTrades();
-}
-
-/* ========== RENDER TRADES TABLE ========== */
-
-function renderTradesTable() {
-    const table = document.getElementById("trades-table");
-    table.innerHTML = "";
-
-    pokemonBusinessData.trades.forEach(trade => {
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>£${trade.give.toFixed(2)}</td>
-            <td>£${trade.receive.toFixed(2)}</td>
-            <td>£${trade.balance.toFixed(2)}</td>
-            <td>${trade.notes || ""}</td>
-        `;
-
-        table.appendChild(row);
-    });
+// Delete trade
+function deleteTrade(index) {
+  tradesData.splice(index, 1);
+  saveTrades();
+  renderTrades();
 }
