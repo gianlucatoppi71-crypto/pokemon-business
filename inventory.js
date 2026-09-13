@@ -1,5 +1,7 @@
 // INVENTORY PAGE LOGIC
 
+let editingIndex = null; // null = adding, number = editing
+
 function renderInventory() {
   loadData();
 
@@ -25,8 +27,7 @@ function renderInventory() {
         <span class="item-meta">${item.category} • ${item.supplier}</span>
       </div>
 
-      <!-- PRODUCT IMAGE -->
-      <img src="${item.image}" alt="${item.name}" 
+      <img src="${item.image}" alt="${item.name}"
            style="width:120px; border:1px solid #333; margin:10px 0;">
 
       <div class="item-meta">
@@ -45,22 +46,35 @@ function renderInventory() {
         Notes: ${item.notes || '—'}
       </div>
 
-      <button class="sell-button" onclick="sellItem(${index})">
-        Sell from Sales page
-      </button>
+      <div style="margin-top:8px;">
+        <button class="sell-button" onclick="sellItem(${index})">
+          Sell from Sales page
+        </button>
+        <button class="sell-button" style="background:#ffa500;"
+                onclick="editItem(${index})">
+          Edit
+        </button>
+        <button class="sell-button" style="background:#888;"
+                onclick="copyItem(${index})">
+          Copy
+        </button>
+        <button class="sell-button" style="background:red; color:white;"
+                onclick="deleteItem(${index})">
+          Delete
+        </button>
+      </div>
     `;
 
     list.appendChild(div);
   });
 }
 
-
-// ADD ITEM TO INVENTORY
+// ADD / EDIT ITEM
 document.getElementById('inventoryForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
   const item = {
-    id: crypto.randomUUID(),
+    id: editingIndex === null ? crypto.randomUUID() : inventoryData[editingIndex].id,
     name: document.getElementById('invName').value,
     category: document.getElementById('invCategory').value,
     supplier: document.getElementById('invSupplier').value,
@@ -68,11 +82,19 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
     sellPrice: Number(document.getElementById('invSellPrice').value),
     quantity: Number(document.getElementById('invQuantity').value),
     marketPrice: Number(document.getElementById('invMarketPrice').value),
-    image: document.getElementById('invImage').value,   // IMAGE SUPPORT
+    image: document.getElementById('invImage').value,
     notes: document.getElementById('invNotes').value || ''
   };
 
-  inventoryData.push(item);
+  if (editingIndex === null) {
+    // add new
+    inventoryData.push(item);
+  } else {
+    // update existing
+    inventoryData[editingIndex] = item;
+    editingIndex = null;
+  }
+
   saveData();
   renderInventory();
   renderSalesInventory();
@@ -81,30 +103,69 @@ document.getElementById('inventoryForm').addEventListener('submit', (e) => {
   e.target.reset();
 });
 
+// EDIT ITEM
+function editItem(index) {
+  const item = inventoryData[index];
+  if (!item) return;
+
+  editingIndex = index;
+
+  document.getElementById('invName').value = item.name;
+  document.getElementById('invCategory').value = item.category;
+  document.getElementById('invSupplier').value = item.supplier;
+  document.getElementById('invBuyPrice').value = item.buyPrice;
+  document.getElementById('invSellPrice').value = item.sellPrice;
+  document.getElementById('invQuantity').value = item.quantity;
+  document.getElementById('invMarketPrice').value = item.marketPrice;
+  document.getElementById('invImage').value = item.image;
+  document.getElementById('invNotes').value = item.notes || '';
+}
+
+// COPY ITEM
+function copyItem(index) {
+  const item = inventoryData[index];
+  if (!item) return;
+
+  const copy = {
+    ...item,
+    id: crypto.randomUUID(),
+    name: item.name + ' (copy)'
+  };
+
+  inventoryData.push(copy);
+  saveData();
+  renderInventory();
+  renderSalesInventory();
+  renderTaxSummary();
+}
+
+// DELETE ITEM
+function deleteItem(index) {
+  inventoryData.splice(index, 1);
+  saveData();
+  renderInventory();
+  renderSalesInventory();
+  renderTaxSummary();
+}
 
 // SELL ITEM (MOVE TO SALES PAGE)
 function sellItem(index) {
   const item = inventoryData[index];
   if (!item) return;
-
   if (item.quantity <= 0) return;
 
   const { profitPerUnit } = calculateItemProfit(item);
 
-  // Add sale entry
   salesData.push({
     id: crypto.randomUUID(),
     name: item.name,
     sellPrice: item.sellPrice,
     profit: profitPerUnit,
-    image: item.image,   // IMAGE SUPPORT
+    image: item.image,
     date: new Date().toISOString()
   });
 
-  // Reduce inventory quantity
   item.quantity -= 1;
-
-  // Remove item if quantity hits zero
   if (item.quantity <= 0) {
     inventoryData.splice(index, 1);
   }
