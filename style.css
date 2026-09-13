@@ -1,160 +1,123 @@
-/* ========== GLOBAL DARK THEME ========== */
-
 body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: #e0e0e0;
-    display: flex;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #eee;
 }
 
-/* ========== SIDEBAR ========== */
-
-#sidebar {
-    width: 260px;
-    background-color: #1e1e1e;
-    height: 100vh;
-    padding: 20px;
-    box-sizing: border-box;
-    border-right: 2px solid #2a2a2a;
-    position: fixed;
-    left: 0;
-    top: 0;
+.app {
+  display: flex;
+  height: 100vh;
 }
 
-.logo {
-    color: #4fc3f7;
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 22px;
-    font-weight: bold;
+.sidebar {
+  width: 260px;
+  background: #000;
+  border-right: 2px solid gold;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
-/* Sidebar Buttons */
-
-.nav-btn {
-    width: 100%;
-    padding: 14px;
-    margin-bottom: 12px;
-    background-color: #2c2c2c;
-    border: none;
-    color: #e0e0e0;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.2s;
-    text-align: left;
+.sidebar h2 {
+  color: gold;
+  margin-top: 0;
 }
 
-.nav-btn:hover {
-    background-color: #4fc3f7;
-    color: #000;
+.sidebar nav button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+  background: #222;
+  color: #eee;
+  border: 1px solid #444;
+  cursor: pointer;
+  text-align: left;
 }
 
-/* ========== MAIN CONTENT AREA ========== */
-
-#content {
-    margin-left: 260px;
-    padding: 30px;
-    width: calc(100% - 260px);
-    box-sizing: border-box;
+.sidebar nav button:hover {
+  background: #333;
 }
 
-h1 {
-    color: #4fc3f7;
-    margin-top: 0;
+.tax-info {
+  margin-top: 20px;
+  font-size: 14px;
 }
 
-/* ========== TABLES ========== */
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background-color: #1e1e1e;
-    border-radius: 6px;
-    overflow: hidden;
+.tax-info h3 {
+  color: gold;
 }
 
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #333;
+.main {
+  flex: 1;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
-th {
-    background-color: #2c2c2c;
-    color: #4fc3f7;
-    text-align: left;
+.page h1 {
+  color: gold;
 }
 
-tr:hover {
-    background-color: #2a2a2a;
+#inventoryForm input,
+#inventoryForm textarea {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 5px 0;
+  padding: 6px;
+  background: #222;
+  border: 1px solid #444;
+  color: #eee;
 }
 
-/* ========== INPUTS & FORMS ========== */
-
-input, select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 8px;
-    margin-bottom: 16px;
-    background-color: #2c2c2c;
-    border: 1px solid #444;
-    color: #e0e0e0;
-    border-radius: 6px;
+#inventoryForm button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: gold;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-input:focus, select:focus {
-    outline: none;
-    border-color: #4fc3f7;
+.item-card {
+  background: #1a1a1a;
+  border-left: 4px solid gold;
+  padding: 10px;
+  margin: 10px 0;
 }
 
-/* Buttons inside content */
-
-.action-btn {
-    padding: 10px 16px;
-    background-color: #4fc3f7;
-    color: #000;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 10px;
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.action-btn:hover {
-    background-color: #81d4fa;
+.item-header h3 {
+  margin: 0;
 }
 
-/* ========== CARDS / BOXES ========== */
-
-.card {
-    background-color: #1e1e1e;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #333;
-    margin-bottom: 20px;
+.item-meta {
+  font-size: 13px;
+  color: #ccc;
 }
 
-/* ========== SUMMARY PAGE STATS ========== */
-
-.summary-box {
-    background-color: #2c2c2c;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border-left: 4px solid #4fc3f7;
+.item-profit {
+  margin-top: 5px;
+  font-size: 14px;
 }
 
-.summary-title {
-    font-size: 20px;
-    color: #4fc3f7;
-    margin-bottom: 10px;
+.item-profit span {
+  display: block;
 }
 
-.summary-value {
-    font-size: 26px;
-    font-weight: bold;
-    color: #e0e0e0;
+.sell-button {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: lime;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
 }
