@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- CHARTS LIBRARY -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -37,7 +40,6 @@
       <form id="inventoryForm">
         <input type="text" id="invName" placeholder="Product name" required>
 
-        <!-- CATEGORY DROPDOWN -->
         <select id="invCategory" required>
           <option value="">Select category</option>
           <option value="Pokemon Singles">Pokémon Singles</option>
@@ -48,7 +50,7 @@
           <option value="Promo Card">Promo Card</option>
           <option value="Graded Card">Graded Card</option>
           <option value="Japanese Product">Japanese Product</option>
-          <option value="Accessories">Accessories (Sleeves, Binders, etc.)</option>
+          <option value="Accessories">Accessories</option>
           <option value="Other">Other</option>
         </select>
 
@@ -60,8 +62,7 @@
 
         <input type="number" step="0.01" id="invMarketPrice" placeholder="UK market price (£)" required>
 
-        <!-- PRODUCT IMAGE -->
-        <input type="text" id="invImage" placeholder="Image URL (card picture)" required>
+        <input type="text" id="invImage" placeholder="Image URL" required>
 
         <textarea id="invNotes" placeholder="Notes / strategy"></textarea>
 
@@ -77,20 +78,55 @@
       <div id="salesInventoryList"></div>
     </section>
 
-    <!-- SUMMARY PAGE -->
+    <!-- ADVANCED SUMMARY PAGE -->
     <section id="summaryPage" class="page" style="display:none">
-      <!-- summary.js will fill this -->
+      <h1>Business Analytics</h1>
+
+      <div class="summary-grid">
+        <div class="summary-box">
+          <div class="summary-title">Inventory Value</div>
+          <div id="summaryInventoryValue" class="summary-value">£0.00</div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-title">Total Sales</div>
+          <div id="summaryTotalSales" class="summary-value">£0.00</div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-title">Sales Profit</div>
+          <div id="summarySalesProfit" class="summary-value">£0.00</div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-title">Singles Profit</div>
+          <div id="summarySinglesProfit" class="summary-value">£0.00</div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-title">Trades Balance</div>
+          <div id="summaryTradesBalance" class="summary-value">£0.00</div>
+        </div>
+      </div>
+
+      <h2>Profit by Category</h2>
+      <canvas id="categoryChart"></canvas>
+
+      <h2>Monthly Profit</h2>
+      <canvas id="monthlyChart"></canvas>
+
+      <h2>Best‑selling items</h2>
+      <ul id="bestSellingList"></ul>
+
+      <h2>ROI by item</h2>
+      <canvas id="roiChart"></canvas>
     </section>
 
     <!-- SUPPLIERS PAGE -->
-    <section id="suppliersPage" class="page" style="display:none">
-      <!-- suppliers.js will fill this -->
-    </section>
+    <section id="suppliersPage" class="page" style="display:none"></section>
 
     <!-- TRADES PAGE -->
-    <section id="tradesPage" class="page" style="display:none">
-      <!-- trades.js will fill this -->
-    </section>
+    <section id="tradesPage" class="page" style="display:none"></section>
 
   </main>
 </div>
@@ -124,7 +160,6 @@
     if (page === 'trades') renderTrades();
   }
 
-  // Load everything on startup
   showPage('inventory');
   renderInventory();
   renderSalesInventory();
