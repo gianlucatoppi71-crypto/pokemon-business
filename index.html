@@ -20,7 +20,6 @@
       <button onclick="showPage('suppliers')">Suppliers</button>
       <button onclick="showPage('trades')">Trades</button>
       <button onclick="showPage('portfolio')">Portfolio</button>
-
     </nav>
 
     <div class="tax-info">
@@ -72,6 +71,12 @@
     <!-- TRADES PAGE -->
     <section id="tradesPage" class="page" style="display:none"></section>
 
+    <!-- PORTFOLIO PAGE -->
+    <section id="portfolioPage" class="page" style="display:none">
+      <h1>Portfolio</h1>
+      <div id="portfolioList" class="portfolio-container"></div>
+    </section>
+
   </main>
 </div>
 
@@ -82,6 +87,7 @@
 <script src="summary.js?v=4"></script>
 <script src="suppliers.js?v=4"></script>
 <script src="trades.js?v=4"></script>
+<script src="portfolio.js?v=1"></script>
 
 <script>
   function showPage(page) {
@@ -100,9 +106,13 @@
     document.getElementById('tradesPage').style.display =
       page === 'trades' ? 'block' : 'none';
 
+    document.getElementById('portfolioPage').style.display =
+      page === 'portfolio' ? 'block' : 'none';
+
     if (page === 'summary') renderSummary();
     if (page === 'suppliers') renderSuppliers();
     if (page === 'trades') renderTrades();
+    if (page === 'portfolio') renderPortfolio();
   }
 
   showPage('inventory');
