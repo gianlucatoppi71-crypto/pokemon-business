@@ -12,10 +12,15 @@ function savePortfolio() {
 function addPortfolio(event) {
   event.preventDefault();
 
-  const name = document.getElementById("portName").value;
-  const description = document.getElementById("portDesc").value;
-  const image = document.getElementById("portImage").value;
-  const link = document.getElementById("portLink").value;
+  const name = document.getElementById("portName").value.trim();
+  const description = document.getElementById("portDesc").value.trim();
+  const image = document.getElementById("portImage").value.trim();
+  const link = document.getElementById("portLink").value.trim();
+
+  if (!name || !description || !image || !link) {
+    alert("Please fill in all fields.");
+    return;
+  }
 
   portfolioData.push({ name, description, image, link });
   savePortfolio();
@@ -34,7 +39,7 @@ function renderPortfolio() {
     return;
   }
 
-  portfolioData.forEach((p) => {
+  portfolioData.forEach((p, index) => {
     const div = document.createElement("div");
     div.className = "portfolio-card";
 
@@ -42,7 +47,10 @@ function renderPortfolio() {
       <img src="${p.image}" alt="${p.name}" class="portfolio-img">
       <h3>${p.name}</h3>
       <p>${p.description}</p>
-      <a href="${p.link}" target="_blank" class="portfolio-link">Open Portfolio</a>
+
+      <a href="${p.link}" target="_blank" class="portfolio-link">
+        Open Portfolio
+      </a>
     `;
 
     container.appendChild(div);
