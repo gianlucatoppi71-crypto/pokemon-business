@@ -72,9 +72,20 @@
     <section id="tradesPage" class="page" style="display:none"></section>
 
     <!-- PORTFOLIO PAGE -->
-    <section id="portfolioPage" class="page" style="display:none">
-      <h1>Portfolio</h1>
-    <div id="portfolioList" class="portfolio-container"></div>
+  <section id="portfolioPage" class="page" style="display:none">
+  <h1>Portfolio</h1>
+
+  <form id="portfolioForm" onsubmit="addPortfolio(event)">
+    <input type="text" id="portName" placeholder="Portfolio name" required>
+    <input type="text" id="portDesc" placeholder="Description" required>
+    <input type="text" id="portImage" placeholder="Image URL" required>
+    <input type="text" id="portLink" placeholder="Link to app" required>
+    <button type="submit">Add Portfolio</button>
+  </form>
+
+  <div id="portfolioList" class="portfolio-container"></div>
+
+
 
     </section>
 
