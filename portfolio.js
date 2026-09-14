@@ -1,38 +1,42 @@
 // PORTFOLIO PAGE LOGIC
 
-// Add all your portfolios here
-const portfolioData = [
-  {
-    name: "Collectr Portfolio",
-    description: "Track Pokémon, MTG, YuGiOh and graded cards.",
-    image: "https://getcollectr.com/assets/images/logo.png",
-    link: "https://app.getcollectr.com/portfolio/products"
-  },
-  {
-    name: "PriceCharting Collection",
-    description: "Track prices for games, consoles, cards and collectibles.",
-    image: "https://www.pricecharting.com/images/logo.png",
-    link: "https://www.pricecharting.com"
+// Load saved portfolios or start empty
+let portfolioData = JSON.parse(localStorage.getItem("portfolioData")) || [];
+
+// Save to localStorage
+function savePortfolio() {
+  localStorage.setItem("portfolioData", JSON.stringify(portfolioData));
+}
+
+// Add new portfolio
+function addPortfolio(event) {
+  event.preventDefault();
+
+  const name = document.getElementById("portName").value;
+  const description = document.getElementById("portDesc").value;
+  const image = document.getElementById("portImage").value;
+  const link = document.getElementById("portLink").value;
+
+  portfolioData.push({ name, description, image, link });
+  savePortfolio();
+  renderPortfolio();
+
+  document.getElementById("portfolioForm").reset();
+}
+
+// Render portfolio cards
+function renderPortfolio() {
+  const container = document.getElementById("portfolioList");
+  container.innerHTML = "";
+
+  if (portfolioData.length === 0) {
+    container.innerHTML = "<p>No portfolios yet.</p>";
+    return;
   }
 
-  // Add more portfolios below
-  // {
-  //   name: "Your Portfolio Name",
-  //   description: "Short description",
-  //   image: "IMAGE_URL",
-  //   link: "LINK_URL"
-  // }
-];
-
-function renderPortfolio() {
-  const container = document.getElementById('portfolioList');
-  if (!container) return;
-
-  container.innerHTML = '';
-
   portfolioData.forEach((p) => {
-    const div = document.createElement('div');
-    div.className = 'portfolio-card';
+    const div = document.createElement("div");
+    div.className = "portfolio-card";
 
     div.innerHTML = `
       <img src="${p.image}" alt="${p.name}" class="portfolio-img">
