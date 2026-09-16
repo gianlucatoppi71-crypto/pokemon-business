@@ -17,36 +17,41 @@ function renderInventory() {
     const { profitPerUnit, totalProfit, marginPercent } = calculateItemProfit(item);
 
     const div = document.createElement('div');
-    div.className = 'item-card';
+    div.className = 'inventory-card';
 
     div.innerHTML = `
-      <div class="item-header">
+      <div class="inv-left">
+        <img src="${item.image}" alt="${item.name}">
+      </div>
+
+      <div class="inv-right">
         <h3>${item.name}</h3>
-        <span>Qty: ${item.quantity}</span>
-      </div>
 
-      <img src="${item.image}" alt="${item.name}">
+        <div class="inv-meta">
+          <span><strong>Category:</strong> ${item.category}</span>
+          <span><strong>Supplier:</strong> ${item.supplier}</span>
+          <span><strong>Qty:</strong> ${item.quantity}</span>
+          <span><strong>Notes:</strong> ${item.notes || '—'}</span>
+        </div>
 
-      <div class="item-meta">
-        <strong>Category:</strong> ${item.category}<br>
-        <strong>Supplier:</strong> ${item.supplier}<br>
-        <strong>Market price:</strong> £${item.marketPrice.toFixed(2)}<br>
-        <strong>Notes:</strong> ${item.notes || '—'}
-      </div>
+        <div class="inv-prices">
+          <span><strong>Buy:</strong> £${item.buyPrice.toFixed(2)}</span>
+          <span><strong>Sell:</strong> £${item.sellPrice.toFixed(2)}</span>
+          <span><strong>Market:</strong> £${item.marketPrice.toFixed(2)}</span>
+        </div>
 
-      <div class="item-profit">
-        <span><strong>Buy price:</strong> £${item.buyPrice.toFixed(2)}</span>
-        <span><strong>Sell price:</strong> £${item.sellPrice.toFixed(2)}</span>
-        <span><strong>Profit per unit:</strong> £${profitPerUnit.toFixed(2)}</span>
-        <span><strong>Total profit:</strong> £${totalProfit.toFixed(2)}</span>
-        <span><strong>Margin:</strong> ${marginPercent.toFixed(1)}%</span>
-      </div>
+        <div class="inv-profit">
+          <span><strong>Profit per unit:</strong> £${profitPerUnit.toFixed(2)}</span>
+          <span><strong>Total profit:</strong> £${totalProfit.toFixed(2)}</span>
+          <span><strong>Margin:</strong> ${marginPercent.toFixed(1)}%</span>
+        </div>
 
-      <div class="item-actions">
-        <button onclick="sellItem(${index})">Sell</button>
-        <button onclick="editItem(${index})">Edit</button>
-        <button onclick="copyItem(${index})">Copy</button>
-        <button onclick="deleteItem(${index})">Delete</button>
+        <div class="inv-actions">
+          <button onclick="sellItem(${index})">Sell</button>
+          <button onclick="editItem(${index})">Edit</button>
+          <button onclick="copyItem(${index})">Copy</button>
+          <button onclick="deleteItem(${index})">Delete</button>
+        </div>
       </div>
     `;
 
