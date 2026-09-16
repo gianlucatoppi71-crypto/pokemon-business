@@ -280,6 +280,80 @@ body {
   margin-top: 15px;
   transition: 0.2s ease;
 }
+/* INVENTORY GRID LAYOUT */
+.inventory-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+/* INVENTORY CARD */
+.inventory-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  gap: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
+}
+
+.inventory-card:hover {
+  transform: scale(1.02);
+}
+
+/* LEFT SIDE (IMAGE) */
+.inv-left img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #444;
+}
+
+/* RIGHT SIDE (INFO) */
+.inv-right {
+  flex: 1;
+}
+
+.inv-right h3 {
+  margin: 0 0 8px 0;
+  color: gold;
+  font-size: 1.3rem;
+}
+
+.inv-meta span,
+.inv-prices span,
+.inv-profit span {
+  display: block;
+  color: #ccc;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.inv-profit span {
+  color: #0f0;
+  font-weight: bold;
+}
+
+/* ACTION BUTTONS */
+.inv-actions button {
+  margin-right: 6px;
+  padding: 6px 10px;
+  background: #333;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.inv-actions button:hover {
+  background: gold;
+  color: #000;
+}
 
 #portfolioForm button:hover {
   background: #e6c200;
