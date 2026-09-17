@@ -343,3 +343,11 @@ body {
   background: #e6c200;
   transform: scale(1.02);
 }
+/* FIX INVENTORY IMAGE SIZE */
+.inventory-card img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #444;
+}
