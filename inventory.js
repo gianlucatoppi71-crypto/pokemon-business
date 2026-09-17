@@ -15,23 +15,40 @@ function renderInventory() {
 
   container.innerHTML = inventoryData.map(item => `
     <div class="inventory-card">
-      <img src="${item.image}" alt="${item.name}" class="inventory-image">
 
-      <h3>${item.name}</h3>
-      <p><strong>Category:</strong> ${item.category}</p>
-      <p><strong>Supplier:</strong> ${item.supplier}</p>
+      <!-- LEFT SIDE: IMAGE -->
+      <div class="inv-left">
+        <img src="${item.image}" alt="${item.name}">
+      </div>
 
-      <p><strong>Buy price:</strong> £${item.buyPrice.toFixed(2)}</p>
-      <p><strong>Sell price:</strong> £${item.sellPrice.toFixed(2)}</p>
-      <p><strong>Quantity:</strong> ${item.quantity}</p>
-      <p><strong>Market price (UK):</strong> £${item.marketPrice.toFixed(2)}</p>
+      <!-- RIGHT SIDE: INFO -->
+      <div class="inv-right">
+        <h3>${item.name}</h3>
 
-      <p><strong>Notes:</strong> ${item.notes || "—"}</p>
+        <div class="inv-meta">
+          <span><strong>Category:</strong> ${item.category}</span>
+          <span><strong>Supplier:</strong> ${item.supplier}</span>
+        </div>
 
-      <button onclick="sellItem(${item.id})">Sell</button>
-      <button onclick="editItem(${item.id})">Edit</button>
-      <button onclick="deleteItem(${item.id})">Delete</button>
-      <button onclick="giftItem(${item.id})">Gift</button>
+        <div class="inv-prices">
+          <span><strong>Buy price:</strong> £${item.buyPrice.toFixed(2)}</span>
+          <span><strong>Sell price:</strong> £${item.sellPrice.toFixed(2)}</span>
+          <span><strong>Quantity:</strong> ${item.quantity}</span>
+          <span><strong>Market price (UK):</strong> £${item.marketPrice.toFixed(2)}</span>
+        </div>
+
+        <div class="inv-meta">
+          <span><strong>Notes:</strong> ${item.notes || "—"}</span>
+        </div>
+
+        <div class="inv-actions">
+          <button onclick="sellItem(${item.id})">Sell</button>
+          <button onclick="editItem(${item.id})">Edit</button>
+          <button onclick="deleteItem(${item.id})">Delete</button>
+          <button onclick="giftItem(${item.id})">Gift</button>
+        </div>
+      </div>
+
     </div>
   `).join("");
 }
@@ -84,7 +101,7 @@ function deleteItem(id) {
 }
 
 // ===============================
-// EDIT ITEM (simple example)
+// EDIT ITEM
 // ===============================
 
 function editItem(id) {
@@ -100,20 +117,16 @@ function editItem(id) {
   document.getElementById('invMarketPrice').value = item.marketPrice;
   document.getElementById('invImage').value = item.image;
   document.getElementById('invNotes').value = item.notes || "";
-
-  // You can extend this to "save changes" with a separate button if you want.
 }
 
 // ===============================
-// SELL ITEM (placeholder hook)
+// SELL ITEM (placeholder)
 // ===============================
 
 function sellItem(id) {
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  // Here you would open a sale form or move data into sales.js
-  // For now, just a simple alert so you know it’s wired:
   alert(`Prepare sale for: ${item.name}`);
 }
 
@@ -122,14 +135,11 @@ function sellItem(id) {
 // ===============================
 
 function giftItem(id) {
-  // Find the item
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  // Load existing expenses
   const expensesData = JSON.parse(localStorage.getItem("expensesData") || "[]");
 
-  // Add expense entry for the gift
   expensesData.push({
     id: Date.now(),
     description: `Gift: ${item.name}`,
@@ -140,11 +150,9 @@ function giftItem(id) {
 
   localStorage.setItem("expensesData", JSON.stringify(expensesData));
 
-  // Remove item from inventory
   inventoryData = inventoryData.filter(i => i.id !== id);
   saveData();
 
-  // Refresh UI
   renderInventory();
   if (typeof renderExpenses === "function") renderExpenses();
   if (typeof renderSummary === "function") renderSummary();
