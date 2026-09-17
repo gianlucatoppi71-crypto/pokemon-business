@@ -39,6 +39,23 @@ function deleteExpense(id) {
   renderExpenses();
 }
 
+// Copy an expense
+function copyExpense(id) {
+  const exp = expensesData.find(e => e.id === id);
+  if (!exp) return;
+
+  expensesData.push({
+    id: Date.now(),
+    description: exp.description,
+    amount: exp.amount,
+    date: exp.date,
+    category: exp.category
+  });
+
+  saveExpenses();
+  renderExpenses();
+}
+
 // Render expenses list
 function renderExpenses() {
   const container = document.getElementById("expensesList");
@@ -55,6 +72,8 @@ function renderExpenses() {
       <p>£${exp.amount.toFixed(2)}</p>
       <p>${exp.date}</p>
       <p>${exp.category}</p>
+
+      <button onclick="copyExpense(${exp.id})">Copy</button>
       <button onclick="deleteExpense(${exp.id})">Delete</button>
     </div>
   `).join("");
