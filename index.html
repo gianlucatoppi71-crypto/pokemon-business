@@ -20,6 +20,8 @@
       <button onclick="showPage('suppliers')">Suppliers</button>
       <button onclick="showPage('trades')">Trades</button>
       <button onclick="showPage('portfolio')">Portfolio</button>
+      <!-- ✅ NEW: EXPENSES BUTTON -->
+      <button onclick="showPage('expenses')">Expenses</button>
     </nav>
 
     <div class="tax-info">
@@ -53,7 +55,6 @@
         <button type="submit">Add to inventory</button>
       </form>
 
-      <!-- ✅ UPDATED LINE -->
       <div id="inventoryList" class="inventory-container"></div>
     </section>
 
@@ -87,6 +88,21 @@
       <div id="portfolioList" class="portfolio-container"></div>
     </section>
 
+    <!-- ✅ NEW: EXPENSES PAGE -->
+    <section id="expensesPage" class="page" style="display:none">
+      <h1>Expenses</h1>
+
+      <form id="expensesForm" onsubmit="addExpense(event)">
+        <input type="text" id="expDesc" placeholder="Expense description" required>
+        <input type="number" step="0.01" id="expAmount" placeholder="Amount (£)" required>
+        <input type="date" id="expDate" required>
+        <input type="text" id="expCategory" placeholder="Category (optional)">
+        <button type="submit">Add Expense</button>
+      </form>
+
+      <div id="expensesList"></div>
+    </section>
+
   </main>
 </div>
 
@@ -98,6 +114,8 @@
 <script src="suppliers.js?v=4"></script>
 <script src="trades.js?v=4"></script>
 <script src="portfolio.js?v=1"></script>
+<!-- ✅ expenses.js will be added in Step 2 -->
+<!-- <script src="expenses.js?v=1"></script> -->
 
 <script>
   function showPage(page) {
@@ -119,10 +137,14 @@
     document.getElementById('portfolioPage').style.display =
       page === 'portfolio' ? 'block' : 'none';
 
+    document.getElementById('expensesPage').style.display =
+      page === 'expenses' ? 'block' : 'none';
+
     if (page === 'summary') renderSummary();
     if (page === 'suppliers') renderSuppliers();
     if (page === 'trades') renderTrades();
     if (page === 'portfolio') renderPortfolio();
+    if (page === 'expenses') renderExpenses && renderExpenses();
   }
 
   showPage('inventory');
