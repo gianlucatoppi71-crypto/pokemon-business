@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -20,8 +20,6 @@
       <button onclick="showPage('suppliers')">Suppliers</button>
       <button onclick="showPage('trades')">Trades</button>
       <button onclick="showPage('portfolio')">Portfolio</button>
-
-      <!-- ⭐ EXPENSES BUTTON -->
       <button onclick="showPage('expenses')">Expenses</button>
     </nav>
 
@@ -89,7 +87,7 @@
       <div id="portfolioList" class="portfolio-container"></div>
     </section>
 
-    <!-- ⭐ EXPENSES PAGE -->
+    <!-- EXPENSES PAGE -->
     <section id="expensesPage" class="page" style="display:none">
       <h1>Expenses</h1>
 
@@ -108,16 +106,14 @@
 </div>
 
 <!-- SCRIPTS -->
-<script src="data.js?v=4"></script>
-<script src="inventory.js?v=4"></script>
-<script src="sales.js?v=4"></script>
-<script src="summary.js?v=4"></script>
-<script src="suppliers.js?v=4"></script>
-<script src="trades.js?v=4"></script>
-<script src="portfolio.js?v=1"></script>
-
-<!-- ⭐ EXPENSES SYSTEM -->
-<script src="expenses.js?v=1"></script>
+<script src="data.js?v=5"></script>
+<script src="inventory.js?v=5"></script>
+<script src="sales.js?v=5"></script>
+<script src="summary.js?v=5"></script>
+<script src="suppliers.js?v=5"></script>
+<script src="trades.js?v=5"></script>
+<script src="portfolio.js?v=5"></script>
+<script src="expenses.js?v=5"></script>
 
 <script>
   function showPage(page) {
