@@ -21,7 +21,7 @@
       <button onclick="showPage('trades')">Trades</button>
       <button onclick="showPage('portfolio')">Portfolio</button>
 
-      <!-- ⭐ NEW BUTTON (same style) -->
+      <!-- ⭐ EXPENSES BUTTON -->
       <button onclick="showPage('expenses')">Expenses</button>
     </nav>
 
@@ -89,7 +89,7 @@
       <div id="portfolioList" class="portfolio-container"></div>
     </section>
 
-    <!-- ⭐ NEW EXPENSES PAGE (same layout style) -->
+    <!-- ⭐ EXPENSES PAGE -->
     <section id="expensesPage" class="page" style="display:none">
       <h1>Expenses</h1>
 
@@ -115,8 +115,9 @@
 <script src="suppliers.js?v=4"></script>
 <script src="trades.js?v=4"></script>
 <script src="portfolio.js?v=1"></script>
-<!-- ⭐ Step 2 will add expenses.js -->
-<!-- <script src="expenses.js?v=1"></script> -->
+
+<!-- ⭐ EXPENSES SYSTEM -->
+<script src="expenses.js?v=1"></script>
 
 <script>
   function showPage(page) {
@@ -145,7 +146,7 @@
     if (page === 'suppliers') renderSuppliers();
     if (page === 'trades') renderTrades();
     if (page === 'portfolio') renderPortfolio();
-    if (page === 'expenses') renderExpenses && renderExpenses();
+    if (page === 'expenses') renderExpenses();
   }
 
   showPage('inventory');
