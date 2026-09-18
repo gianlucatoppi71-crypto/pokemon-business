@@ -1,107 +1,89 @@
 // ===============================
-// CENTRAL DATA STORAGE FOR ALL APP MODULES (UPDATED FOR BOX + PACK SYSTEM)
+// GLOBAL DATA STORAGE (NEW SYSTEM)
 // ===============================
 
-// GLOBAL ARRAYS
+// Core arrays
 let inventoryData = [];
 let salesData = [];
-let suppliersData = [];
 let expensesData = [];
-let tradesData = []; // reserved for future upgrades
+let suppliersData = [];
+let tradesData = [];
+let portfolioData = [];
+let customerData = [];
+
+// Simple settings
+let annualIncome = 37000;        // default
+let tradingAllowance = 1000;     // UK trading allowance
 
 // ===============================
-// LOAD DATA FROM LOCALSTORAGE
+// LOAD & SAVE HELPERS
 // ===============================
+
 function loadData() {
-  inventoryData = JSON.parse(localStorage.getItem("inventoryData") || "[]");
-  salesData = JSON.parse(localStorage.getItem("salesData") || "[]");
-  suppliersData = JSON.parse(localStorage.getItem("suppliersData") || "[]");
-  expensesData = JSON.parse(localStorage.getItem("expensesData") || "[]");
-  tradesData = JSON.parse(localStorage.getItem("tradesData") || "[]");
+  try {
+    inventoryData = JSON.parse(localStorage.getItem('inventoryData')) || [];
+    salesData     = JSON.parse(localStorage.getItem('salesData'))     || [];
+    expensesData  = JSON.parse(localStorage.getItem('expensesData'))  || [];
+    suppliersData = JSON.parse(localStorage.getItem('suppliersData')) || [];
+    tradesData    = JSON.parse(localStorage.getItem('tradesData'))    || [];
+    portfolioData = JSON.parse(localStorage.getItem('portfolioData')) || [];
+    customerData  = JSON.parse(localStorage.getItem('customerData'))  || [];
+
+    annualIncome      = parseFloat(localStorage.getItem('annualIncome'))      || 37000;
+    tradingAllowance  = parseFloat(localStorage.getItem('tradingAllowance'))  || 1000;
+  } catch (e) {
+    console.error("Error loading data:", e);
+  }
 }
 
-// ===============================
-// SAVE DATA TO LOCALSTORAGE
-// ===============================
 function saveData() {
-  localStorage.setItem("inventoryData", JSON.stringify(inventoryData));
-  localStorage.setItem("salesData", JSON.stringify(salesData));
-  localStorage.setItem("suppliersData", JSON.stringify(suppliersData));
-  localStorage.setItem("expensesData", JSON.stringify(expensesData));
-  localStorage.setItem("tradesData", JSON.stringify(tradesData));
+  try {
+    localStorage.setItem('inventoryData', JSON.stringify(inventoryData));
+    localStorage.setItem('salesData',     JSON.stringify(salesData));
+    localStorage.setItem('expensesData',  JSON.stringify(expensesData));
+    localStorage.setItem('suppliersData', JSON.stringify(suppliersData));
+    localStorage.setItem('tradesData',    JSON.stringify(tradesData));
+    localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+    localStorage.setItem('customerData',  JSON.stringify(customerData));
+
+    localStorage.setItem('annualIncome',     annualIncome.toString());
+    localStorage.setItem('tradingAllowance', tradingAllowance.toString());
+  } catch (e) {
+    console.error("Error saving data:", e);
+  }
 }
 
 // ===============================
-// PROFIT CALCULATIONS (NEW BOX + PACK SYSTEM)
+// TAX SUMMARY RENDER
 // ===============================
 
-// Calculate profit for a BOX or PACK sale
-function calculateSaleProfit(sale) {
-  const profitPerUnit = sale.sellPrice - sale.buyPrice;
-  const totalProfit = profitPerUnit * sale.quantitySold;
-
-  return {
-    profitPerUnit,
-    totalProfit
-  };
-}
-
-// ===============================
-// TOTAL PROFIT (SALES ONLY)
-// ===============================
-function calculateTotalProfit() {
-  return salesData.reduce((sum, sale) => {
-    const p = calculateSaleProfit(sale);
-    return sum + p.totalProfit;
-  }, 0);
-}
-
-// ===============================
-// UK TAX ESTIMATE (NEW SYSTEM)
-// ===============================
-function estimateUkTax(totalProfit) {
-  const tradingAllowance = 1000;
-  const taxableProfit = Math.max(0, totalProfit - tradingAllowance);
-
-  const incomeTax = taxableProfit * 0.20;
-  const nic = taxableProfit * 0.09;
-
-  const totalTax = incomeTax + nic;
-  const netProfit = totalProfit - totalTax;
-
-  return {
-    tradingAllowance,
-    taxableProfit,
-    incomeTax,
-    nic,
-    totalTax,
-    netProfit
-  };
-}
-
-// ===============================
-// RENDER TAX SUMMARY (NEW SYSTEM)
-// ===============================
 function renderTaxSummary() {
   loadData();
 
-  const totalProfit = calculateTotalProfit();
-  const tax = estimateUkTax(totalProfit);
-
-  const el = document.getElementById("taxSummary");
+  const el = document.getElementById('taxSummary');
   if (!el) return;
 
+  // Total sales profit from salesData
+  const totalSalesProfit = salesData.reduce((sum, sale) => {
+    return sum + (sale.totalProfit || 0);
+  }, 0);
+
+  // Total expenses
+  const totalExpenses = expensesData.reduce((sum, exp) => {
+    return sum + (exp.amount || 0);
+  }, 0);
+
+  const netBusinessProfit = totalSalesProfit - totalExpenses;
+  const taxableProfit = Math.max(0, netBusinessProfit - tradingAllowance);
+  const incomeTax = taxableProfit * 0.20; // 20% basic rate
+
   el.innerHTML = `
-    Total profit: £${totalProfit.toFixed(2)}<br>
-    Trading allowance: £${tax.tradingAllowance.toFixed(2)}<br>
-    Taxable profit: £${tax.taxableProfit.toFixed(2)}<br>
-    Income tax (20%): £${tax.incomeTax.toFixed(2)}<br>
-    NIC (9%): £${tax.nic.toFixed(2)}<br>
-    Total estimated tax: £${tax.totalTax.toFixed(2)}<br>
-    Net profit after tax: £${tax.netProfit.toFixed(2)}<br>
-    <small>Estimates only — final tax depends on HMRC rules.</small>
+    <p><strong>Annual income:</strong> £${annualIncome.toFixed(2)}</p>
+    <p><strong>Trading allowance:</strong> £${tradingAllowance.toFixed(2)}</p>
+    <p><strong>Total sales profit:</strong> £${totalSalesProfit.toFixed(2)}</p>
+    <p><strong>Total expenses:</strong> £${totalExpenses.toFixed(2)}</p>
+    <p><strong>Net business profit:</strong> £${netBusinessProfit.toFixed(2)}</p>
+    <p><strong>Taxable profit:</strong> £${taxableProfit.toFixed(2)}</p>
+    <p><strong>Income tax (20%):</strong> £${incomeTax.toFixed(2)}</p>
   `;
 }
-
-// INITIAL LOAD
-loadData();
