@@ -14,11 +14,11 @@ function addPortfolio(event) {
   event.preventDefault();
 
   const name = document.getElementById("portName").value;
-  const desc = document.getElementById("portDesc").value;
+  const description = document.getElementById("portDesc").value;
   const image = document.getElementById("portImage").value;
   const link = document.getElementById("portLink").value;
 
-  portfolioData.push({ name, description: desc, image, link });
+  portfolioData.push({ name, description, image, link });
   savePortfolio();
   renderPortfolio();
 
@@ -29,6 +29,7 @@ function addPortfolio(event) {
 // DELETE PORTFOLIO
 // ===============================
 function deletePortfolio(index) {
+  if (!confirm("Delete this portfolio?")) return;
   portfolioData.splice(index, 1);
   savePortfolio();
   renderPortfolio();
@@ -83,11 +84,14 @@ function renderPortfolio() {
       </a>
 
       <div class="portfolio-actions">
-        <button onclick="editPortfolio(${index})" class="portfolio-edit">Edit</button>
-        <button onclick="deletePortfolio(${index})" class="portfolio-delete">Delete</button>
+        <button class="portfolio-edit" onclick="editPortfolio(${index})">Edit</button>
+        <button class="portfolio-delete" onclick="deletePortfolio(${index})">Delete</button>
       </div>
     `;
 
     container.appendChild(div);
   });
 }
+
+// Force render on load
+renderPortfolio();
