@@ -1,5 +1,5 @@
 // =========================
-// INVENTORY SYSTEM (FULL)
+// INVENTORY SYSTEM (FULL, FIXED)
 // =========================
 
 let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
@@ -12,6 +12,8 @@ function saveInventory() {
 // Render inventory list
 function renderInventory() {
     const container = document.getElementById('inventoryList');
+    if (!container) return;
+
     container.innerHTML = '';
 
     inventory.forEach((item, index) => {
@@ -20,16 +22,16 @@ function renderInventory() {
 
         card.innerHTML = `
             <h3>${item.name}</h3>
-            <p><strong>Category:</strong> ${item.category}</p>
-            <p><strong>Supplier:</strong> ${item.supplier}</p>
-            <p><strong>Buy price per BOX:</strong> £${item.buyPriceBox.toFixed(2)}</p>
-            <p><strong>Sell price per BOX:</strong> £${item.sellPriceBox.toFixed(2)}</p>
-            <p><strong>Sell price per PACK:</strong> £${item.sellPricePack.toFixed(2)}</p>
-            <p><strong>Packs per box:</strong> ${item.packsPerBox}</p>
-            <p><strong>Quantity of BOXES:</strong> ${item.quantityBoxes}</p>
-            <p><strong>Loose packs:</strong> ${item.loosePacks}</p>
-            <p><strong>Total packs:</strong> ${item.totalPacks}</p>
-            <p><strong>Market price (UK):</strong> £${item.marketPrice}</p>
+            <p><strong>Category:</strong> ${item.category || '—'}</p>
+            <p><strong>Supplier:</strong> ${item.supplier || '—'}</p>
+            <p><strong>Buy price per BOX:</strong> £${(item.buyPriceBox || 0).toFixed(2)}</p>
+            <p><strong>Sell price per BOX:</strong> £${(item.sellPriceBox || 0).toFixed(2)}</p>
+            <p><strong>Sell price per PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</p>
+            <p><strong>Packs per box:</strong> ${item.packsPerBox || 0}</p>
+            <p><strong>Quantity of BOXES:</strong> ${item.quantityBoxes || 0}</p>
+            <p><strong>Loose packs:</strong> ${item.loosePacks || 0}</p>
+            <p><strong>Total packs:</strong> ${item.totalPacks || 0}</p>
+            <p><strong>Market price (UK):</strong> £${(item.marketPrice || 0).toFixed(2)}</p>
             <p><strong>Notes:</strong> ${item.notes || '—'}</p>
 
             <button onclick="sellBox(${index})">Sell BOX</button>
@@ -45,18 +47,54 @@ function renderInventory() {
 }
 
 // Add new inventory item
-function addInventoryItem() {
-    const name = document.getElementById('productName').value;
-    const category = document.getElementById('productCategory').value;
-    const supplier = document.getElementById('productSupplier').value;
-    const buyPriceBox = parseFloat(document.getElementById('buyPriceBox').value);
-    const sellPriceBox = parseFloat(document.getElementById('sellPriceBox').value);
-    const sellPricePack = parseFloat(document.getElementById('sellPricePack').value);
-    const packsPerBox = parseInt(document.getElementById('packsPerBox').value);
-    const quantityBoxes = parseInt(document.getElementById('quantityBoxes').value);
-    const loosePacks = parseInt(document.getElementById('loosePacks').value);
-    const marketPrice = parseFloat(document.getElementById('marketPrice').value);
-    const notes = document.getElementById('notes').value;
+// Works both with form onsubmit="addInventoryItem(event)"
+// and with button onclick="addInventoryItem()"
+function addInventoryItem(event) {
+    if (event && event.preventDefault) {
+        event.preventDefault();
+    }
+
+    const getNumber = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return 0;
+        const v = parseFloat(el.value);
+        return isNaN(v) ? 0 : v;
+    };
+
+    const getInt = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return 0;
+        const v = parseInt(el.value);
+        return isNaN(v) ? 0 : v;
+    };
+
+    const getText = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    };
+
+    const name = getText('productName');
+    if (!name) {
+        alert('Product name is required.');
+        return;
+    }
+
+    const category = getText('productCategory');
+    const supplier = getText('productSupplier');
+
+    const buyPriceBox = getNumber('buyPriceBox');
+    const sellPriceBox = getNumber('sellPriceBox');
+    let sellPricePack = getNumber('sellPricePack');
+    const packsPerBox = getInt('packsPerBox');
+    const quantityBoxes = getInt('quantityBoxes');
+    const loosePacks = getInt('loosePacks');
+    const marketPrice = getNumber('marketPrice');
+    const notes = getText('notes');
+
+    // Auto-calc pack price if not provided but we have box price + packs per box
+    if (!sellPricePack && sellPriceBox && packsPerBox) {
+        sellPricePack = sellPriceBox / packsPerBox;
+    }
 
     const totalPacks = (quantityBoxes * packsPerBox) + loosePacks;
 
@@ -78,15 +116,24 @@ function addInventoryItem() {
     inventory.push(item);
     saveInventory();
     renderInventory();
+
+    // Clear form if fields exist
+    ['productName','productCategory','productSupplier','buyPriceBox','sellPriceBox',
+     'sellPricePack','packsPerBox','quantityBoxes','loosePacks','marketPrice','notes']
+        .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
 }
 
 // Sell BOX
 function sellBox(index) {
     const item = inventory[index];
+    if (!item) return;
 
-    if (item.quantityBoxes > 0) {
+    if ((item.quantityBoxes || 0) > 0) {
         item.quantityBoxes -= 1;
-        item.totalPacks -= item.packsPerBox;
+        item.totalPacks = (item.quantityBoxes * (item.packsPerBox || 0)) + (item.loosePacks || 0);
         saveInventory();
         renderInventory();
     }
@@ -95,17 +142,18 @@ function sellBox(index) {
 // Sell PACK
 function sellPack(index) {
     const item = inventory[index];
+    if (!item) return;
 
-    if (item.totalPacks > 0) {
-        item.totalPacks -= 1;
-
-        if (item.loosePacks > 0) {
+    if ((item.totalPacks || 0) > 0) {
+        if ((item.loosePacks || 0) > 0) {
             item.loosePacks -= 1;
-        } else {
-            // Reduce box count when packs come from boxes
-            item.loosePacks = 0;
+        } else if ((item.quantityBoxes || 0) > 0 && (item.packsPerBox || 0) > 0) {
+            // Take one pack from a box
+            item.loosePacks = (item.packsPerBox || 0) - 1;
+            item.quantityBoxes -= 1;
         }
 
+        item.totalPacks = (item.quantityBoxes * (item.packsPerBox || 0)) + (item.loosePacks || 0);
         saveInventory();
         renderInventory();
     }
@@ -114,20 +162,26 @@ function sellPack(index) {
 // Edit item
 function editItem(index) {
     const item = inventory[index];
+    if (!item) return;
 
-    document.getElementById('productName').value = item.name;
-    document.getElementById('productCategory').value = item.category;
-    document.getElementById('productSupplier').value = item.supplier;
-    document.getElementById('buyPriceBox').value = item.buyPriceBox;
-    document.getElementById('sellPriceBox').value = item.sellPriceBox;
-    document.getElementById('sellPricePack').value = item.sellPricePack;
-    document.getElementById('packsPerBox').value = item.packsPerBox;
-    document.getElementById('quantityBoxes').value = item.quantityBoxes;
-    document.getElementById('loosePacks').value = item.loosePacks;
-    document.getElementById('marketPrice').value = item.marketPrice;
-    document.getElementById('notes').value = item.notes;
+    const setValue = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+    };
 
-    // Remove old item
+    setValue('productName', item.name);
+    setValue('productCategory', item.category);
+    setValue('productSupplier', item.supplier);
+    setValue('buyPriceBox', item.buyPriceBox);
+    setValue('sellPriceBox', item.sellPriceBox);
+    setValue('sellPricePack', item.sellPricePack);
+    setValue('packsPerBox', item.packsPerBox);
+    setValue('quantityBoxes', item.quantityBoxes);
+    setValue('loosePacks', item.loosePacks);
+    setValue('marketPrice', item.marketPrice);
+    setValue('notes', item.notes);
+
+    // Remove old item; user will re-save
     inventory.splice(index, 1);
     saveInventory();
     renderInventory();
@@ -136,6 +190,8 @@ function editItem(index) {
 // Copy item
 function copyItem(index) {
     const item = inventory[index];
+    if (!item) return;
+
     inventory.push({ ...item });
     saveInventory();
     renderInventory();
@@ -144,8 +200,10 @@ function copyItem(index) {
 // Add quantity
 function addQty(index) {
     const item = inventory[index];
-    item.quantityBoxes += 1;
-    item.totalPacks += item.packsPerBox;
+    if (!item) return;
+
+    item.quantityBoxes = (item.quantityBoxes || 0) + 1;
+    item.totalPacks = (item.quantityBoxes * (item.packsPerBox || 0)) + (item.loosePacks || 0);
     saveInventory();
     renderInventory();
 }
