@@ -42,14 +42,16 @@ body {
   text-align: left;
   font-size: 15px;
   border-radius: 4px;
+  transition: 0.2s ease;
 }
 
 .sidebar nav button:hover {
-  background: #333;
+  background: gold;
+  color: #000;
 }
 
 /* ============================
-   CLEAN TAX SUMMARY BOX
+   TAX SUMMARY BOX
 ============================ */
 .tax-info {
   margin-top: 20px;
@@ -78,14 +80,6 @@ body {
   color: #ccc;
 }
 
-#taxSummary small {
-  display: block;
-  margin-top: 10px;
-  font-size: 10px;
-  opacity: 0.6;
-  text-align: center;
-}
-
 /* ============================
    MAIN AREA
 ============================ */
@@ -102,28 +96,28 @@ body {
 }
 
 /* ============================
-   FORMS
+   FORMS (GLOBAL)
 ============================ */
-#inventoryForm input,
-#inventoryForm textarea {
+form input,
+form textarea {
   display: block;
   width: 100%;
   max-width: 420px;
   margin: 6px 0;
-  padding: 8px;
+  padding: 10px;
   background: #222;
   border: 1px solid #444;
   color: #eee;
   font-size: 14px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-#inventoryForm textarea {
+form textarea {
   height: 80px;
   resize: vertical;
 }
 
-#inventoryForm button {
+form button {
   margin-top: 12px;
   padding: 10px 15px;
   background: gold;
@@ -131,11 +125,12 @@ body {
   color: #000;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 15px;
+  transition: 0.2s ease;
 }
 
-#inventoryForm button:hover {
+form button:hover {
   background: #e6c200;
 }
 
@@ -188,8 +183,7 @@ body {
 }
 
 .inv-meta span,
-.inv-prices span,
-.inv-profit span {
+.inv-prices span {
   display: block;
   color: #ccc;
   font-size: 0.9rem;
@@ -197,20 +191,27 @@ body {
 }
 
 .inv-profit span {
+  display: block;
   color: #0f0;
   font-weight: bold;
+  margin-bottom: 4px;
 }
 
 /* ACTION BUTTONS */
+.inv-actions {
+  margin-top: 10px;
+}
+
 .inv-actions button {
   margin-right: 6px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   background: #333;
   color: #eee;
   border: 1px solid #555;
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
+  transition: 0.2s ease;
 }
 
 .inv-actions button:hover {
@@ -227,6 +228,7 @@ body {
   margin-bottom: 15px;
   border-radius: 8px;
   background: #1a1a1a;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
 }
 
 .sale-meta,
@@ -234,6 +236,59 @@ body {
 .sale-profit {
   margin: 8px 0;
   line-height: 1.4;
+}
+
+/* ============================
+   SUPPLIER PAGE
+============================ */
+.supplier-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.supplier-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  transition: 0.2s ease;
+}
+
+.supplier-card:hover {
+  transform: scale(1.02);
+}
+
+.supplier-card h3 {
+  margin: 0 0 10px 0;
+  color: gold;
+}
+
+.supplier-card p {
+  margin: 4px 0;
+  color: #ccc;
+}
+
+.supplier-actions {
+  margin-top: 10px;
+}
+
+.supplier-actions button {
+  padding: 8px 12px;
+  margin-right: 6px;
+  background: #333;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.supplier-actions button:hover {
+  background: gold;
+  color: #000;
 }
 
 /* ============================
@@ -291,154 +346,9 @@ body {
   font-size: 1rem;
 }
 
-/* PORTFOLIO FORM */
-#portfolioForm {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  padding: 25px;
-  border-radius: 12px;
-  margin-bottom: 30px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.45);
-  max-width: 550px;
-  transition: 0.2s ease;
-}
-
-#portfolioForm:hover {
-  box-shadow: 0 0 18px rgba(255,215,0,0.25);
-}
-
-#portfolioForm input {
-  width: 100%;
-  padding: 14px;
-  margin: 12px 0;
-  background: #222;
-  border: 1px solid #444;
-  color: #eee;
-  border-radius: 10px;
-  font-size: 15px;
-  transition: 0.2s ease;
-}
-
-#portfolioForm input:focus {
-  border-color: gold;
-  background: #262626;
-  outline: none;
-}
-
-#portfolioForm button {
-  width: 100%;
-  padding: 14px;
-  background: gold;
-  color: #000;
-  font-weight: bold;
-  border: none;
-  border-radius: 10px;
-  font-size: 17px;
-  cursor: pointer;
-  margin-top: 15px;
-  transition: 0.2s ease;
-}
-
-#portfolioForm button:hover {
-  background: #e6c200;
-  transform: scale(1.02);
-}
-
-/* FIX INVENTORY IMAGE SIZE */
-.inventory-card img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid #444;
-}
-
 /* ============================
-   CUSTOMER PAGE (ADDED)
+   CUSTOMER PAGE
 ============================ */
-.customer-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background: #fff;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.customer-img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.customer-info h3 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.whatsapp-btn {
-  width: 100%;
-  padding: 12px;
-  background: #25D366;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 18px;
-  margin-top: 20px;
-}
-/* ============================
-   CUSTOMER PAGE (DARK THEME FIX)
-============================ */
-.customer-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background: #1a1a1a;       /* DARK background */
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  border: 1px solid #333;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-}
-
-.customer-img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #444;
-}
-
-.customer-info h3 {
-  margin: 0;
-  font-size: 18px;
-  color: gold;               /* TITLE visible */
-}
-
-.customer-info p {
-  color: #ccc;               /* TEXT visible */
-}
-
-.whatsapp-btn {
-  width: 100%;
-  padding: 12px;
-  background: #25D366;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 18px;
-  margin-top: 20px;
-}
-/* CUSTOMER PAGE DARK THEME */
-.customer-dark {
-  background: #111;
-  color: #eee;
-}
-
-/* CUSTOMER CARDS */
 .customer-card {
   display: flex;
   align-items: center;
@@ -479,57 +389,24 @@ body {
   font-size: 18px;
   margin-top: 20px;
 }
-/* PORTFOLIO ACTION BUTTONS */
-.portfolio-actions {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
 
-.portfolio-edit,
-.portfolio-delete {
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-}
+/* ============================
+   MOBILE RESPONSIVE
+============================ */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
 
-.portfolio-edit {
-  background: #3498db;
-  color: white;
-}
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 2px solid gold;
+  }
 
-.portfolio-delete {
-  background: #e74c3c;
-  color: white;
-}
-/* PORTFOLIO ACTION BUTTONS */
-.portfolio-actions {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-.portfolio-edit,
-.portfolio-delete {
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.portfolio-edit {
-  background: #3498db;
-  color: white;
-}
-
-.portfolio-delete {
-  background: #e74c3c;
-  color: white;
+  .inventory-container,
+  .supplier-container,
+  .portfolio-container {
+    grid-template-columns: 1fr;
+  }
 }
