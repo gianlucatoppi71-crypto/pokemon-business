@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -21,8 +21,6 @@
       <button onclick="showPage('trades')">Trades</button>
       <button onclick="showPage('portfolio')">Portfolio</button>
       <button onclick="showPage('expenses')">Expenses</button>
-
-      <!-- CUSTOMER PAGE BUTTON -->
       <button onclick="openCustomerPage()">Customer List</button>
     </nav>
 
@@ -39,29 +37,64 @@
     <section id="inventoryPage" class="page">
       <h1>Inventory</h1>
 
-      <!-- ⭐ UPDATED INVENTORY FORM ⭐ -->
+      <!-- ⭐ NEW INVENTORY FORM ⭐ -->
       <form id="inventoryForm">
+
+        <!-- PRODUCT TYPE -->
+        <select id="invType" required>
+          <option value="">Select product type</option>
+          <option value="BOX">BOX</option>
+          <option value="PACK">PACK</option>
+        </select>
+
+        <!-- NAME -->
         <input type="text" id="invName" placeholder="Product name" required>
-        <input type="text" id="invCategory" placeholder="Category (e.g. Booster Box)" required>
-        <input type="text" id="invSupplier" placeholder="Supplier" required>
 
-        <!-- BUY / STRUCTURE -->
-        <input type="number" step="0.01" id="invBuyPriceBox" placeholder="Buy price per BOX (£)" required>
-        <input type="number" id="invPacksPerBox" placeholder="Packs per box" required>
+        <!-- CATEGORY DROPDOWN -->
+        <select id="invCategory" required>
+          <option value="">Select category</option>
+          <option>Booster Box</option>
+          <option>Booster Pack</option>
+          <option>Elite Trainer Box (ETB)</option>
+          <option>Collection Box</option>
+          <option>Premium Collection</option>
+          <option>Special Set</option>
+          <option>Tin</option>
+          <option>Blister</option>
+          <option>Sleeved Pack</option>
+          <option>Promo Pack</option>
+          <option>Japanese Box</option>
+          <option>Korean Box</option>
+          <option>Chinese Box</option>
+          <option>Deck</option>
+          <option>Bundle</option>
+          <option>Other</option>
+        </select>
 
-        <!-- SELL PRICES -->
-        <input type="number" step="0.01" id="invSellPriceBox" placeholder="Sell price per BOX (£)" required>
-        <input type="number" step="0.01" id="invSellPricePack" placeholder="Sell price per PACK (£)" required>
+        <!-- SUPPLIER DROPDOWN -->
+        <select id="invSupplier" required></select>
 
-        <!-- QUANTITIES -->
-        <input type="number" id="invQuantityBoxes" placeholder="Quantity of BOXES" required>
-        <input type="number" id="invManualPacks" placeholder="Manual loose packs (optional)" value="0">
+        <!-- ⭐ BOX FIELDS ⭐ -->
+        <div id="boxFields" style="display:none">
+          <input type="number" step="0.01" id="invBuyPriceBox" placeholder="Buy price per BOX (£)">
+          <input type="number" id="invPacksPerBox" placeholder="Packs per box">
+          <input type="number" step="0.01" id="invSellPriceBox" placeholder="Sell price per BOX (£)">
+          <input type="number" step="0.01" id="invSellPricePack" placeholder="Sell price per PACK (£)">
+          <input type="number" id="invQuantityBoxes" placeholder="Quantity of BOXES">
+          <input type="number" id="invManualPacks" placeholder="Loose packs (optional)">
+        </div>
+
+        <!-- ⭐ PACK FIELDS ⭐ -->
+        <div id="packFields" style="display:none">
+          <input type="number" step="0.01" id="invBuyPricePack" placeholder="Buy price per PACK (£)">
+          <input type="number" step="0.01" id="invSellPricePack" placeholder="Sell price per PACK (£)">
+          <input type="number" id="invQuantityPacks" placeholder="Quantity of PACKS">
+        </div>
 
         <!-- MARKET / IMAGE / NOTES -->
-        <input type="number" step="0.01" id="invMarketPrice" placeholder="UK market price (£)" required>
-        <input type="text" id="invImage" placeholder="Image URL (card picture)" required>
-
-        <textarea id="invNotes" placeholder="Notes / strategy"></textarea>
+        <input type="number" step="0.01" id="invMarketPrice" placeholder="UK market price (£)">
+        <input type="text" id="invImage" placeholder="Image URL (optional)">
+        <textarea id="invNotes" placeholder="Notes (optional)"></textarea>
 
         <button type="submit">Add to inventory</button>
       </form>
@@ -82,7 +115,6 @@
     <section id="suppliersPage" class="page" style="display:none">
       <h1>Suppliers</h1>
 
-      <!-- ⭐ UPDATED SUPPLIER FORM ⭐ -->
       <form id="supplierForm" onsubmit="addSupplier(event)">
         <input type="text" id="supName" placeholder="Supplier name" required>
         <input type="text" id="supAddress" placeholder="Address (optional)">
@@ -136,40 +168,20 @@
 </div>
 
 <!-- SCRIPTS -->
-<script src="data.js?v=7"></script>
-<script src="inventory.js?v=7"></script>
-<script src="sales.js?v=7"></script>
-<script src="summary.js?v=7"></script>
-<script src="suppliers.js?v=7"></script>
-<script src="trades.js?v=7"></script>
-<script src="portfolio.js?v=7"></script>
-<script src="expenses.js?v=7"></script>
+<script src="data.js?v=8"></script>
+<script src="inventory.js?v=8"></script>
+<script src="sales.js?v=8"></script>
+<script src="summary.js?v=8"></script>
+<script src="suppliers.js?v=8"></script>
+<script src="trades.js?v=8"></script>
+<script src="portfolio.js?v=8"></script>
+<script src="expenses.js?v=8"></script>
 
 <script>
+  // PAGE SWITCHING
   function showPage(page) {
-    document.getElementById('inventoryPage').style.display =
-      page === 'inventory' ? 'block' : 'none';
-
-    document.getElementById('salesPage').style.display =
-      page === 'sales' ? 'block' : 'none';
-
-    document.getElementById('summaryPage').style.display =
-      page === 'summary' ? 'block' : 'none';
-
-    document.getElementById('suppliersPage').style.display =
-      page === 'suppliers' ? 'block' : 'none';
-
-    document.getElementById('tradesPage').style.display =
-      page === 'trades' ? 'block' : 'none';
-
-    document.getElementById('portfolioPage').style.display =
-      page === 'portfolio' ? 'block' : 'none';
-
-    document.getElementById('expensesPage').style.display =
-      page === 'expenses' ? 'block' : 'none';
-
-    document.getElementById('customerPage').style.display =
-      page === 'customer' ? 'block' : 'none';
+    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    document.getElementById(page + 'Page').style.display = 'block';
 
     if (page === 'summary') renderSummary();
     if (page === 'suppliers') renderSuppliers();
@@ -183,6 +195,40 @@
     showPage('customer');
   }
 
+  // ⭐ DYNAMIC FORM LOGIC ⭐
+  const typeSelect = document.getElementById('invType');
+  const boxFields = document.getElementById('boxFields');
+  const packFields = document.getElementById('packFields');
+
+  typeSelect.addEventListener('change', () => {
+    if (typeSelect.value === "BOX") {
+      boxFields.style.display = "block";
+      packFields.style.display = "none";
+    } else if (typeSelect.value === "PACK") {
+      boxFields.style.display = "none";
+      packFields.style.display = "block";
+    } else {
+      boxFields.style.display = "none";
+      packFields.style.display = "none";
+    }
+  });
+
+  // ⭐ LOAD SUPPLIERS INTO DROPDOWN ⭐
+  function loadSupplierDropdown() {
+    const select = document.getElementById('invSupplier');
+    select.innerHTML = "<option value=''>Select supplier</option>";
+
+    suppliersData.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.name;
+      opt.textContent = s.name;
+      select.appendChild(opt);
+    });
+  }
+
+  loadSupplierDropdown();
+
+  // INITIAL PAGE
   showPage('inventory');
   renderInventory();
   renderSalesInventory();
