@@ -2,8 +2,11 @@
 // EXPENSES SYSTEM (UPGRADED FOR BOX + PACK + TRADES)
 // ===============================
 
-// Load expenses
-let expensesData = JSON.parse(localStorage.getItem("expensesData") || "[]");
+// IMPORTANT:
+// expensesData is already declared in data.js
+// REMOVE the duplicate declaration here.
+
+// We ONLY use expensesData — do NOT redeclare it.
 
 function saveExpenses() {
   localStorage.setItem("expensesData", JSON.stringify(expensesData));
@@ -39,7 +42,6 @@ function addExpense(event) {
 
 // ===============================
 // AUTO‑EXPENSE FROM GIFT SYSTEM
-// (inventory.js already pushes gift expenses)
 // ===============================
 
 function addGiftExpense(item, totalCost) {
@@ -56,7 +58,6 @@ function addGiftExpense(item, totalCost) {
 
 // ===============================
 // OPTIONAL: AUTO‑EXPENSE FROM TRADES
-// (OUT items can be treated as business cost)
 // ===============================
 
 function addTradeExpense(item, qty) {
