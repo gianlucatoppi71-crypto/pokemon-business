@@ -47,51 +47,26 @@ function renderInventory() {
 }
 
 // Add new inventory item
-// Works both with form onsubmit="addInventoryItem(event)"
-// and with button onclick="addInventoryItem()"
 function addInventoryItem(event) {
-    if (event && event.preventDefault) {
-        event.preventDefault();
-    }
+    event.preventDefault(); // STOP FORM RELOAD
 
-    const getNumber = (id) => {
-        const el = document.getElementById(id);
-        if (!el) return 0;
-        const v = parseFloat(el.value);
-        return isNaN(v) ? 0 : v;
-    };
+    const name = document.getElementById('productName').value.trim();
+    if (!name) return;
 
-    const getInt = (id) => {
-        const el = document.getElementById(id);
-        if (!el) return 0;
-        const v = parseInt(el.value);
-        return isNaN(v) ? 0 : v;
-    };
+    const category = document.getElementById('productCategory').value.trim();
+    const supplier = document.getElementById('productSupplier').value.trim();
 
-    const getText = (id) => {
-        const el = document.getElementById(id);
-        return el ? el.value.trim() : '';
-    };
+    const buyPriceBox = parseFloat(document.getElementById('buyPriceBox').value) || 0;
+    const sellPriceBox = parseFloat(document.getElementById('sellPriceBox').value) || 0;
+    let sellPricePack = parseFloat(document.getElementById('sellPricePack').value) || 0;
 
-    const name = getText('productName');
-    if (!name) {
-        alert('Product name is required.');
-        return;
-    }
+    const packsPerBox = parseInt(document.getElementById('packsPerBox').value) || 0;
+    const quantityBoxes = parseInt(document.getElementById('quantityBoxes').value) || 0;
+    const loosePacks = parseInt(document.getElementById('loosePacks').value) || 0;
 
-    const category = getText('productCategory');
-    const supplier = getText('productSupplier');
+    const marketPrice = parseFloat(document.getElementById('marketPrice').value) || 0;
+    const notes = document.getElementById('notes').value.trim();
 
-    const buyPriceBox = getNumber('buyPriceBox');
-    const sellPriceBox = getNumber('sellPriceBox');
-    let sellPricePack = getNumber('sellPricePack');
-    const packsPerBox = getInt('packsPerBox');
-    const quantityBoxes = getInt('quantityBoxes');
-    const loosePacks = getInt('loosePacks');
-    const marketPrice = getNumber('marketPrice');
-    const notes = getText('notes');
-
-    // Auto-calc pack price if not provided but we have box price + packs per box
     if (!sellPricePack && sellPriceBox && packsPerBox) {
         sellPricePack = sellPriceBox / packsPerBox;
     }
@@ -117,13 +92,7 @@ function addInventoryItem(event) {
     saveInventory();
     renderInventory();
 
-    // Clear form if fields exist
-    ['productName','productCategory','productSupplier','buyPriceBox','sellPriceBox',
-     'sellPricePack','packsPerBox','quantityBoxes','loosePacks','marketPrice','notes']
-        .forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = '';
-        });
+    document.getElementById('inventoryForm').reset();
 }
 
 // Sell BOX
@@ -131,9 +100,9 @@ function sellBox(index) {
     const item = inventory[index];
     if (!item) return;
 
-    if ((item.quantityBoxes || 0) > 0) {
+    if (item.quantityBoxes > 0) {
         item.quantityBoxes -= 1;
-        item.totalPacks = (item.quantityBoxes * (item.packsPerBox || 0)) + (item.loosePacks || 0);
+        item.totalPacks = (item.quantityBoxes * item.packsPerBox) + item.loosePacks;
         saveInventory();
         renderInventory();
     }
@@ -144,16 +113,15 @@ function sellPack(index) {
     const item = inventory[index];
     if (!item) return;
 
-    if ((item.totalPacks || 0) > 0) {
-        if ((item.loosePacks || 0) > 0) {
+    if (item.totalPacks > 0) {
+        if (item.loosePacks > 0) {
             item.loosePacks -= 1;
-        } else if ((item.quantityBoxes || 0) > 0 && (item.packsPerBox || 0) > 0) {
-            // Take one pack from a box
-            item.loosePacks = (item.packsPerBox || 0) - 1;
+        } else if (item.quantityBoxes > 0) {
             item.quantityBoxes -= 1;
+            item.loosePacks = item.packsPerBox - 1;
         }
 
-        item.totalPacks = (item.quantityBoxes * (item.packsPerBox || 0)) + (item.loosePacks || 0);
+        item.totalPacks = (item.quantityBoxes * item.packsPerBox) + item.loosePacks;
         saveInventory();
         renderInventory();
     }
@@ -164,24 +132,18 @@ function editItem(index) {
     const item = inventory[index];
     if (!item) return;
 
-    const setValue = (id, value) => {
-        const el = document.getElementById(id);
-        if (el) el.value = value;
-    };
+    document.getElementById('productName').value = item.name;
+    document.getElementById('productCategory').value = item.category;
+    document.getElementById('productSupplier').value = item.supplier;
+    document.getElementById('buyPriceBox').value = item.buyPriceBox;
+    document.getElementById('sellPriceBox').value = item.sellPriceBox;
+    document.getElementById('sellPricePack').value = item.sellPricePack;
+    document.getElementById('packsPerBox').value = item.packsPerBox;
+    document.getElementById('quantityBoxes').value = item.quantityBoxes;
+    document.getElementById('loosePacks').value = item.loosePacks;
+    document.getElementById('marketPrice').value = item.marketPrice;
+    document.getElementById('notes').value = item.notes;
 
-    setValue('productName', item.name);
-    setValue('productCategory', item.category);
-    setValue('productSupplier', item.supplier);
-    setValue('buyPriceBox', item.buyPriceBox);
-    setValue('sellPriceBox', item.sellPriceBox);
-    setValue('sellPricePack', item.sellPricePack);
-    setValue('packsPerBox', item.packsPerBox);
-    setValue('quantityBoxes', item.quantityBoxes);
-    setValue('loosePacks', item.loosePacks);
-    setValue('marketPrice', item.marketPrice);
-    setValue('notes', item.notes);
-
-    // Remove old item; user will re-save
     inventory.splice(index, 1);
     saveInventory();
     renderInventory();
@@ -190,8 +152,6 @@ function editItem(index) {
 // Copy item
 function copyItem(index) {
     const item = inventory[index];
-    if (!item) return;
-
     inventory.push({ ...item });
     saveInventory();
     renderInventory();
@@ -200,10 +160,8 @@ function copyItem(index) {
 // Add quantity
 function addQty(index) {
     const item = inventory[index];
-    if (!item) return;
-
-    item.quantityBoxes = (item.quantityBoxes || 0) + 1;
-    item.totalPacks = (item.quantityBoxes * (item.packsPerBox || 0)) + (item.loosePacks || 0);
+    item.quantityBoxes += 1;
+    item.totalPacks = (item.quantityBoxes * item.packsPerBox) + item.loosePacks;
     saveInventory();
     renderInventory();
 }
