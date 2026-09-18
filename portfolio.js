@@ -1,7 +1,12 @@
 // ===============================
-// PORTFOLIO DATA
+// PORTFOLIO SYSTEM (FIXED VERSION)
 // ===============================
-let portfolioData = JSON.parse(localStorage.getItem("portfolioData") || "[]");
+
+// IMPORTANT:
+// portfolioData is already declared in data.js
+// REMOVE the duplicate declaration here.
+
+// We ONLY use portfolioData — do NOT redeclare it.
 
 function savePortfolio() {
   localStorage.setItem("portfolioData", JSON.stringify(portfolioData));
