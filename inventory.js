@@ -192,13 +192,13 @@ function addQuantity(id) {
   const qty = prompt("Enter quantity to add:");
   if (!qty || isNaN(qty)) return;
 
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
+  const index = inventoryData.findIndex(i => i.id === id);
+  if (index === -1) return;
 
-  if (item.type === "BOX") {
-    item.quantityBoxes += parseInt(qty);
+  if (inventoryData[index].type === "BOX") {
+    inventoryData[index].quantityBoxes += parseInt(qty);
   } else {
-    item.quantityPacks += parseInt(qty);
+    inventoryData[index].quantityPacks += parseInt(qty);
   }
 
   saveData();
@@ -212,8 +212,10 @@ function addQuantity(id) {
 function sellPack(id) {
   loadData();
 
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
+  const index = inventoryData.findIndex(i => i.id === id);
+  if (index === -1) return;
+
+  const item = inventoryData[index];
 
   const qty = prompt("How many packs to sell?");
   if (!qty || isNaN(qty)) return;
@@ -235,30 +237,31 @@ function sellPack(id) {
 
     if (amount <= packsFromBoxes) {
       const boxesUsed = Math.floor(amount / (item.packsPerBox || 1));
-      item.quantityBoxes -= boxesUsed;
+      inventoryData[index].quantityBoxes -= boxesUsed;
 
       const leftover = amount % (item.packsPerBox || 1);
-      item.manualPacks -= leftover;
+      inventoryData[index].manualPacks -= leftover;
     } else {
-      item.manualPacks -= (amount - packsFromBoxes);
-      item.quantityBoxes = 0;
+      inventoryData[index].manualPacks -= (amount - packsFromBoxes);
+      inventoryData[index].quantityBoxes = 0;
     }
 
-    if (item.manualPacks < 0) item.manualPacks = 0;
+    if (inventoryData[index].manualPacks < 0) inventoryData[index].manualPacks = 0;
   }
 
   if (item.type === "PACK") {
-    item.quantityPacks -= amount;
-    if (item.quantityPacks < 0) item.quantityPacks = 0;
+    inventoryData[index].quantityPacks -= amount;
+    if (inventoryData[index].quantityPacks < 0) inventoryData[index].quantityPacks = 0;
   }
 
-  // Record sale using NEW SYSTEM
+  // Record sale
   recordSale(item, "PACK", amount);
 
   // Remove item if empty
-  if ((item.type === "BOX" && (item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) ||
-      (item.type === "PACK" && (item.quantityPacks || 0) <= 0)) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
+  if ((item.type === "BOX" && (inventoryData[index].quantityBoxes || 0) <= 0 &&
+       (inventoryData[index].manualPacks || 0) <= 0) ||
+      (item.type === "PACK" && (inventoryData[index].quantityPacks || 0) <= 0)) {
+    inventoryData.splice(index, 1);
   }
 
   saveData();
@@ -272,23 +275,26 @@ function sellPack(id) {
 function sellBox(id) {
   loadData();
 
-  const item = inventoryData.find(i => i.id === id);
-  if (!item || item.type !== "BOX") return;
+  const index = inventoryData.findIndex(i => i.id === id);
+  if (index === -1) return;
+
+  const item = inventoryData[index];
 
   if ((item.quantityBoxes || 0) <= 0) {
     alert("No boxes left.");
     return;
   }
 
-  // Record sale using NEW SYSTEM
+  // Record sale
   recordSale(item, "BOX", 1);
 
-  // Reduce inventory
-  item.quantityBoxes -= 1;
+  // Reduce stock
+  inventoryData[index].quantityBoxes -= 1;
 
   // Remove item if empty
-  if ((item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
+  if ((inventoryData[index].quantityBoxes || 0) <= 0 &&
+      (inventoryData[index].manualPacks || 0) <= 0) {
+    inventoryData.splice(index, 1);
   }
 
   saveData();
