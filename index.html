@@ -39,17 +39,26 @@
     <section id="inventoryPage" class="page">
       <h1>Inventory</h1>
 
+      <!-- ⭐ UPDATED INVENTORY FORM ⭐ -->
       <form id="inventoryForm">
         <input type="text" id="invName" placeholder="Product name" required>
-        <input type="text" id="invCategory" placeholder="Category" required>
+        <input type="text" id="invCategory" placeholder="Category (e.g. Booster Box)" required>
         <input type="text" id="invSupplier" placeholder="Supplier" required>
 
-        <input type="number" step="0.01" id="invBuyPrice" placeholder="Buy price (£)" required>
-        <input type="number" step="0.01" id="invSellPrice" placeholder="Sell price (£)" required>
-        <input type="number" id="invQuantity" placeholder="Quantity" required>
+        <!-- BUY / STRUCTURE -->
+        <input type="number" step="0.01" id="invBuyPriceBox" placeholder="Buy price per BOX (£)" required>
+        <input type="number" id="invPacksPerBox" placeholder="Packs per box" required>
 
+        <!-- SELL PRICES -->
+        <input type="number" step="0.01" id="invSellPriceBox" placeholder="Sell price per BOX (£)" required>
+        <input type="number" step="0.01" id="invSellPricePack" placeholder="Sell price per PACK (£)" required>
+
+        <!-- QUANTITIES -->
+        <input type="number" id="invQuantityBoxes" placeholder="Quantity of BOXES" required>
+        <input type="number" id="invManualPacks" placeholder="Manual loose packs (optional)" value="0">
+
+        <!-- MARKET / IMAGE / NOTES -->
         <input type="number" step="0.01" id="invMarketPrice" placeholder="UK market price (£)" required>
-
         <input type="text" id="invImage" placeholder="Image URL (card picture)" required>
 
         <textarea id="invNotes" placeholder="Notes / strategy"></textarea>
