@@ -1,5 +1,5 @@
 // =========================
-// INVENTORY SYSTEM (FULL, FIXED)
+// INVENTORY SYSTEM (FULLY FIXED FOR YOUR HTML)
 // =========================
 
 let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
@@ -22,16 +22,16 @@ function renderInventory() {
 
         card.innerHTML = `
             <h3>${item.name}</h3>
-            <p><strong>Category:</strong> ${item.category || '—'}</p>
-            <p><strong>Supplier:</strong> ${item.supplier || '—'}</p>
-            <p><strong>Buy price per BOX:</strong> £${(item.buyPriceBox || 0).toFixed(2)}</p>
-            <p><strong>Sell price per BOX:</strong> £${(item.sellPriceBox || 0).toFixed(2)}</p>
-            <p><strong>Sell price per PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</p>
-            <p><strong>Packs per box:</strong> ${item.packsPerBox || 0}</p>
-            <p><strong>Quantity of BOXES:</strong> ${item.quantityBoxes || 0}</p>
-            <p><strong>Loose packs:</strong> ${item.loosePacks || 0}</p>
-            <p><strong>Total packs:</strong> ${item.totalPacks || 0}</p>
-            <p><strong>Market price (UK):</strong> £${(item.marketPrice || 0).toFixed(2)}</p>
+            <p><strong>Category:</strong> ${item.category}</p>
+            <p><strong>Supplier:</strong> ${item.supplier}</p>
+            <p><strong>Buy price per BOX:</strong> £${item.buyPriceBox.toFixed(2)}</p>
+            <p><strong>Sell price per BOX:</strong> £${item.sellPriceBox.toFixed(2)}</p>
+            <p><strong>Sell price per PACK:</strong> £${item.sellPricePack.toFixed(2)}</p>
+            <p><strong>Packs per box:</strong> ${item.packsPerBox}</p>
+            <p><strong>Quantity of BOXES:</strong> ${item.quantityBoxes}</p>
+            <p><strong>Loose packs:</strong> ${item.loosePacks}</p>
+            <p><strong>Total packs:</strong> ${item.totalPacks}</p>
+            <p><strong>Market price (UK):</strong> £${item.marketPrice.toFixed(2)}</p>
             <p><strong>Notes:</strong> ${item.notes || '—'}</p>
 
             <button onclick="sellBox(${index})">Sell BOX</button>
@@ -48,32 +48,45 @@ function renderInventory() {
 
 // Add new inventory item
 function addInventoryItem(event) {
-    event.preventDefault(); // STOP FORM RELOAD
+    event.preventDefault();
 
-    const name = document.getElementById('productName').value.trim();
-    if (!name) return;
+    const type = document.getElementById('invType').value;
+    const name = document.getElementById('invName').value.trim();
+    const category = document.getElementById('invCategory').value.trim();
+    const supplier = document.getElementById('invSupplier').value.trim();
 
-    const category = document.getElementById('productCategory').value.trim();
-    const supplier = document.getElementById('productSupplier').value.trim();
+    let buyPriceBox = 0;
+    let sellPriceBox = 0;
+    let sellPricePack = 0;
+    let packsPerBox = 0;
+    let quantityBoxes = 0;
+    let loosePacks = 0;
 
-    const buyPriceBox = parseFloat(document.getElementById('buyPriceBox').value) || 0;
-    const sellPriceBox = parseFloat(document.getElementById('sellPriceBox').value) || 0;
-    let sellPricePack = parseFloat(document.getElementById('sellPricePack').value) || 0;
+    if (type === "BOX") {
+        buyPriceBox = parseFloat(document.getElementById('invBuyPriceBox').value) || 0;
+        sellPriceBox = parseFloat(document.getElementById('invSellPriceBox').value) || 0;
+        sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
+        packsPerBox = parseInt(document.getElementById('invPacksPerBox').value) || 0;
+        quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value) || 0;
+        loosePacks = parseInt(document.getElementById('invManualPacks').value) || 0;
 
-    const packsPerBox = parseInt(document.getElementById('packsPerBox').value) || 0;
-    const quantityBoxes = parseInt(document.getElementById('quantityBoxes').value) || 0;
-    const loosePacks = parseInt(document.getElementById('loosePacks').value) || 0;
-
-    const marketPrice = parseFloat(document.getElementById('marketPrice').value) || 0;
-    const notes = document.getElementById('notes').value.trim();
-
-    if (!sellPricePack && sellPriceBox && packsPerBox) {
-        sellPricePack = sellPriceBox / packsPerBox;
+        if (!sellPricePack && sellPriceBox && packsPerBox) {
+            sellPricePack = sellPriceBox / packsPerBox;
+        }
     }
+
+    if (type === "PACK") {
+        sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
+        loosePacks = parseInt(document.getElementById('invQuantityPacks').value) || 0;
+    }
+
+    const marketPrice = parseFloat(document.getElementById('invMarketPrice').value) || 0;
+    const notes = document.getElementById('invNotes').value.trim();
 
     const totalPacks = (quantityBoxes * packsPerBox) + loosePacks;
 
     const item = {
+        type,
         name,
         category,
         supplier,
@@ -132,17 +145,27 @@ function editItem(index) {
     const item = inventory[index];
     if (!item) return;
 
-    document.getElementById('productName').value = item.name;
-    document.getElementById('productCategory').value = item.category;
-    document.getElementById('productSupplier').value = item.supplier;
-    document.getElementById('buyPriceBox').value = item.buyPriceBox;
-    document.getElementById('sellPriceBox').value = item.sellPriceBox;
-    document.getElementById('sellPricePack').value = item.sellPricePack;
-    document.getElementById('packsPerBox').value = item.packsPerBox;
-    document.getElementById('quantityBoxes').value = item.quantityBoxes;
-    document.getElementById('loosePacks').value = item.loosePacks;
-    document.getElementById('marketPrice').value = item.marketPrice;
-    document.getElementById('notes').value = item.notes;
+    document.getElementById('invType').value = item.type;
+    document.getElementById('invName').value = item.name;
+    document.getElementById('invCategory').value = item.category;
+    document.getElementById('invSupplier').value = item.supplier;
+
+    if (item.type === "BOX") {
+        document.getElementById('invBuyPriceBox').value = item.buyPriceBox;
+        document.getElementById('invSellPriceBox').value = item.sellPriceBox;
+        document.getElementById('invSellPricePack').value = item.sellPricePack;
+        document.getElementById('invPacksPerBox').value = item.packsPerBox;
+        document.getElementById('invQuantityBoxes').value = item.quantityBoxes;
+        document.getElementById('invManualPacks').value = item.loosePacks;
+    }
+
+    if (item.type === "PACK") {
+        document.getElementById('invSellPricePack').value = item.sellPricePack;
+        document.getElementById('invQuantityPacks').value = item.loosePacks;
+    }
+
+    document.getElementById('invMarketPrice').value = item.marketPrice;
+    document.getElementById('invNotes').value = item.notes;
 
     inventory.splice(index, 1);
     saveInventory();
