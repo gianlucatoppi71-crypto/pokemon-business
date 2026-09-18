@@ -1,8 +1,8 @@
 // ===============================
 // SALES PAGE LOGIC (BOX + PACK SYSTEM)
 // ===============================
-// Uses global salesData and saveData() from data.js
-// Do NOT redeclare salesData here.
+// Uses global salesData, inventoryData, loadData(), saveData() from data.js
+// Do NOT redeclare salesData or inventoryData here.
 
 // ===============================
 // RECORD SALE (BOX or PACK)
@@ -19,7 +19,7 @@ function recordSale(item, type, quantitySold) {
     sellPrice = item.sellPriceBox;
   } else {
     buyPrice = item.type === "BOX"
-      ? item.buyPriceBox / item.packsPerBox
+      ? (item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0)
       : item.buyPricePack;
 
     sellPrice = item.sellPricePack;
@@ -46,7 +46,7 @@ function recordSale(item, type, quantitySold) {
   };
 
   salesData.push(saleEntry);
-  saveData();          // uses global saveData from data.js
+  saveData();
   renderSalesInventory();
 }
 
@@ -55,7 +55,7 @@ function recordSale(item, type, quantitySold) {
 // ===============================
 
 function renderSalesInventory() {
-  loadData(); // refresh salesData from storage
+  loadData();
 
   const list = document.getElementById('salesList');
   if (!list) return;
@@ -74,13 +74,13 @@ function renderSalesInventory() {
     div.innerHTML = `
       <h3>${sale.name} (${sale.type})</h3>
 
-      <img src="${sale.image || 'img/default.png'}" alt="${sale.name}"
+      <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
            style="width:120px; border:1px solid #333; margin:10px 0;">
 
       <div class="sale-meta">
-        <strong>Category:</strong> ${sale.category}<br>
-        <strong>Supplier:</strong> ${sale.supplier}<br>
-        <strong>Notes:</strong> ${sale.notes}
+        <strong>Category:</strong> ${sale.category || "—"}<br>
+        <strong>Supplier:</strong> ${sale.supplier || "—"}<br>
+        <strong>Notes:</strong> ${sale.notes || "—"}
       </div>
 
       <div class="sale-prices">
