@@ -1,13 +1,8 @@
 // ===============================
 // SALES PAGE LOGIC (BOX + PACK SYSTEM)
 // ===============================
-
-// Load sales from storage
-let salesData = JSON.parse(localStorage.getItem("salesData") || "[]");
-
-function saveSales() {
-  localStorage.setItem("salesData", JSON.stringify(salesData));
-}
+// Uses global salesData and saveData() from data.js
+// Do NOT redeclare salesData here.
 
 // ===============================
 // RECORD SALE (BOX or PACK)
@@ -51,98 +46,8 @@ function recordSale(item, type, quantitySold) {
   };
 
   salesData.push(saleEntry);
-  saveSales();
+  saveData();          // uses global saveData from data.js
   renderSalesInventory();
-}
-
-// ===============================
-// SELL BOX
-// ===============================
-
-function sellBox(id) {
-  const item = inventoryData.find(i => i.id === id);
-  if (!item || item.type !== "BOX") return;
-
-  if (item.quantityBoxes <= 0) {
-    alert("No boxes left.");
-    return;
-  }
-
-  // Reduce inventory
-  item.quantityBoxes -= 1;
-
-  // Remove packs inside the box
-  item.manualPacks -= item.packsPerBox;
-  if (item.manualPacks < 0) item.manualPacks = 0;
-
-  // Record sale
-  recordSale(item, "BOX", 1);
-
-  // Remove item if empty
-  if (item.quantityBoxes <= 0 && item.manualPacks <= 0) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
-  }
-
-  saveData();
-  renderInventory();
-}
-
-// ===============================
-// SELL PACK
-// ===============================
-
-function sellPack(id) {
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
-
-  const qty = prompt("How many packs do you want to sell?");
-  if (!qty || isNaN(qty)) return;
-
-  const amount = parseInt(qty);
-
-  let totalPacks = item.type === "BOX"
-    ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
-    : item.quantityPacks;
-
-  if (amount > totalPacks) {
-    alert("Not enough packs available.");
-    return;
-  }
-
-  // BOX PRODUCT PACK REDUCTION
-  if (item.type === "BOX") {
-    let packsFromBoxes = item.quantityBoxes * item.packsPerBox;
-
-    if (amount <= packsFromBoxes) {
-      const boxesUsed = Math.floor(amount / item.packsPerBox);
-      item.quantityBoxes -= boxesUsed;
-
-      const leftover = amount % item.packsPerBox;
-      item.manualPacks -= leftover;
-    } else {
-      item.manualPacks -= (amount - packsFromBoxes);
-      item.quantityBoxes = 0;
-    }
-
-    if (item.manualPacks < 0) item.manualPacks = 0;
-  }
-
-  // PACK PRODUCT REDUCTION
-  if (item.type === "PACK") {
-    item.quantityPacks -= amount;
-  }
-
-  // Record sale
-  recordSale(item, "PACK", amount);
-
-  // Remove item if empty
-  if ((item.type === "BOX" && item.quantityBoxes <= 0 && item.manualPacks <= 0) ||
-      (item.type === "PACK" && item.quantityPacks <= 0)) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
-  }
-
-  saveData();
-  renderInventory();
 }
 
 // ===============================
@@ -150,14 +55,14 @@ function sellPack(id) {
 // ===============================
 
 function renderSalesInventory() {
-  loadData();
+  loadData(); // refresh salesData from storage
 
   const list = document.getElementById('salesList');
   if (!list) return;
 
   list.innerHTML = '';
 
-  if (salesData.length === 0) {
+  if (!salesData || salesData.length === 0) {
     list.innerHTML = '<p>No sales yet.</p>';
     return;
   }
@@ -198,3 +103,4 @@ function renderSalesInventory() {
     list.appendChild(div);
   });
 }
+
