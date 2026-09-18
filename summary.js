@@ -1,5 +1,5 @@
 // ===============================
-// BUSINESS SUMMARY PAGE (ADVANCED)
+// BUSINESS SUMMARY PAGE (UPGRADED FOR BOX + PACK SYSTEM)
 // ===============================
 
 function renderSummary() {
@@ -15,17 +15,29 @@ function renderSummary() {
   const expensesData = JSON.parse(localStorage.getItem("expensesData") || "[]");
   const totalExpenses = expensesData.reduce((sum, e) => sum + e.amount, 0);
 
-  // Inventory value (unsold)
+  // ===============================
+  // INVENTORY VALUE (UNSOLD)
+  // ===============================
   const totalInventoryValue = inventoryData.reduce((sum, item) => {
-    return sum + (item.sellPrice * item.quantity);
+    const buyPricePack = item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0;
+
+    const totalPacks = (item.quantityBoxes * item.packsPerBox) + item.manualPacks;
+
+    const boxValue = item.quantityBoxes * item.sellPriceBox;
+    const packValue = totalPacks * item.sellPricePack;
+
+    return sum + boxValue + packValue;
   }, 0);
 
-  // Sales data
+  // ===============================
+  // SALES DATA
+  // ===============================
   const totalSalesProfit = salesData.reduce((sum, sale) => sum + sale.totalProfit, 0);
-  const totalRevenue = salesData.reduce((sum, sale) => sum + sale.totalSellPrice, 0);
-  const totalCOGS = salesData.reduce((sum, sale) => sum + sale.totalBuyPrice, 0);
 
-  // Advanced stats
+  const totalRevenue = salesData.reduce((sum, sale) => sum + sale.sellPrice, 0);
+
+  const totalCOGS = salesData.reduce((sum, sale) => sum + sale.buyPrice, 0);
+
   const grossProfit = totalRevenue - totalCOGS;
   const netBusinessProfit = totalSalesProfit - totalExpenses;
 
@@ -37,18 +49,22 @@ function renderSummary() {
     ? (grossProfit / totalRevenue) * 100
     : 0;
 
-  // Supplier performance
+  // ===============================
+  // SUPPLIER PERFORMANCE
+  // ===============================
   const supplierStats = {};
   salesData.forEach(sale => {
     if (!supplierStats[sale.supplier]) {
       supplierStats[sale.supplier] = { revenue: 0, profit: 0, items: 0 };
     }
-    supplierStats[sale.supplier].revenue += sale.totalSellPrice;
+    supplierStats[sale.supplier].revenue += sale.sellPrice;
     supplierStats[sale.supplier].profit += sale.totalProfit;
-    supplierStats[sale.supplier].items += sale.quantity;
+    supplierStats[sale.supplier].items += sale.quantitySold;
   });
 
-  // Monthly chart data (for future chart.js)
+  // ===============================
+  // MONTHLY PROFIT (for charts)
+  // ===============================
   const monthlyStats = {};
   salesData.forEach(sale => {
     const month = sale.date.substring(0, 7); // YYYY-MM
@@ -56,20 +72,21 @@ function renderSummary() {
     monthlyStats[month] += sale.totalProfit;
   });
 
-  // UK trading allowance
+  // ===============================
+  // TAX CALCULATIONS
+  // ===============================
   const tradingAllowance = 1000;
-
-  // Taxable profit
   const taxableProfit = Math.max(0, netBusinessProfit - tradingAllowance);
 
-  // UK tax rates
   const incomeTax = taxableProfit * 0.20;
   const nic = taxableProfit * 0.09;
 
   const totalTax = incomeTax + nic;
   const netProfitAfterTax = netBusinessProfit - totalTax;
 
-  // Tax deadline
+  // ===============================
+  // TAX DEADLINE
+  // ===============================
   const taxDeadline = localStorage.getItem("taxDeadline") || "";
   let deadlineInfo = "";
   if (taxDeadline) {
@@ -77,7 +94,6 @@ function renderSummary() {
     deadlineInfo = `<p><strong>Next tax deadline:</strong> ${taxDeadline} (${daysLeft} days left)</p>`;
   }
 
-  // Tax status
   let taxStatus = "";
   if (netBusinessProfit <= tradingAllowance) {
     taxStatus = `<p style="color:green"><strong>Status:</strong> Under trading allowance — usually no tax due.</p>`;
@@ -85,7 +101,9 @@ function renderSummary() {
     taxStatus = `<p style="color:red"><strong>Status:</strong> Over trading allowance — tax may be due.</p>`;
   }
 
-  // Supplier performance HTML
+  // ===============================
+  // SUPPLIER PERFORMANCE HTML
+  // ===============================
   let supplierHTML = "<h2>Supplier Performance</h2>";
   Object.keys(supplierStats).forEach(supplier => {
     const s = supplierStats[supplier];
@@ -97,9 +115,11 @@ function renderSummary() {
     `;
   });
 
-  // Monthly chart JSON
   const monthlyChartJSON = JSON.stringify(monthlyStats, null, 2);
 
+  // ===============================
+  // RENDER SUMMARY PAGE
+  // ===============================
   container.innerHTML = `
     <h1>Business Summary</h1>
 
@@ -150,7 +170,9 @@ function renderSummary() {
   `;
 }
 
-// Save annual income
+// ===============================
+// SAVE ANNUAL INCOME
+// ===============================
 function saveIncome() {
   const input = document.getElementById("incomeInput");
   const value = parseFloat(input.value);
@@ -161,14 +183,18 @@ function saveIncome() {
   }
 }
 
-// Save tax deadline
+// ===============================
+// SAVE TAX DEADLINE
+// ===============================
 function saveTaxDeadline() {
   const d = document.getElementById("taxDeadlineInput").value;
   localStorage.setItem("taxDeadline", d);
   renderSummary();
 }
 
-// Calculate days left
+// ===============================
+// CALCULATE DAYS LEFT
+// ===============================
 function getDaysLeft(dateStr) {
   const today = new Date();
   const deadline = new Date(dateStr);
