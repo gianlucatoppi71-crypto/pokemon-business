@@ -479,3 +479,30 @@ body {
   font-size: 18px;
   margin-top: 20px;
 }
+/* PORTFOLIO ACTION BUTTONS */
+.portfolio-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.portfolio-edit,
+.portfolio-delete {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.portfolio-edit {
+  background: #3498db;
+  color: white;
+}
+
+.portfolio-delete {
+  background: #e74c3c;
+  color: white;
+}
