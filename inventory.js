@@ -1,5 +1,5 @@
 // ===============================
-// INVENTORY PAGE LOGIC (UPGRADED)
+// INVENTORY PAGE LOGIC (BOX + PACK SYSTEM)
 // ===============================
 
 function renderInventory() {
@@ -14,14 +14,8 @@ function renderInventory() {
   }
 
   container.innerHTML = inventoryData.map(item => {
-
-    // AUTO CALCULATIONS
+    const totalPacks = (item.quantityBoxes * item.packsPerBox) + item.manualPacks;
     const buyPricePack = item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0;
-    const totalPacksFromBoxes = item.quantityBoxes * item.packsPerBox;
-    const totalPacks = totalPacksFromBoxes + item.manualPacks;
-
-    const profitBox = item.sellPriceBox - item.buyPriceBox;
-    const profitPack = item.sellPricePack - buyPricePack;
 
     return `
       <div class="inventory-card">
@@ -41,20 +35,16 @@ function renderInventory() {
           </div>
 
           <div class="inv-prices">
-            <span><strong>Buy (BOX):</strong> £${item.buyPriceBox.toFixed(2)}</span>
+            <span><strong>Buy price per BOX:</strong> £${item.buyPriceBox.toFixed(2)}</span>
+            <span><strong>Sell price per BOX:</strong> £${item.sellPriceBox.toFixed(2)}</span>
+            <span><strong>Sell price per PACK:</strong> £${item.sellPricePack.toFixed(2)}</span>
             <span><strong>Packs per box:</strong> ${item.packsPerBox}</span>
-            <span><strong>Buy (PACK):</strong> £${buyPricePack.toFixed(2)}</span>
+          </div>
 
-            <span><strong>Sell (BOX):</strong> £${item.sellPriceBox.toFixed(2)}</span>
-            <span><strong>Sell (PACK):</strong> £${item.sellPricePack.toFixed(2)}</span>
-
-            <span><strong>Boxes:</strong> ${item.quantityBoxes}</span>
-            <span><strong>Manual packs:</strong> ${item.manualPacks}</span>
-            <span><strong>Total packs:</strong> ${totalPacks}</span>
-
-            <span><strong>Profit (BOX):</strong> £${profitBox.toFixed(2)}</span>
-            <span><strong>Profit (PACK):</strong> £${profitPack.toFixed(2)}</span>
-
+          <div class="inv-prices">
+            <span><strong>Quantity of BOXES:</strong> ${item.quantityBoxes}</span>
+            <span><strong>Manual loose packs:</strong> ${item.manualPacks}</span>
+            <span><strong>Total packs (boxes + loose):</strong> ${totalPacks}</span>
             <span><strong>Market price (UK):</strong> £${item.marketPrice.toFixed(2)}</span>
           </div>
 
@@ -77,7 +67,7 @@ function renderInventory() {
 }
 
 // ===============================
-// ADD ITEM (UPGRADED)
+// ADD ITEM
 // ===============================
 
 document.getElementById('inventoryForm').addEventListener('submit', function (event) {
@@ -105,15 +95,12 @@ document.getElementById('inventoryForm').addEventListener('submit', function (ev
     name,
     category,
     supplier,
-
     buyPriceBox,
-    packsPerBox,
     sellPriceBox,
     sellPricePack,
-
+    packsPerBox,
     quantityBoxes,
     manualPacks,
-
     marketPrice,
     image,
     notes
@@ -137,7 +124,7 @@ function deleteItem(id) {
 }
 
 // ===============================
-// EDIT ITEM (UPGRADED)
+// EDIT ITEM
 // ===============================
 
 function editItem(id) {
@@ -163,61 +150,7 @@ function editItem(id) {
 }
 
 // ===============================
-// SELL BOX
-// ===============================
-
-function sellBox(id) {
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
-
-  if (item.quantityBoxes <= 0) {
-    alert("No boxes left to sell.");
-    return;
-  }
-
-  item.quantityBoxes -= 1;
-  item.manualPacks -= item.packsPerBox;
-
-  if (item.manualPacks < 0) item.manualPacks = 0;
-
-  saveData();
-  renderInventory();
-}
-
-// ===============================
-// SELL PACK
-// ===============================
-
-function sellPack(id) {
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
-
-  const totalPacks = item.quantityBoxes * item.packsPerBox + item.manualPacks;
-
-  if (totalPacks <= 0) {
-    alert("No packs left to sell.");
-    return;
-  }
-
-  // Sell manual packs first
-  if (item.manualPacks > 0) {
-    item.manualPacks -= 1;
-  } else {
-    // Sell from boxes
-    const totalBoxPacks = item.quantityBoxes * item.packsPerBox;
-    if (totalBoxPacks > 0) {
-      const newTotalBoxPacks = totalBoxPacks - 1;
-      const newBoxes = Math.floor(newTotalBoxPacks / item.packsPerBox);
-      item.quantityBoxes = newBoxes;
-    }
-  }
-
-  saveData();
-  renderInventory();
-}
-
-// ===============================
-// GIFT SYSTEM (unchanged)
+// GIFT SYSTEM
 // ===============================
 
 function giftItem(id) {
@@ -226,10 +159,15 @@ function giftItem(id) {
 
   const expensesData = JSON.parse(localStorage.getItem("expensesData") || "[]");
 
+  const buyPricePack = item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0;
+  const totalBoxesCost = item.quantityBoxes * item.buyPriceBox;
+  const totalManualPacksCost = item.manualPacks * buyPricePack;
+  const totalGiftCost = totalBoxesCost + totalManualPacksCost;
+
   expensesData.push({
     id: Date.now(),
     description: `Gift: ${item.name}`,
-    amount: item.buyPriceBox * item.quantityBoxes,
+    amount: totalGiftCost,
     date: new Date().toISOString().split("T")[0],
     category: "Gift / Promotion"
   });
