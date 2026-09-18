@@ -1,5 +1,5 @@
 // ===============================
-// INVENTORY PAGE LOGIC (BOX + PACK SYSTEM)
+// INVENTORY PAGE LOGIC (NEW SYSTEM)
 // ===============================
 
 function renderInventory() {
@@ -18,22 +18,16 @@ function renderInventory() {
     const isPack = item.type === "PACK";
 
     const totalPacks = isBox
-      ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
-      : item.quantityPacks;
-
-    const buyPricePack = isBox
-      ? (item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0)
-      : item.buyPricePack;
+      ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
+      : (item.quantityPacks || 0);
 
     return `
       <div class="inventory-card">
 
-        <!-- LEFT SIDE: IMAGE -->
         <div class="inv-left">
-          <img src="${item.image || 'img/default.png'}" alt="${item.name}">
+          <img src="${item.image || 'Logo.png'}" alt="${item.name}">
         </div>
 
-        <!-- RIGHT SIDE: INFO -->
         <div class="inv-right">
           <h3>${item.name}</h3>
 
@@ -44,22 +38,22 @@ function renderInventory() {
 
           <div class="inv-prices">
             ${isBox ? `
-              <span><strong>Buy price per BOX:</strong> £${item.buyPriceBox.toFixed(2)}</span>
-              <span><strong>Sell price per BOX:</strong> £${item.sellPriceBox.toFixed(2)}</span>
-              <span><strong>Sell price per PACK:</strong> £${item.sellPricePack.toFixed(2)}</span>
-              <span><strong>Packs per box:</strong> ${item.packsPerBox}</span>
+              <span><strong>Buy price per BOX:</strong> £${(item.buyPriceBox || 0).toFixed(2)}</span>
+              <span><strong>Sell price per BOX:</strong> £${(item.sellPriceBox || 0).toFixed(2)}</span>
+              <span><strong>Sell price per PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</span>
+              <span><strong>Packs per box:</strong> ${item.packsPerBox || 0}</span>
             ` : `
-              <span><strong>Buy price per PACK:</strong> £${item.buyPricePack.toFixed(2)}</span>
-              <span><strong>Sell price per PACK:</strong> £${item.sellPricePack.toFixed(2)}</span>
+              <span><strong>Buy price per PACK:</strong> £${(item.buyPricePack || 0).toFixed(2)}</span>
+              <span><strong>Sell price per PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</span>
             `}
           </div>
 
           <div class="inv-prices">
             ${isBox ? `
-              <span><strong>Quantity of BOXES:</strong> ${item.quantityBoxes}</span>
-              <span><strong>Loose packs:</strong> ${item.manualPacks}</span>
+              <span><strong>Quantity of BOXES:</strong> ${item.quantityBoxes || 0}</span>
+              <span><strong>Loose packs:</strong> ${item.manualPacks || 0}</span>
             ` : `
-              <span><strong>Quantity of PACKS:</strong> ${item.quantityPacks}</span>
+              <span><strong>Quantity of PACKS:</strong> ${item.quantityPacks || 0}</span>
             `}
             <span><strong>Total packs:</strong> ${totalPacks}</span>
             <span><strong>Market price (UK):</strong> £${item.marketPrice || 0}</span>
@@ -191,12 +185,11 @@ function editItem(id) {
 }
 
 // ===============================
-// ADD QUANTITY POPUP
+// ADD QUANTITY
 // ===============================
 
 function addQuantity(id) {
   const qty = prompt("Enter quantity to add:");
-
   if (!qty || isNaN(qty)) return;
 
   const item = inventoryData.find(i => i.id === id);
@@ -213,10 +206,12 @@ function addQuantity(id) {
 }
 
 // ===============================
-// SELL PACK
+// SELL PACK (NEW SYSTEM)
 // ===============================
 
 function sellPack(id) {
+  loadData();
+
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
@@ -226,45 +221,43 @@ function sellPack(id) {
   const amount = parseInt(qty);
 
   let totalPacks = item.type === "BOX"
-    ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
-    : item.quantityPacks;
+    ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
+    : (item.quantityPacks || 0);
 
   if (amount > totalPacks) {
     alert("Not enough packs in inventory.");
     return;
   }
 
-  const profit = (item.sellPricePack - (item.type === "BOX"
-    ? item.buyPriceBox / item.packsPerBox
-    : item.buyPricePack)) * amount;
-
-  salesData.push({
-    id: Date.now(),
-    name: item.name,
-    type: "PACK",
-    quantity: amount,
-    profit,
-    date: new Date().toISOString().split("T")[0]
-  });
-
+  // Reduce inventory
   if (item.type === "BOX") {
-    let packsFromBoxes = item.quantityBoxes * item.packsPerBox;
+    let packsFromBoxes = (item.quantityBoxes || 0) * (item.packsPerBox || 0);
 
     if (amount <= packsFromBoxes) {
-      const boxesUsed = Math.floor(amount / item.packsPerBox);
+      const boxesUsed = Math.floor(amount / (item.packsPerBox || 1));
       item.quantityBoxes -= boxesUsed;
-      const leftover = amount % item.packsPerBox;
+
+      const leftover = amount % (item.packsPerBox || 1);
       item.manualPacks -= leftover;
     } else {
-      item.manualPacks -= amount - packsFromBoxes;
+      item.manualPacks -= (amount - packsFromBoxes);
       item.quantityBoxes = 0;
     }
-  } else {
-    item.quantityPacks -= amount;
+
+    if (item.manualPacks < 0) item.manualPacks = 0;
   }
 
-  if ((item.type === "BOX" && item.quantityBoxes <= 0 && item.manualPacks <= 0) ||
-      (item.type === "PACK" && item.quantityPacks <= 0)) {
+  if (item.type === "PACK") {
+    item.quantityPacks -= amount;
+    if (item.quantityPacks < 0) item.quantityPacks = 0;
+  }
+
+  // Record sale using NEW SYSTEM
+  recordSale(item, "PACK", amount);
+
+  // Remove item if empty
+  if ((item.type === "BOX" && (item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) ||
+      (item.type === "PACK" && (item.quantityPacks || 0) <= 0)) {
     inventoryData = inventoryData.filter(i => i.id !== id);
   }
 
@@ -273,32 +266,28 @@ function sellPack(id) {
 }
 
 // ===============================
-// SELL BOX
+// SELL BOX (NEW SYSTEM)
 // ===============================
 
 function sellBox(id) {
+  loadData();
+
   const item = inventoryData.find(i => i.id === id);
   if (!item || item.type !== "BOX") return;
 
-  if (item.quantityBoxes <= 0) {
+  if ((item.quantityBoxes || 0) <= 0) {
     alert("No boxes left.");
     return;
   }
 
-  const profit = item.sellPriceBox - item.buyPriceBox;
+  // Record sale using NEW SYSTEM
+  recordSale(item, "BOX", 1);
 
-  salesData.push({
-    id: Date.now(),
-    name: item.name,
-    type: "BOX",
-    quantity: 1,
-    profit,
-    date: new Date().toISOString().split("T")[0]
-  });
-
+  // Reduce inventory
   item.quantityBoxes -= 1;
 
-  if (item.quantityBoxes <= 0 && item.manualPacks <= 0) {
+  // Remove item if empty
+  if ((item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) {
     inventoryData = inventoryData.filter(i => i.id !== id);
   }
 
