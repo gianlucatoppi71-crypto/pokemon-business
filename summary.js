@@ -1,5 +1,5 @@
 // ===============================
-// BUSINESS SUMMARY PAGE (UPGRADED FOR BOX + PACK SYSTEM)
+// BUSINESS SUMMARY PAGE (FULLY UPDATED FOR BOX + PACK SYSTEM)
 // ===============================
 
 function renderSummary() {
@@ -19,24 +19,33 @@ function renderSummary() {
   // INVENTORY VALUE (UNSOLD)
   // ===============================
   const totalInventoryValue = inventoryData.reduce((sum, item) => {
-    const buyPricePack = item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0;
 
-    const totalPacks = (item.quantityBoxes * item.packsPerBox) + item.manualPacks;
+    if (item.type === "BOX") {
+      const boxValue = item.quantityBoxes * item.sellPriceBox;
+      const packValue = item.manualPacks * item.sellPricePack;
+      return sum + boxValue + packValue;
+    }
 
-    const boxValue = item.quantityBoxes * item.sellPriceBox;
-    const packValue = totalPacks * item.sellPricePack;
+    if (item.type === "PACK") {
+      const packValue = item.quantityPacks * item.sellPricePack;
+      return sum + packValue;
+    }
 
-    return sum + boxValue + packValue;
+    return sum;
   }, 0);
 
   // ===============================
-  // SALES DATA
+  // SALES DATA (BOX + PACK)
   // ===============================
   const totalSalesProfit = salesData.reduce((sum, sale) => sum + sale.totalProfit, 0);
 
-  const totalRevenue = salesData.reduce((sum, sale) => sum + sale.sellPrice, 0);
+  const totalRevenue = salesData.reduce((sum, sale) => {
+    return sum + (sale.sellPrice * sale.quantitySold);
+  }, 0);
 
-  const totalCOGS = salesData.reduce((sum, sale) => sum + sale.buyPrice, 0);
+  const totalCOGS = salesData.reduce((sum, sale) => {
+    return sum + (sale.buyPrice * sale.quantitySold);
+  }, 0);
 
   const grossProfit = totalRevenue - totalCOGS;
   const netBusinessProfit = totalSalesProfit - totalExpenses;
@@ -57,7 +66,7 @@ function renderSummary() {
     if (!supplierStats[sale.supplier]) {
       supplierStats[sale.supplier] = { revenue: 0, profit: 0, items: 0 };
     }
-    supplierStats[sale.supplier].revenue += sale.sellPrice;
+    supplierStats[sale.supplier].revenue += sale.sellPrice * sale.quantitySold;
     supplierStats[sale.supplier].profit += sale.totalProfit;
     supplierStats[sale.supplier].items += sale.quantitySold;
   });
