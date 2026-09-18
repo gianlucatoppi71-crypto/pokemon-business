@@ -103,4 +103,3 @@ function renderSalesInventory() {
     list.appendChild(div);
   });
 }
-
