@@ -1,412 +1,179 @@
 /* ============================
-   GLOBAL
+   GLOBAL APP LAYOUT
 ============================ */
+
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: #eee;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
 }
 
 .app {
-  display: flex;
-  height: 100vh;
+    display: flex;
+    height: 100vh;
 }
 
 /* ============================
    SIDEBAR
 ============================ */
+
 .sidebar {
-  width: 260px;
-  background: #000;
-  border-right: 2px solid gold;
-  padding: 15px;
-  box-sizing: border-box;
+    width: 260px;
+    background: #1a1a1a;
+    padding: 20px;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.4);
 }
 
 .sidebar h2 {
-  color: gold;
-  text-align: center;
-  margin: 0 0 20px 0;
+    margin-top: 0;
+    color: #ffd700;
+    font-size: 24px;
+    text-align: center;
 }
 
 .sidebar nav button {
-  display: block;
-  width: 100%;
-  margin-bottom: 6px;
-  padding: 10px;
-  background: #222;
-  color: #eee;
-  border: 1px solid #444;
-  cursor: pointer;
-  text-align: left;
-  font-size: 15px;
-  border-radius: 4px;
-  transition: 0.2s ease;
+    width: 100%;
+    padding: 12px;
+    margin: 6px 0;
+    background: #333;
+    color: #eee;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
 .sidebar nav button:hover {
-  background: gold;
-  color: #000;
+    background: #444;
 }
 
-/* ============================
-   TAX SUMMARY BOX
-============================ */
 .tax-info {
-  margin-top: 20px;
-  padding: 12px;
-  background: #0d0d0d;
-  border: 1px solid #333;
-  border-radius: 10px;
-}
-
-.tax-info h3 {
-  margin: 0 0 12px 0;
-  font-size: 15px;
-  text-align: center;
-  color: gold;
-}
-
-#taxSummary {
-  max-height: 220px;
-  overflow-y: auto;
-}
-
-#taxSummary p {
-  margin: 3px 0;
-  font-size: 12px;
-  line-height: 1.25;
-  color: #ccc;
+    margin-top: 20px;
+    padding: 10px;
+    background: #222;
+    border-radius: 6px;
 }
 
 /* ============================
-   MAIN AREA
+   MAIN CONTENT
 ============================ */
+
 .main {
-  flex: 1;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
 }
 
 .page h1 {
-  color: gold;
-  margin-top: 0;
+    margin-top: 0;
+    font-size: 28px;
+    color: #ffd700;
 }
 
 /* ============================
-   FORMS (GLOBAL)
+   FORM STYLE
 ============================ */
-form input,
-form textarea {
-  display: block;
-  width: 100%;
-  max-width: 420px;
-  margin: 6px 0;
-  padding: 10px;
-  background: #222;
-  border: 1px solid #444;
-  color: #eee;
-  font-size: 14px;
-  border-radius: 6px;
+
+#inventoryForm,
+#supplierForm,
+#portfolioForm,
+#expensesForm {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
-form textarea {
-  height: 80px;
-  resize: vertical;
-}
-
-form button {
-  margin-top: 12px;
-  padding: 10px 15px;
-  background: gold;
-  border: none;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: 15px;
-  transition: 0.2s ease;
-}
-
-form button:hover {
-  background: #e6c200;
-}
-
-/* ============================
-   INVENTORY GRID
-============================ */
-.inventory-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 25px;
-  margin-top: 20px;
-}
-
-/* ============================
-   INVENTORY CARD
-============================ */
-.inventory-card {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 15px;
-  display: flex;
-  gap: 15px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
-  transition: transform 0.2s ease;
-}
-
-.inventory-card:hover {
-  transform: scale(1.02);
-}
-
-/* LEFT SIDE IMAGE */
-.inv-left img {
-  width: 140px;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid #444;
-}
-
-/* RIGHT SIDE INFO */
-.inv-right {
-  flex: 1;
-}
-
-.inv-right h3 {
-  margin: 0 0 8px 0;
-  color: gold;
-  font-size: 1.3rem;
-}
-
-.inv-meta span,
-.inv-prices span {
-  display: block;
-  color: #ccc;
-  font-size: 0.9rem;
-  margin-bottom: 4px;
-}
-
-.inv-profit span {
-  display: block;
-  color: #0f0;
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-/* ACTION BUTTONS */
-.inv-actions {
-  margin-top: 10px;
-}
-
-.inv-actions button {
-  margin-right: 6px;
-  padding: 8px 12px;
-  background: #333;
-  color: #eee;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: 0.2s ease;
-}
-
-.inv-actions button:hover {
-  background: gold;
-  color: #000;
-}
-
-/* ============================
-   SALES PAGE
-============================ */
-.sale-card {
-  border: 1px solid #444;
-  padding: 12px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  background: #1a1a1a;
-  box-shadow: 0 0 8px rgba(0,0,0,0.3);
-}
-
-.sale-meta,
-.sale-prices,
-.sale-profit {
-  margin: 8px 0;
-  line-height: 1.4;
-}
-
-/* ============================
-   SUPPLIER PAGE
-============================ */
-.supplier-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 25px;
-  margin-top: 20px;
-}
-
-.supplier-card {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
-  transition: 0.2s ease;
-}
-
-.supplier-card:hover {
-  transform: scale(1.02);
-}
-
-.supplier-card h3 {
-  margin: 0 0 10px 0;
-  color: gold;
-}
-
-.supplier-card p {
-  margin: 4px 0;
-  color: #ccc;
-}
-
-.supplier-actions {
-  margin-top: 10px;
-}
-
-.supplier-actions button {
-  padding: 8px 12px;
-  margin-right: 6px;
-  background: #333;
-  color: #eee;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.supplier-actions button:hover {
-  background: gold;
-  color: #000;
-}
-
-/* ============================
-   PORTFOLIO PAGE
-============================ */
-.portfolio-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 30px;
-  margin-top: 20px;
-}
-
-.portfolio-card {
-  background: #1e1e1e;
-  border: 1px solid #333;
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
-  transition: transform 0.2s ease;
-}
-
-.portfolio-card:hover {
-  transform: scale(1.03);
-}
-
-.portfolio-img {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
-
-.portfolio-card h3 {
-  font-size: 1.6rem;
-  margin-bottom: 10px;
-  color: #f1c40f;
-}
-
-.portfolio-card p {
-  font-size: 1rem;
-  margin-bottom: 15px;
-  color: #ccc;
-}
-
-.portfolio-link {
-  display: inline-block;
-  padding: 12px 18px;
-  background: #f1c40f;
-  color: #000;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-/* ============================
-   CUSTOMER PAGE
-============================ */
-.customer-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background: #1a1a1a;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  border: 1px solid #333;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-}
-
-.customer-img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #444;
-}
-
-.customer-info h3 {
-  margin: 0;
-  font-size: 18px;
-  color: gold;
-}
-
-.customer-info p {
-  color: #ccc;
-}
-
-.whatsapp-btn {
-  width: 100%;
-  padding: 12px;
-  background: #25D366;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 18px;
-  margin-top: 20px;
-}
-
-/* ============================
-   MOBILE RESPONSIVE
-============================ */
-@media (max-width: 768px) {
-  .app {
-    flex-direction: column;
-  }
-
-  .sidebar {
+#inventoryForm input,
+#inventoryForm select,
+#inventoryForm textarea {
     width: 100%;
-    border-right: none;
-    border-bottom: 2px solid gold;
-  }
+    padding: 10px;
+    margin: 8px 0;
+    background: #222;
+    color: #eee;
+    border: 1px solid #333;
+    border-radius: 6px;
+}
 
-  .inventory-container,
-  .supplier-container,
-  .portfolio-container {
-    grid-template-columns: 1fr;
-  }
+#inventoryForm button {
+    width: 100%;
+    padding: 12px;
+    background: #ffd700;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+#inventoryForm button:hover {
+    background: #e6c200;
+}
+
+/* ============================
+   INVENTORY CARD STYLE
+============================ */
+
+.inventory-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 20px;
+}
+
+.inventory-card {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.inventory-card h3 {
+    margin-top: 0;
+    color: #ffd700;
+    font-size: 22px;
+}
+
+.inventory-card p {
+    margin: 6px 0;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.inventory-card button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    background: #333;
+    color: #eee;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.inventory-card button:hover {
+    background: #444;
+}
+
+/* ============================
+   SCROLLBAR
+============================ */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: #111;
 }
