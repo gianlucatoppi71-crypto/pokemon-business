@@ -1,5 +1,5 @@
 function renderCustomerList() {
-  loadData();
+  loadData(); // loads inventoryData
 
   const container = document.getElementById("customerList");
   container.innerHTML = "";
@@ -26,13 +26,11 @@ function renderCustomerList() {
 
 renderCustomerList();
 
-// Copy text list for WhatsApp
 function copyWhatsAppList() {
   let text = "📦 *Pokémon Products Available*\n\n";
 
   inventoryData.forEach(item => {
     const status = item.quantity > 0 ? "Available" : "Order Required";
-
     text += `• ${item.name} — £${item.sellPrice.toFixed(2)} (${status})\n`;
   });
 
