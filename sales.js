@@ -1,8 +1,8 @@
 // ===============================
-// SALES PAGE LOGIC (UPGRADED)
+// SALES PAGE LOGIC (BOX + PACK SYSTEM)
 // ===============================
 
-// salesData is stored in localStorage
+// Load sales from storage
 let salesData = JSON.parse(localStorage.getItem("salesData") || "[]");
 
 function saveSales() {
@@ -13,13 +13,27 @@ function saveSales() {
 // RECORD SALE (BOX or PACK)
 // ===============================
 
-function recordSale(item, type) {
+function recordSale(item, type, quantitySold) {
   const date = new Date().toISOString();
 
-  // Calculate buy cost per pack
-  const buyPricePack = item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0;
+  let buyPrice = 0;
+  let sellPrice = 0;
 
-  let saleEntry = {
+  if (type === "BOX") {
+    buyPrice = item.buyPriceBox;
+    sellPrice = item.sellPriceBox;
+  } else {
+    buyPrice = item.type === "BOX"
+      ? item.buyPriceBox / item.packsPerBox
+      : item.buyPricePack;
+
+    sellPrice = item.sellPricePack;
+  }
+
+  const profitPerUnit = sellPrice - buyPrice;
+  const totalProfit = profitPerUnit * quantitySold;
+
+  const saleEntry = {
     id: Date.now(),
     name: item.name,
     image: item.image,
@@ -27,23 +41,13 @@ function recordSale(item, type) {
     supplier: item.supplier,
     notes: item.notes || "—",
     date,
-
-    // dynamic fields
-    type, // "BOX" or "PACK"
-    quantitySold: 1,
-    buyPrice: type === "BOX" ? item.buyPriceBox : buyPricePack,
-    sellPrice: type === "BOX" ? item.sellPriceBox : item.sellPricePack,
-    marketPrice: item.marketPrice,
-
-    profitPerUnit:
-      type === "BOX"
-        ? item.sellPriceBox - item.buyPriceBox
-        : item.sellPricePack - buyPricePack,
-
-    totalProfit:
-      type === "BOX"
-        ? item.sellPriceBox - item.buyPriceBox
-        : item.sellPricePack - buyPricePack
+    type,
+    quantitySold,
+    buyPrice,
+    sellPrice,
+    marketPrice: item.marketPrice || 0,
+    profitPerUnit,
+    totalProfit
   };
 
   salesData.push(saleEntry);
@@ -52,15 +56,15 @@ function recordSale(item, type) {
 }
 
 // ===============================
-// SELL BOX (called from inventory.js)
+// SELL BOX
 // ===============================
 
 function sellBox(id) {
   const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
+  if (!item || item.type !== "BOX") return;
 
   if (item.quantityBoxes <= 0) {
-    alert("No boxes left to sell.");
+    alert("No boxes left.");
     return;
   }
 
@@ -72,43 +76,70 @@ function sellBox(id) {
   if (item.manualPacks < 0) item.manualPacks = 0;
 
   // Record sale
-  recordSale(item, "BOX");
+  recordSale(item, "BOX", 1);
+
+  // Remove item if empty
+  if (item.quantityBoxes <= 0 && item.manualPacks <= 0) {
+    inventoryData = inventoryData.filter(i => i.id !== id);
+  }
 
   saveData();
   renderInventory();
 }
 
 // ===============================
-// SELL PACK (called from inventory.js)
+// SELL PACK
 // ===============================
 
 function sellPack(id) {
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  const totalPacks = item.quantityBoxes * item.packsPerBox + item.manualPacks;
+  const qty = prompt("How many packs do you want to sell?");
+  if (!qty || isNaN(qty)) return;
 
-  if (totalPacks <= 0) {
-    alert("No packs left to sell.");
+  const amount = parseInt(qty);
+
+  let totalPacks = item.type === "BOX"
+    ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
+    : item.quantityPacks;
+
+  if (amount > totalPacks) {
+    alert("Not enough packs available.");
     return;
   }
 
-  // Sell manual packs first
-  if (item.manualPacks > 0) {
-    item.manualPacks -= 1;
-  } else {
-    // Sell from boxes
-    const totalBoxPacks = item.quantityBoxes * item.packsPerBox;
+  // BOX PRODUCT PACK REDUCTION
+  if (item.type === "BOX") {
+    let packsFromBoxes = item.quantityBoxes * item.packsPerBox;
 
-    if (totalBoxPacks > 0) {
-      const newTotalBoxPacks = totalBoxPacks - 1;
-      const newBoxes = Math.floor(newTotalBoxPacks / item.packsPerBox);
-      item.quantityBoxes = newBoxes;
+    if (amount <= packsFromBoxes) {
+      const boxesUsed = Math.floor(amount / item.packsPerBox);
+      item.quantityBoxes -= boxesUsed;
+
+      const leftover = amount % item.packsPerBox;
+      item.manualPacks -= leftover;
+    } else {
+      item.manualPacks -= (amount - packsFromBoxes);
+      item.quantityBoxes = 0;
     }
+
+    if (item.manualPacks < 0) item.manualPacks = 0;
+  }
+
+  // PACK PRODUCT REDUCTION
+  if (item.type === "PACK") {
+    item.quantityPacks -= amount;
   }
 
   // Record sale
-  recordSale(item, "PACK");
+  recordSale(item, "PACK", amount);
+
+  // Remove item if empty
+  if ((item.type === "BOX" && item.quantityBoxes <= 0 && item.manualPacks <= 0) ||
+      (item.type === "PACK" && item.quantityPacks <= 0)) {
+    inventoryData = inventoryData.filter(i => i.id !== id);
+  }
 
   saveData();
   renderInventory();
@@ -138,7 +169,7 @@ function renderSalesInventory() {
     div.innerHTML = `
       <h3>${sale.name} (${sale.type})</h3>
 
-      <img src="${sale.image}" alt="${sale.name}"
+      <img src="${sale.image || 'img/default.png'}" alt="${sale.name}"
            style="width:120px; border:1px solid #333; margin:10px 0;">
 
       <div class="sale-meta">
