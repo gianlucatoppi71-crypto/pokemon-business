@@ -21,6 +21,9 @@
       <button onclick="showPage('trades')">Trades</button>
       <button onclick="showPage('portfolio')">Portfolio</button>
       <button onclick="showPage('expenses')">Expenses</button>
+
+      <!-- ⭐ NEW BUTTON -->
+      <button onclick="openCustomerPage()">Customer List</button>
     </nav>
 
     <div class="tax-info">
@@ -102,6 +105,11 @@
       <div id="expensesList"></div>
     </section>
 
+    <!-- ⭐ CUSTOMER PAGE LOADER -->
+    <section id="customerPage" class="page" style="display:none">
+      <iframe id="customerFrame" src="" style="width:100%; height:100vh; border:none;"></iframe>
+    </section>
+
   </main>
 </div>
 
@@ -138,11 +146,19 @@
     document.getElementById('expensesPage').style.display =
       page === 'expenses' ? 'block' : 'none';
 
+    document.getElementById('customerPage').style.display =
+      page === 'customer' ? 'block' : 'none';
+
     if (page === 'summary') renderSummary();
     if (page === 'suppliers') renderSuppliers();
     if (page === 'trades') renderTrades();
     if (page === 'portfolio') renderPortfolio();
     if (page === 'expenses') renderExpenses();
+  }
+
+  function openCustomerPage() {
+    document.getElementById('customerFrame').src = "customer-list.html";
+    showPage('customer');
   }
 
   showPage('inventory');
