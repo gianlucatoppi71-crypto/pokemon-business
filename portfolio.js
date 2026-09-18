@@ -1,66 +1,35 @@
-// ===============================
-// PORTFOLIO DATA
-// ===============================
-let portfolioData = JSON.parse(localStorage.getItem("portfolioData") || "[]");
+// PORTFOLIO PAGE LOGIC
 
+// Load saved portfolios or start empty
+let portfolioData = JSON.parse(localStorage.getItem("portfolioData")) || [];
+
+// Save to localStorage
 function savePortfolio() {
   localStorage.setItem("portfolioData", JSON.stringify(portfolioData));
 }
 
-// ===============================
-// ADD PORTFOLIO
-// ===============================
+// Add new portfolio
 function addPortfolio(event) {
   event.preventDefault();
 
-  const name = document.getElementById("portName").value;
-  const description = document.getElementById("portDesc").value;
-  const image = document.getElementById("portImage").value;
-  const link = document.getElementById("portLink").value;
+  const name = document.getElementById("portName").value.trim();
+  const description = document.getElementById("portDesc").value.trim();
+  const image = document.getElementById("portImage").value.trim();
+  const link = document.getElementById("portLink").value.trim();
+
+  if (!name || !description || !image || !link) {
+    alert("Please fill in all fields.");
+    return;
+  }
 
   portfolioData.push({ name, description, image, link });
   savePortfolio();
   renderPortfolio();
 
-  event.target.reset();
+  document.getElementById("portfolioForm").reset();
 }
 
-// ===============================
-// DELETE PORTFOLIO
-// ===============================
-function deletePortfolio(index) {
-  if (!confirm("Delete this portfolio?")) return;
-  portfolioData.splice(index, 1);
-  savePortfolio();
-  renderPortfolio();
-}
-
-// ===============================
-// EDIT PORTFOLIO
-// ===============================
-function editPortfolio(index) {
-  const item = portfolioData[index];
-
-  const name = prompt("Edit name:", item.name);
-  if (name === null) return;
-
-  const description = prompt("Edit description:", item.description);
-  if (description === null) return;
-
-  const image = prompt("Edit image URL:", item.image);
-  if (image === null) return;
-
-  const link = prompt("Edit link:", item.link);
-  if (link === null) return;
-
-  portfolioData[index] = { name, description, image, link };
-  savePortfolio();
-  renderPortfolio();
-}
-
-// ===============================
-// RENDER PORTFOLIO
-// ===============================
+// Render portfolio cards
 function renderPortfolio() {
   const container = document.getElementById("portfolioList");
   container.innerHTML = "";
@@ -75,23 +44,15 @@ function renderPortfolio() {
     div.className = "portfolio-card";
 
     div.innerHTML = `
-      <img src="${p.image}" class="portfolio-img">
+      <img src="${p.image}" alt="${p.name}" class="portfolio-img">
       <h3>${p.name}</h3>
       <p>${p.description}</p>
 
       <a href="${p.link}" target="_blank" class="portfolio-link">
         Open Portfolio
       </a>
-
-      <div class="portfolio-actions">
-        <button class="portfolio-edit" onclick="editPortfolio(${index})">Edit</button>
-        <button class="portfolio-delete" onclick="deletePortfolio(${index})">Delete</button>
-      </div>
     `;
 
     container.appendChild(div);
   });
 }
-
-// Force render on load
-renderPortfolio();

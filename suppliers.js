@@ -1,97 +1,21 @@
-// ===============================
-// SUPPLIERS SYSTEM (USES GLOBAL DATA FROM data.js)
-// ===============================
+// SUPPLIERS PAGE
 
-// We use suppliersData from data.js and saveData() to persist everything.
-
-// ADD SUPPLIER
-function addSupplier(event) {
-  event.preventDefault();
-
-  const name = document.getElementById("supName").value.trim();
-  const address = document.getElementById("supAddress").value.trim();
-  const website = document.getElementById("supWebsite").value.trim();
-  const notes = document.getElementById("supNotes").value.trim();
-
-  if (!name) return;
-
-  suppliersData.push({
-    id: Date.now(),
-    name,
-    address,
-    website,
-    notes
-  });
-
-  saveData();          // uses data.js
-  renderSuppliers();
-  loadSupplierDropdown();
-
-  event.target.reset();
-}
-
-// DELETE SUPPLIER
-function deleteSupplier(id) {
-  suppliersData = suppliersData.filter(s => s.id !== id);
-  saveData();
-  renderSuppliers();
-  loadSupplierDropdown();
-}
-
-// EDIT SUPPLIER
-function editSupplier(id) {
-  const s = suppliersData.find(x => x.id === id);
-  if (!s) return;
-
-  document.getElementById("supName").value = s.name;
-  document.getElementById("supAddress").value = s.address;
-  document.getElementById("supWebsite").value = s.website;
-  document.getElementById("supNotes").value = s.notes;
-
-  deleteSupplier(id); // new save will replace it
-}
-
-// RENDER SUPPLIER LIST
 function renderSuppliers() {
-  const container = document.getElementById("supplierList");
+  loadData();
+
+  const container = document.getElementById('suppliersPage');
   if (!container) return;
 
-  if (suppliersData.length === 0) {
-    container.innerHTML = "<p>No suppliers added yet.</p>";
+  container.innerHTML = '<h1>Suppliers</h1>';
+
+  const suppliers = [...new Set(inventoryData.map(item => item.supplier))];
+
+  if (suppliers.length === 0) {
+    container.innerHTML += '<p>No suppliers yet.</p>';
     return;
   }
 
-  container.innerHTML = suppliersData.map(s => `
-    <div class="supplier-card">
-      <h3>${s.name}</h3>
-
-      <p><strong>Address:</strong> ${s.address || "—"}</p>
-      <p><strong>Website:</strong> ${s.website || "—"}</p>
-      <p><strong>Notes:</strong> ${s.notes || "—"}</p>
-
-      <div class="supplier-actions">
-        <button onclick="editSupplier(${s.id})">Edit</button>
-        <button onclick="deleteSupplier(${s.id})">Delete</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-// LOAD SUPPLIERS INTO INVENTORY DROPDOWN
-function loadSupplierDropdown() {
-  const select = document.getElementById("invSupplier");
-  if (!select) return;
-
-  select.innerHTML = "<option value=''>Select supplier</option>";
-
-  suppliersData.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.name;
-    opt.textContent = s.name;
-    select.appendChild(opt);
+  suppliers.forEach(supplier => {
+    container.innerHTML += `<p>${supplier}</p>`;
   });
 }
-
-// Initial load (after data.js has run loadData())
-renderSuppliers();
-loadSupplierDropdown();

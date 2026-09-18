@@ -1,58 +1,4 @@
-// ===============================
-// SALES PAGE LOGIC (BOX + PACK SYSTEM)
-// ===============================
-// Uses global salesData, inventoryData, loadData(), saveData() from data.js
-// Do NOT redeclare salesData or inventoryData here.
-
-// ===============================
-// RECORD SALE (BOX or PACK)
-// ===============================
-
-function recordSale(item, type, quantitySold) {
-  const date = new Date().toISOString();
-
-  let buyPrice = 0;
-  let sellPrice = 0;
-
-  if (type === "BOX") {
-    buyPrice = item.buyPriceBox;
-    sellPrice = item.sellPriceBox;
-  } else {
-    buyPrice = item.type === "BOX"
-      ? (item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0)
-      : item.buyPricePack;
-
-    sellPrice = item.sellPricePack;
-  }
-
-  const profitPerUnit = sellPrice - buyPrice;
-  const totalProfit = profitPerUnit * quantitySold;
-
-  const saleEntry = {
-    id: Date.now(),
-    name: item.name,
-    image: item.image,
-    category: item.category,
-    supplier: item.supplier,
-    notes: item.notes || "—",
-    date,
-    type,
-    quantitySold,
-    buyPrice,
-    sellPrice,
-    marketPrice: item.marketPrice || 0,
-    profitPerUnit,
-    totalProfit
-  };
-
-  salesData.push(saleEntry);
-  saveData();
-  renderSalesInventory();
-}
-
-// ===============================
-// RENDER SALES PAGE
-// ===============================
+// SALES PAGE LOGIC
 
 function renderSalesInventory() {
   loadData();
@@ -62,7 +8,7 @@ function renderSalesInventory() {
 
   list.innerHTML = '';
 
-  if (!salesData || salesData.length === 0) {
+  if (salesData.length === 0) {
     list.innerHTML = '<p>No sales yet.</p>';
     return;
   }
@@ -72,15 +18,15 @@ function renderSalesInventory() {
     div.className = 'sale-card';
 
     div.innerHTML = `
-      <h3>${sale.name} (${sale.type})</h3>
+      <h3>${sale.name}</h3>
 
-      <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
+      <img src="${sale.image}" alt="${sale.name}"
            style="width:120px; border:1px solid #333; margin:10px 0;">
 
       <div class="sale-meta">
-        <strong>Category:</strong> ${sale.category || "—"}<br>
-        <strong>Supplier:</strong> ${sale.supplier || "—"}<br>
-        <strong>Notes:</strong> ${sale.notes || "—"}
+        <strong>Category:</strong> ${sale.category}<br>
+        <strong>Supplier:</strong> ${sale.supplier}<br>
+        <strong>Notes:</strong> ${sale.notes || '—'}
       </div>
 
       <div class="sale-prices">
