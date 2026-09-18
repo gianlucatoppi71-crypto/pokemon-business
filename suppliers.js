@@ -1,18 +1,10 @@
 // ===============================
-// SUPPLIERS SYSTEM (FULLY UPDATED)
+// SUPPLIERS SYSTEM (USES GLOBAL DATA FROM data.js)
 // ===============================
 
-// Load suppliers
-let suppliersData = JSON.parse(localStorage.getItem("suppliersData") || "[]");
+// We use suppliersData from data.js and saveData() to persist everything.
 
-function saveSuppliers() {
-  localStorage.setItem("suppliersData", JSON.stringify(suppliersData));
-}
-
-// ===============================
 // ADD SUPPLIER
-// ===============================
-
 function addSupplier(event) {
   event.preventDefault();
 
@@ -31,28 +23,22 @@ function addSupplier(event) {
     notes
   });
 
-  saveSuppliers();
+  saveData();          // uses data.js
   renderSuppliers();
-  loadSupplierDropdown(); // update inventory dropdown
+  loadSupplierDropdown();
 
   event.target.reset();
 }
 
-// ===============================
 // DELETE SUPPLIER
-// ===============================
-
 function deleteSupplier(id) {
   suppliersData = suppliersData.filter(s => s.id !== id);
-  saveSuppliers();
+  saveData();
   renderSuppliers();
   loadSupplierDropdown();
 }
 
-// ===============================
 // EDIT SUPPLIER
-// ===============================
-
 function editSupplier(id) {
   const s = suppliersData.find(x => x.id === id);
   if (!s) return;
@@ -62,13 +48,10 @@ function editSupplier(id) {
   document.getElementById("supWebsite").value = s.website;
   document.getElementById("supNotes").value = s.notes;
 
-  deleteSupplier(id); // remove old entry, new one will replace it
+  deleteSupplier(id); // new save will replace it
 }
 
-// ===============================
 // RENDER SUPPLIER LIST
-// ===============================
-
 function renderSuppliers() {
   const container = document.getElementById("supplierList");
   if (!container) return;
@@ -94,10 +77,7 @@ function renderSuppliers() {
   `).join("");
 }
 
-// ===============================
 // LOAD SUPPLIERS INTO INVENTORY DROPDOWN
-// ===============================
-
 function loadSupplierDropdown() {
   const select = document.getElementById("invSupplier");
   if (!select) return;
@@ -112,6 +92,6 @@ function loadSupplierDropdown() {
   });
 }
 
-// Initial load
+// Initial load (after data.js has run loadData())
 renderSuppliers();
 loadSupplierDropdown();
