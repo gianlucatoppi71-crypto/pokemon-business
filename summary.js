@@ -1,5 +1,5 @@
 // ===============================
-// BUSINESS SUMMARY PAGE
+// BUSINESS SUMMARY PAGE (FIXED)
 // ===============================
 
 function renderSummary() {
@@ -8,28 +8,25 @@ function renderSummary() {
   const container = document.getElementById('summaryPage');
   if (!container) return;
 
-  // Load annual income (default empty)
+  // Annual income
   const annualIncome = parseFloat(localStorage.getItem("annualIncome")) || 0;
 
-  // Load expenses
+  // Expenses
   const expensesData = JSON.parse(localStorage.getItem("expensesData") || "[]");
   const totalExpenses = expensesData.reduce((sum, e) => sum + e.amount, 0);
 
-  // Inventory value
+  // Inventory value (NOT part of profit)
   const totalInventoryValue = inventoryData.reduce((sum, item) => {
     return sum + (item.sellPrice * item.quantity);
   }, 0);
 
-  // Sales profit
+  // Sales profit (profit from sold items only)
   const totalSalesProfit = salesData.reduce((sum, sale) => {
     return sum + sale.totalProfit;
   }, 0);
 
-  // Total profit (inventory + sales)
-  const totalProfit = calculateTotalProfit() || 0;
-
-  // Business profit after expenses
-  const businessProfit = totalProfit - totalExpenses;
+  // ⭐ FIXED: Business profit = sales profit – expenses
+  const businessProfit = totalSalesProfit - totalExpenses;
 
   // UK trading allowance
   const tradingAllowance = 1000;
@@ -38,8 +35,8 @@ function renderSummary() {
   const taxableProfit = Math.max(0, businessProfit - tradingAllowance);
 
   // UK tax rates
-  const incomeTax = taxableProfit * 0.20; // 20%
-  const nic = taxableProfit * 0.09;       // 9%
+  const incomeTax = taxableProfit * 0.20;
+  const nic = taxableProfit * 0.09;
 
   const totalTax = incomeTax + nic;
   const netProfit = businessProfit - totalTax;
@@ -54,7 +51,7 @@ function renderSummary() {
 
   // Tax status
   let taxStatus = "";
-  if (businessProfit <= 1000) {
+  if (businessProfit <= tradingAllowance) {
     taxStatus = `<p style="color:green"><strong>Status:</strong> Under trading allowance — usually no tax due.</p>`;
   } else {
     taxStatus = `<p style="color:red"><strong>Status:</strong> Over trading allowance — tax may be due.</p>`;
@@ -63,10 +60,12 @@ function renderSummary() {
   container.innerHTML = `
     <h1>Business Summary</h1>
 
-    <p><strong>Inventory value:</strong> £${totalInventoryValue.toFixed(2)}</p>
+    <p><strong>Inventory value (unsold):</strong> £${totalInventoryValue.toFixed(2)}</p>
     <p><strong>Total sales profit:</strong> £${totalSalesProfit.toFixed(2)}</p>
     <p><strong>Total expenses:</strong> £${totalExpenses.toFixed(2)}</p>
-    <p><strong>Business profit:</strong> £${businessProfit.toFixed(2)}</p>
+
+    <h2>Business Profit</h2>
+    <p><strong>Net business profit:</strong> £${businessProfit.toFixed(2)}</p>
 
     <h2>Your Income</h2>
     <p><strong>Annual income:</strong> £${annualIncome.toFixed(2)}</p>
