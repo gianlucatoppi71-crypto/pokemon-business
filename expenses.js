@@ -1,80 +1,123 @@
 // ===============================
-// EXPENSES SYSTEM
+// EXPENSES SYSTEM (UPGRADED FOR BOX + PACK + TRADES)
 // ===============================
 
-// Load existing expenses or create empty array
+// Load expenses
 let expensesData = JSON.parse(localStorage.getItem("expensesData") || "[]");
 
-// Save expenses to localStorage
 function saveExpenses() {
   localStorage.setItem("expensesData", JSON.stringify(expensesData));
 }
 
-// Add a new expense
+// ===============================
+// ADD EXPENSE (MANUAL)
+// ===============================
+
 function addExpense(event) {
   event.preventDefault();
 
-  const desc = document.getElementById("expDesc").value;
+  const desc = document.getElementById("expDesc").value.trim();
   const amount = parseFloat(document.getElementById("expAmount").value);
   const date = document.getElementById("expDate").value;
-  const category = document.getElementById("expCategory").value || "General";
+  const category = document.getElementById("expCategory").value.trim();
+
+  if (!desc || isNaN(amount) || !date) return;
 
   expensesData.push({
     id: Date.now(),
     description: desc,
     amount,
     date,
-    category
+    category: category || "Other"
   });
 
   saveExpenses();
   renderExpenses();
+
   event.target.reset();
 }
 
-// Delete an expense
+// ===============================
+// AUTO‑EXPENSE FROM GIFT SYSTEM
+// (inventory.js already pushes gift expenses)
+// ===============================
+
+function addGiftExpense(item, totalCost) {
+  expensesData.push({
+    id: Date.now(),
+    description: `Gift: ${item.name}`,
+    amount: totalCost,
+    date: new Date().toISOString().split("T")[0],
+    category: "Gift"
+  });
+
+  saveExpenses();
+}
+
+// ===============================
+// OPTIONAL: AUTO‑EXPENSE FROM TRADES
+// (OUT items can be treated as business cost)
+// ===============================
+
+function addTradeExpense(item, qty) {
+  let cost = 0;
+
+  if (item.type === "BOX") {
+    cost = qty * item.buyPriceBox;
+  } else {
+    const buyPricePack = item.type === "BOX"
+      ? item.buyPriceBox / item.packsPerBox
+      : item.buyPricePack;
+
+    cost = qty * buyPricePack;
+  }
+
+  expensesData.push({
+    id: Date.now(),
+    description: `Trade OUT: ${item.name}`,
+    amount: cost,
+    date: new Date().toISOString().split("T")[0],
+    category: "Trade"
+  });
+
+  saveExpenses();
+}
+
+// ===============================
+// DELETE EXPENSE
+// ===============================
+
 function deleteExpense(id) {
   expensesData = expensesData.filter(e => e.id !== id);
   saveExpenses();
   renderExpenses();
 }
 
-// Copy an expense
-function copyExpense(id) {
-  const exp = expensesData.find(e => e.id === id);
-  if (!exp) return;
+// ===============================
+// RENDER EXPENSES PAGE
+// ===============================
 
-  expensesData.push({
-    id: Date.now(),
-    description: exp.description,
-    amount: exp.amount,
-    date: exp.date,
-    category: exp.category
-  });
-
-  saveExpenses();
-  renderExpenses();
-}
-
-// Render expenses list
 function renderExpenses() {
   const container = document.getElementById("expensesList");
   if (!container) return;
 
   if (expensesData.length === 0) {
-    container.innerHTML = "<p>No expenses added yet.</p>";
+    container.innerHTML = "<p>No expenses recorded yet.</p>";
     return;
   }
 
-  container.innerHTML = expensesData.map(exp => `
+  container.innerHTML = expensesData.map(e => `
     <div class="expense-card">
-      <p><strong>${exp.description}</strong></p>
-      <p>£${exp.amount.toFixed(2)}</p>
-      <p>${exp.date}</p>
-      <p>${exp.category}</p>
+      <h3>${e.description}</h3>
 
-      <button onclick="copyExpense(${exp.id})">Copy</button>
-      <button onclick="deleteExpense(${exp.id})">Delete</button>
+      <p><strong>Amount:</strong> £${e.amount.toFixed(2)}</p>
+      <p><strong>Date:</strong> ${e.date}</p>
+      <p><strong>Category:</strong> ${e.category}</p>
+
+      <button onclick="deleteExpense(${e.id})">Delete</button>
     </div>
   `).join("");
 }
+
+// Initial render
+renderExpenses();
