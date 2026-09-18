@@ -1,5 +1,5 @@
 // ===============================
-// CENTRAL DATA STORAGE FOR ALL APP MODULES
+// CENTRAL DATA STORAGE FOR ALL APP MODULES (UPDATED FOR BOX + PACK SYSTEM)
 // ===============================
 
 // GLOBAL ARRAYS
@@ -32,41 +32,32 @@ function saveData() {
 }
 
 // ===============================
-// PROFIT CALCULATIONS FOR OLD ITEMS (still used by summary)
+// PROFIT CALCULATIONS (NEW BOX + PACK SYSTEM)
 // ===============================
-function calculateItemProfit(item) {
-  const profitPerUnit = item.sellPrice - item.buyPrice;
-  const totalProfit = profitPerUnit * item.quantity;
 
-  const marginPercent = item.sellPrice > 0
-    ? (profitPerUnit / item.sellPrice) * 100
-    : 0;
+// Calculate profit for a BOX or PACK sale
+function calculateSaleProfit(sale) {
+  const profitPerUnit = sale.sellPrice - sale.buyPrice;
+  const totalProfit = profitPerUnit * sale.quantitySold;
 
   return {
     profitPerUnit,
-    totalProfit,
-    marginPercent
+    totalProfit
   };
 }
 
 // ===============================
-// TOTAL PROFIT (INVENTORY + SALES)
+// TOTAL PROFIT (SALES ONLY)
 // ===============================
 function calculateTotalProfit() {
-  const inventoryProfit = inventoryData.reduce((sum, item) => {
-    const { totalProfit } = calculateItemProfit(item);
-    return sum + totalProfit;
+  return salesData.reduce((sum, sale) => {
+    const p = calculateSaleProfit(sale);
+    return sum + p.totalProfit;
   }, 0);
-
-  const salesProfit = salesData.reduce((sum, sale) => {
-    return sum + sale.profit;
-  }, 0);
-
-  return inventoryProfit + salesProfit;
 }
 
 // ===============================
-// UK TAX ESTIMATE
+// UK TAX ESTIMATE (NEW SYSTEM)
 // ===============================
 function estimateUkTax(totalProfit) {
   const tradingAllowance = 1000;
@@ -89,7 +80,7 @@ function estimateUkTax(totalProfit) {
 }
 
 // ===============================
-// RENDER TAX SUMMARY
+// RENDER TAX SUMMARY (NEW SYSTEM)
 // ===============================
 function renderTaxSummary() {
   loadData();
