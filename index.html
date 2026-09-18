@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=1001">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -159,15 +159,18 @@
   </main>
 </div>
 
-<!-- SCRIPTS (NEW SYSTEM, CACHE-BUSTED v=1001) -->
-<script src="data.js?v=1001"></script>
-<script src="inventory.js?v=1001"></script>
-<script src="sales.js?v=1001"></script>
-<script src="summary.js?v=1001"></script>
-<script src="suppliers.js?v=1001"></script>
-<script src="trades.js?v=1001"></script>
-<script src="portfolio.js?v=1001"></script>
-<script src="expenses.js?v=1001"></script>
+<!-- AUTO CACHE-BUSTING SCRIPTS -->
+<script>
+  const bust = Date.now();
+  document.write(`<script src="data.js?v=${bust}"></script>`);
+  document.write(`<script src="inventory.js?v=${bust}"></script>`);
+  document.write(`<script src="sales.js?v=${bust}"></script>`);
+  document.write(`<script src="summary.js?v=${bust}"></script>`);
+  document.write(`<script src="suppliers.js?v=${bust}"></script>`);
+  document.write(`<script src="trades.js?v=${bust}"></script>`);
+  document.write(`<script src="portfolio.js?v=${bust}"></script>`);
+  document.write(`<script src="expenses.js?v=${bust}"></script>`);
+</script>
 
 <script>
   window.onload = () => {
