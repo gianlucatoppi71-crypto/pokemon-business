@@ -170,6 +170,13 @@
 <script src="expenses.js?v=8"></script>
 
 <script>
+  window.onload = () => {
+    showPage('inventory');
+    renderInventory();
+    renderSalesInventory();
+    renderTaxSummary();
+  };
+
   function showPage(page) {
     document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
     document.getElementById(page + 'Page').style.display = 'block';
@@ -202,11 +209,6 @@
       packFields.style.display = "none";
     }
   });
-
-  showPage('inventory');
-  renderInventory();
-  renderSalesInventory();
-  renderTaxSummary();
 </script>
 
 </body>
