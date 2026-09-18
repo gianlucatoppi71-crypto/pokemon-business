@@ -94,13 +94,16 @@
       <div id="inventoryList" class="inventory-container"></div>
     </section>
 
+    <!-- SALES PAGE -->
     <section id="salesPage" class="page" style="display:none">
       <h1>Sales</h1>
       <div id="salesList"></div>
     </section>
 
+    <!-- SUMMARY PAGE -->
     <section id="summaryPage" class="page" style="display:none"></section>
 
+    <!-- SUPPLIERS PAGE -->
     <section id="suppliersPage" class="page" style="display:none">
       <h1>Suppliers</h1>
 
@@ -115,8 +118,10 @@
       <div id="supplierList" class="supplier-container"></div>
     </section>
 
+    <!-- TRADES PAGE -->
     <section id="tradesPage" class="page" style="display:none"></section>
 
+    <!-- PORTFOLIO PAGE -->
     <section id="portfolioPage" class="page" style="display:none">
       <h1>Portfolio</h1>
 
@@ -131,6 +136,7 @@
       <div id="portfolioList" class="portfolio-container"></div>
     </section>
 
+    <!-- EXPENSES PAGE -->
     <section id="expensesPage" class="page" style="display:none">
       <h1>Expenses</h1>
 
@@ -145,6 +151,7 @@
       <div id="expensesList"></div>
     </section>
 
+    <!-- CUSTOMER PAGE -->
     <section id="customerPage" class="page" style="display:none">
       <iframe id="customerFrame" src="" style="width:100%; height:100vh; border:none;"></iframe>
     </section>
@@ -155,7 +162,7 @@
 <!-- SCRIPTS -->
 <script src="data.js?v=8"></script>
 <script src="inventory.js?v=8"></script>
-<script src="sales.js?v=8"></script>
+<script src="sales.js?v=9"></script>
 <script src="summary.js?v=8"></script>
 <script src="suppliers.js?v=8"></script>
 <script src="trades.js?v=8"></script>
@@ -163,6 +170,14 @@
 <script src="expenses.js?v=8"></script>
 
 <script>
+  window.onload = () => {
+    showPage('inventory');
+    renderInventory();
+    renderSalesInventory();
+    renderSummary();
+    renderTaxSummary();
+  };
+
   function showPage(page) {
     document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
     document.getElementById(page + 'Page').style.display = 'block';
@@ -195,13 +210,6 @@
       packFields.style.display = "none";
     }
   });
-
-  // ⭐ REMOVED OLD loadSupplierDropdown (suppliers.js handles it)
-
-  showPage('inventory');
-  renderInventory();
-  renderSalesInventory();
-  renderTaxSummary();
 </script>
 
 </body>
