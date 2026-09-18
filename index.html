@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -79,7 +79,20 @@
     <section id="summaryPage" class="page" style="display:none"></section>
 
     <!-- SUPPLIERS PAGE -->
-    <section id="suppliersPage" class="page" style="display:none"></section>
+    <section id="suppliersPage" class="page" style="display:none">
+      <h1>Suppliers</h1>
+
+      <!-- ⭐ UPDATED SUPPLIER FORM ⭐ -->
+      <form id="supplierForm" onsubmit="addSupplier(event)">
+        <input type="text" id="supName" placeholder="Supplier name" required>
+        <input type="text" id="supAddress" placeholder="Address (optional)">
+        <input type="text" id="supWebsite" placeholder="Website URL (optional)">
+        <textarea id="supNotes" placeholder="Notes (optional)"></textarea>
+        <button type="submit">Add Supplier</button>
+      </form>
+
+      <div id="supplierList" class="supplier-container"></div>
+    </section>
 
     <!-- TRADES PAGE -->
     <section id="tradesPage" class="page" style="display:none"></section>
@@ -123,14 +136,14 @@
 </div>
 
 <!-- SCRIPTS -->
-<script src="data.js?v=6"></script>
-<script src="inventory.js?v=6"></script>
-<script src="sales.js?v=6"></script>
-<script src="summary.js?v=6"></script>
-<script src="suppliers.js?v=6"></script>
-<script src="trades.js?v=6"></script>
-<script src="portfolio.js?v=6"></script>
-<script src="expenses.js?v=6"></script>
+<script src="data.js?v=7"></script>
+<script src="inventory.js?v=7"></script>
+<script src="sales.js?v=7"></script>
+<script src="summary.js?v=7"></script>
+<script src="suppliers.js?v=7"></script>
+<script src="trades.js?v=7"></script>
+<script src="portfolio.js?v=7"></script>
+<script src="expenses.js?v=7"></script>
 
 <script>
   function showPage(page) {
