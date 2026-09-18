@@ -14,15 +14,23 @@ function renderInventory() {
   }
 
   container.innerHTML = inventoryData.map(item => {
-    const totalPacks = (item.quantityBoxes * item.packsPerBox) + item.manualPacks;
-    const buyPricePack = item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0;
+    const isBox = item.type === "BOX";
+    const isPack = item.type === "PACK";
+
+    const totalPacks = isBox
+      ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
+      : item.quantityPacks;
+
+    const buyPricePack = isBox
+      ? (item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0)
+      : item.buyPricePack;
 
     return `
       <div class="inventory-card">
 
         <!-- LEFT SIDE: IMAGE -->
         <div class="inv-left">
-          <img src="${item.image}" alt="${item.name}">
+          <img src="${item.image || 'img/default.png'}" alt="${item.name}">
         </div>
 
         <!-- RIGHT SIDE: INFO -->
@@ -35,17 +43,26 @@ function renderInventory() {
           </div>
 
           <div class="inv-prices">
-            <span><strong>Buy price per BOX:</strong> £${item.buyPriceBox.toFixed(2)}</span>
-            <span><strong>Sell price per BOX:</strong> £${item.sellPriceBox.toFixed(2)}</span>
-            <span><strong>Sell price per PACK:</strong> £${item.sellPricePack.toFixed(2)}</span>
-            <span><strong>Packs per box:</strong> ${item.packsPerBox}</span>
+            ${isBox ? `
+              <span><strong>Buy price per BOX:</strong> £${item.buyPriceBox.toFixed(2)}</span>
+              <span><strong>Sell price per BOX:</strong> £${item.sellPriceBox.toFixed(2)}</span>
+              <span><strong>Sell price per PACK:</strong> £${item.sellPricePack.toFixed(2)}</span>
+              <span><strong>Packs per box:</strong> ${item.packsPerBox}</span>
+            ` : `
+              <span><strong>Buy price per PACK:</strong> £${item.buyPricePack.toFixed(2)}</span>
+              <span><strong>Sell price per PACK:</strong> £${item.sellPricePack.toFixed(2)}</span>
+            `}
           </div>
 
           <div class="inv-prices">
-            <span><strong>Quantity of BOXES:</strong> ${item.quantityBoxes}</span>
-            <span><strong>Manual loose packs:</strong> ${item.manualPacks}</span>
-            <span><strong>Total packs (boxes + loose):</strong> ${totalPacks}</span>
-            <span><strong>Market price (UK):</strong> £${item.marketPrice.toFixed(2)}</span>
+            ${isBox ? `
+              <span><strong>Quantity of BOXES:</strong> ${item.quantityBoxes}</span>
+              <span><strong>Loose packs:</strong> ${item.manualPacks}</span>
+            ` : `
+              <span><strong>Quantity of PACKS:</strong> ${item.quantityPacks}</span>
+            `}
+            <span><strong>Total packs:</strong> ${totalPacks}</span>
+            <span><strong>Market price (UK):</strong> £${item.marketPrice || 0}</span>
           </div>
 
           <div class="inv-meta">
@@ -53,11 +70,12 @@ function renderInventory() {
           </div>
 
           <div class="inv-actions">
-            <button onclick="sellBox(${item.id})">Sell BOX</button>
+            ${isBox ? `<button onclick="sellBox(${item.id})">Sell BOX</button>` : ""}
             <button onclick="sellPack(${item.id})">Sell PACK</button>
             <button onclick="editItem(${item.id})">Edit</button>
+            <button onclick="copyItem(${item.id})">Copy</button>
+            <button onclick="addQuantity(${item.id})">Add Qty</button>
             <button onclick="deleteItem(${item.id})">Delete</button>
-            <button onclick="giftItem(${item.id})">Gift</button>
           </div>
         </div>
 
@@ -73,38 +91,39 @@ function renderInventory() {
 document.getElementById('inventoryForm').addEventListener('submit', function (event) {
   event.preventDefault();
 
+  const type = document.getElementById('invType').value;
   const name = document.getElementById('invName').value;
   const category = document.getElementById('invCategory').value;
   const supplier = document.getElementById('invSupplier').value;
-
-  const buyPriceBox = parseFloat(document.getElementById('invBuyPriceBox').value);
-  const packsPerBox = parseInt(document.getElementById('invPacksPerBox').value, 10);
-
-  const sellPriceBox = parseFloat(document.getElementById('invSellPriceBox').value);
-  const sellPricePack = parseFloat(document.getElementById('invSellPricePack').value);
-
-  const quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value, 10);
-  const manualPacks = parseInt(document.getElementById('invManualPacks').value || "0", 10);
-
-  const marketPrice = parseFloat(document.getElementById('invMarketPrice').value);
   const image = document.getElementById('invImage').value;
   const notes = document.getElementById('invNotes').value;
+  const marketPrice = parseFloat(document.getElementById('invMarketPrice').value) || 0;
 
-  const newItem = {
+  let newItem = {
     id: Date.now(),
+    type,
     name,
     category,
     supplier,
-    buyPriceBox,
-    sellPriceBox,
-    sellPricePack,
-    packsPerBox,
-    quantityBoxes,
-    manualPacks,
-    marketPrice,
     image,
-    notes
+    notes,
+    marketPrice
   };
+
+  if (type === "BOX") {
+    newItem.buyPriceBox = parseFloat(document.getElementById('invBuyPriceBox').value) || 0;
+    newItem.sellPriceBox = parseFloat(document.getElementById('invSellPriceBox').value) || 0;
+    newItem.sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
+    newItem.packsPerBox = parseInt(document.getElementById('invPacksPerBox').value) || 0;
+    newItem.quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value) || 0;
+    newItem.manualPacks = parseInt(document.getElementById('invManualPacks').value) || 0;
+  }
+
+  if (type === "PACK") {
+    newItem.buyPricePack = parseFloat(document.getElementById('invBuyPricePack').value) || 0;
+    newItem.sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
+    newItem.quantityPacks = parseInt(document.getElementById('invQuantityPacks').value) || 0;
+  }
 
   inventoryData.push(newItem);
   saveData();
@@ -124,6 +143,22 @@ function deleteItem(id) {
 }
 
 // ===============================
+// COPY ITEM
+// ===============================
+
+function copyItem(id) {
+  const item = inventoryData.find(i => i.id === id);
+  if (!item) return;
+
+  const copy = JSON.parse(JSON.stringify(item));
+  copy.id = Date.now();
+
+  inventoryData.push(copy);
+  saveData();
+  renderInventory();
+}
+
+// ===============================
 // EDIT ITEM
 // ===============================
 
@@ -131,53 +166,142 @@ function editItem(id) {
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
+  document.getElementById('invType').value = item.type;
   document.getElementById('invName').value = item.name;
   document.getElementById('invCategory').value = item.category;
   document.getElementById('invSupplier').value = item.supplier;
-
-  document.getElementById('invBuyPriceBox').value = item.buyPriceBox;
-  document.getElementById('invPacksPerBox').value = item.packsPerBox;
-
-  document.getElementById('invSellPriceBox').value = item.sellPriceBox;
-  document.getElementById('invSellPricePack').value = item.sellPricePack;
-
-  document.getElementById('invQuantityBoxes').value = item.quantityBoxes;
-  document.getElementById('invManualPacks').value = item.manualPacks;
-
-  document.getElementById('invMarketPrice').value = item.marketPrice;
   document.getElementById('invImage').value = item.image;
   document.getElementById('invNotes').value = item.notes || "";
+  document.getElementById('invMarketPrice').value = item.marketPrice || 0;
+
+  if (item.type === "BOX") {
+    document.getElementById('invBuyPriceBox').value = item.buyPriceBox;
+    document.getElementById('invSellPriceBox').value = item.sellPriceBox;
+    document.getElementById('invSellPricePack').value = item.sellPricePack;
+    document.getElementById('invPacksPerBox').value = item.packsPerBox;
+    document.getElementById('invQuantityBoxes').value = item.quantityBoxes;
+    document.getElementById('invManualPacks').value = item.manualPacks;
+  }
+
+  if (item.type === "PACK") {
+    document.getElementById('invBuyPricePack').value = item.buyPricePack;
+    document.getElementById('invSellPricePack').value = item.sellPricePack;
+    document.getElementById('invQuantityPacks').value = item.quantityPacks;
+  }
 }
 
 // ===============================
-// GIFT SYSTEM
+// ADD QUANTITY POPUP
 // ===============================
 
-function giftItem(id) {
+function addQuantity(id) {
+  const qty = prompt("Enter quantity to add:");
+
+  if (!qty || isNaN(qty)) return;
+
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  const expensesData = JSON.parse(localStorage.getItem("expensesData") || "[]");
+  if (item.type === "BOX") {
+    item.quantityBoxes += parseInt(qty);
+  } else {
+    item.quantityPacks += parseInt(qty);
+  }
 
-  const buyPricePack = item.packsPerBox > 0 ? item.buyPriceBox / item.packsPerBox : 0;
-  const totalBoxesCost = item.quantityBoxes * item.buyPriceBox;
-  const totalManualPacksCost = item.manualPacks * buyPricePack;
-  const totalGiftCost = totalBoxesCost + totalManualPacksCost;
+  saveData();
+  renderInventory();
+}
 
-  expensesData.push({
+// ===============================
+// SELL PACK
+// ===============================
+
+function sellPack(id) {
+  const item = inventoryData.find(i => i.id === id);
+  if (!item) return;
+
+  const qty = prompt("How many packs to sell?");
+  if (!qty || isNaN(qty)) return;
+
+  const amount = parseInt(qty);
+
+  let totalPacks = item.type === "BOX"
+    ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
+    : item.quantityPacks;
+
+  if (amount > totalPacks) {
+    alert("Not enough packs in inventory.");
+    return;
+  }
+
+  const profit = (item.sellPricePack - (item.type === "BOX"
+    ? item.buyPriceBox / item.packsPerBox
+    : item.buyPricePack)) * amount;
+
+  salesData.push({
     id: Date.now(),
-    description: `Gift: ${item.name}`,
-    amount: totalGiftCost,
-    date: new Date().toISOString().split("T")[0],
-    category: "Gift / Promotion"
+    name: item.name,
+    type: "PACK",
+    quantity: amount,
+    profit,
+    date: new Date().toISOString().split("T")[0]
   });
 
-  localStorage.setItem("expensesData", JSON.stringify(expensesData));
+  if (item.type === "BOX") {
+    let packsFromBoxes = item.quantityBoxes * item.packsPerBox;
 
-  inventoryData = inventoryData.filter(i => i.id !== id);
+    if (amount <= packsFromBoxes) {
+      const boxesUsed = Math.floor(amount / item.packsPerBox);
+      item.quantityBoxes -= boxesUsed;
+      const leftover = amount % item.packsPerBox;
+      item.manualPacks -= leftover;
+    } else {
+      item.manualPacks -= amount - packsFromBoxes;
+      item.quantityBoxes = 0;
+    }
+  } else {
+    item.quantityPacks -= amount;
+  }
+
+  if ((item.type === "BOX" && item.quantityBoxes <= 0 && item.manualPacks <= 0) ||
+      (item.type === "PACK" && item.quantityPacks <= 0)) {
+    inventoryData = inventoryData.filter(i => i.id !== id);
+  }
+
   saveData();
-
   renderInventory();
-  if (typeof renderExpenses === "function") renderExpenses();
-  if (typeof renderSummary === "function") renderSummary();
+}
+
+// ===============================
+// SELL BOX
+// ===============================
+
+function sellBox(id) {
+  const item = inventoryData.find(i => i.id === id);
+  if (!item || item.type !== "BOX") return;
+
+  if (item.quantityBoxes <= 0) {
+    alert("No boxes left.");
+    return;
+  }
+
+  const profit = item.sellPriceBox - item.buyPriceBox;
+
+  salesData.push({
+    id: Date.now(),
+    name: item.name,
+    type: "BOX",
+    quantity: 1,
+    profit,
+    date: new Date().toISOString().split("T")[0]
+  });
+
+  item.quantityBoxes -= 1;
+
+  if (item.quantityBoxes <= 0 && item.manualPacks <= 0) {
+    inventoryData = inventoryData.filter(i => i.id !== id);
+  }
+
+  saveData();
+  renderInventory();
 }
