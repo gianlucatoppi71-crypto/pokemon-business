@@ -30,6 +30,7 @@ function recordSale(item, type, quantitySold) {
 
   const saleEntry = {
     id: Date.now(),
+    inventoryId: item.id || null, // link back to inventory item if needed
     name: item.name,
     image: item.image,
     category: item.category,
@@ -70,9 +71,6 @@ function sellBox(id) {
 
   // Reduce inventory
   item.quantityBoxes = (item.quantityBoxes || 0) - 1;
-
-  // If you want boxes to contain packs, you can adjust manualPacks here if needed
-  // For now we leave manualPacks unchanged when selling a box
 
   // Remove item if empty
   if ((item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) {
@@ -145,6 +143,75 @@ function sellPack(id) {
 }
 
 // ===============================
+// SALES ACTIONS: DELETE / COPY / EDIT / UNDO
+// ===============================
+
+function deleteSale(id) {
+  loadData();
+  salesData = salesData.filter(sale => sale.id !== id);
+  saveData();
+  renderSalesInventory();
+}
+
+function copySale(id) {
+  loadData();
+  const sale = salesData.find(s => s.id === id);
+  if (!sale) return;
+
+  const copy = { ...sale, id: Date.now(), date: new Date().toISOString() };
+  salesData.push(copy);
+  saveData();
+  renderSalesInventory();
+}
+
+function editSale(id) {
+  loadData();
+  const sale = salesData.find(s => s.id === id);
+  if (!sale) return;
+
+  const newQty = prompt("New quantity sold:", sale.quantitySold || 0);
+  if (!newQty || isNaN(newQty)) return;
+
+  const qty = parseInt(newQty);
+
+  // Recalculate profit based on new quantity
+  sale.quantitySold = qty;
+  sale.totalProfit = (sale.profitPerUnit || 0) * qty;
+
+  saveData();
+  renderSalesInventory();
+}
+
+function undoSale(id) {
+  loadData();
+  const sale = salesData.find(s => s.id === id);
+  if (!sale) return;
+
+  // Try to restore inventory if linked
+  if (sale.inventoryId) {
+    const item = inventoryData.find(i => i.id === sale.inventoryId);
+    if (item) {
+      if (sale.type === "BOX") {
+        item.quantityBoxes = (item.quantityBoxes || 0) + (sale.quantitySold || 0);
+      } else if (sale.type === "PACK") {
+        if (item.type === "BOX") {
+          item.manualPacks = (item.manualPacks || 0) + (sale.quantitySold || 0);
+        } else if (item.type === "PACK") {
+          item.quantityPacks = (item.quantityPacks || 0) + (sale.quantitySold || 0);
+        }
+      }
+    }
+  }
+
+  // Remove sale
+  salesData = salesData.filter(s => s.id !== id);
+
+  saveData();
+  renderSalesInventory();
+  renderInventory();
+}
+
+// ===============================
 // RENDER SALES PAGE
 // ===============================
 
@@ -191,6 +258,13 @@ function renderSalesInventory() {
       <div class="sale-meta">
         <strong>Quantity sold:</strong> ${sale.quantitySold || 0}<br>
         <strong>Date:</strong> ${sale.date ? new Date(sale.date).toLocaleString() : "—"}
+      </div>
+
+      <div class="sale-actions" style="margin-top:10px;">
+        <button onclick="editSale(${sale.id})">Edit</button>
+        <button onclick="copySale(${sale.id})">Copy</button>
+        <button onclick="deleteSale(${sale.id})">Delete</button>
+        <button onclick="undoSale(${sale.id})">Undo</button>
       </div>
     `;
 
