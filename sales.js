@@ -1,273 +1,204 @@
 // ===============================
-// SALES PAGE LOGIC (BOX + PACK SYSTEM, NEW SYSTEM)
-// ===============================
-// Uses global salesData, inventoryData, loadData(), saveData() from data.js
-// Do NOT redeclare salesData or inventoryData here.
-
-// ===============================
-// RECORD SALE (BOX or PACK)
+// SALES SYSTEM (Unified with inventory.js + data.js)
 // ===============================
 
-function recordSale(item, type, quantitySold) {
-  const date = new Date().toISOString();
+// RECORD SALE
+function recordSale(item, type) {
+  loadData();
 
-  let buyPrice = 0;
-  let sellPrice = 0;
+  const now = new Date();
+  const dateString = now.toLocaleString("en-GB");
+
+  let profitPerUnit = 0;
+  let totalProfit = 0;
 
   if (type === "BOX") {
-    buyPrice = item.buyPriceBox || 0;
-    sellPrice = item.sellPriceBox || 0;
-  } else {
-    buyPrice = item.type === "BOX"
-      ? (item.packsPerBox > 0 ? (item.buyPriceBox || 0) / item.packsPerBox : 0)
-      : (item.buyPricePack || 0);
-
-    sellPrice = item.sellPricePack || 0;
+    profitPerUnit = (item.sellPriceBox || 0) - (item.buyPriceBox || 0);
+    totalProfit = profitPerUnit;
   }
 
-  const profitPerUnit = sellPrice - buyPrice;
-  const totalProfit = profitPerUnit * quantitySold;
+  if (type === "PACK") {
+    profitPerUnit = (item.sellPricePack || 0) - ((item.buyPriceBox || 0) / (item.packsPerBox || 1));
+    totalProfit = profitPerUnit;
+  }
 
-  const saleEntry = {
+  const sale = {
     id: Date.now(),
-    inventoryId: item.id || null, // link back to inventory item if needed
+    inventoryId: item.id,
     name: item.name,
-    image: item.image,
-    category: item.category,
-    supplier: item.supplier,
-    notes: item.notes || "—",
-    date,
-    type,
-    quantitySold,
-    buyPrice,
-    sellPrice,
+    type: type,
+    category: item.category || "",
+    supplier: item.supplier || "",
+    buyPrice: type === "BOX" ? item.buyPriceBox : item.buyPriceBox / item.packsPerBox,
+    sellPrice: type === "BOX" ? item.sellPriceBox : item.sellPricePack,
     marketPrice: item.marketPrice || 0,
     profitPerUnit,
-    totalProfit
+    totalProfit,
+    quantitySold: 1,
+    date: dateString,
+    image: item.image || "",
+    notes: item.notes || ""
   };
 
-  salesData.push(saleEntry);
+  salesData.push(sale);
   saveData();
-  renderSalesInventory();
+  renderSales();
 }
 
 // ===============================
 // SELL BOX
 // ===============================
-
 function sellBox(id) {
   loadData();
 
   const item = inventoryData.find(i => i.id === id);
-  if (!item || item.type !== "BOX") return;
+  if (!item) return;
 
   if ((item.quantityBoxes || 0) <= 0) {
-    alert("No boxes left.");
+    alert("No boxes left in stock.");
     return;
   }
 
-  // Record sale first
-  recordSale(item, "BOX", 1);
-
-  // Reduce inventory
-  item.quantityBoxes = (item.quantityBoxes || 0) - 1;
-
-  // Remove item if empty
-  if ((item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
-  }
+  // Reduce box count
+  item.quantityBoxes -= 1;
 
   saveData();
+  recordSale(item, "BOX");
   renderInventory();
 }
 
 // ===============================
-// SELL PACK
+// SELL PACK (Option A: reduce packs inside box first)
 // ===============================
-
 function sellPack(id) {
   loadData();
 
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  const qty = prompt("How many packs do you want to sell?");
-  if (!qty || isNaN(qty)) return;
+  // Total packs inside boxes
+  let packsInBoxes = (item.quantityBoxes || 0) * (item.packsPerBox || 0);
 
-  const amount = parseInt(qty);
+  // Loose packs
+  let loosePacks = item.manualPacks || 0;
 
-  let totalPacks = item.type === "BOX"
-    ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
-    : (item.quantityPacks || 0);
+  // Total packs
+  let totalPacks = packsInBoxes + loosePacks;
 
-  if (amount > totalPacks) {
-    alert("Not enough packs available.");
+  if (totalPacks <= 0) {
+    alert("No packs left in stock.");
     return;
   }
 
-  // BOX PRODUCT PACK REDUCTION
-  if (item.type === "BOX") {
-    let packsFromBoxes = (item.quantityBoxes || 0) * (item.packsPerBox || 0);
+  // OPTION A: Reduce packs inside boxes first
+  if (packsInBoxes > 0) {
+    packsInBoxes -= 1;
 
-    if (amount <= packsFromBoxes) {
-      const boxesUsed = Math.floor(amount / (item.packsPerBox || 1));
-      item.quantityBoxes = (item.quantityBoxes || 0) - boxesUsed;
+    // Recalculate boxes + leftover packs inside last box
+    const fullBoxes = Math.floor(packsInBoxes / item.packsPerBox);
+    const leftoverPacks = packsInBoxes % item.packsPerBox;
 
-      const leftover = amount % (item.packsPerBox || 1);
-      item.manualPacks = (item.manualPacks || 0) - leftover;
-    } else {
-      item.manualPacks = (item.manualPacks || 0) - (amount - packsFromBoxes);
-      item.quantityBoxes = 0;
-    }
-
-    if (item.manualPacks < 0) item.manualPacks = 0;
-  }
-
-  // PACK PRODUCT REDUCTION
-  if (item.type === "PACK") {
-    item.quantityPacks = (item.quantityPacks || 0) - amount;
-    if (item.quantityPacks < 0) item.quantityPacks = 0;
-  }
-
-  // Record sale
-  recordSale(item, "PACK", amount);
-
-  // Remove item if empty
-  if ((item.type === "BOX" && (item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) ||
-      (item.type === "PACK" && (item.quantityPacks || 0) <= 0)) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
+    item.quantityBoxes = fullBoxes;
+    item.manualPacks = leftoverPacks + loosePacks;
+  } else {
+    // If no packs in boxes, reduce loose packs
+    item.manualPacks -= 1;
   }
 
   saveData();
-  renderInventory();
-}
-
-// ===============================
-// SALES ACTIONS: DELETE / COPY / EDIT / UNDO
-// ===============================
-
-function deleteSale(id) {
-  loadData();
-  salesData = salesData.filter(sale => sale.id !== id);
-  saveData();
-  renderSalesInventory();
-}
-
-function copySale(id) {
-  loadData();
-  const sale = salesData.find(s => s.id === id);
-  if (!sale) return;
-
-  const copy = { ...sale, id: Date.now(), date: new Date().toISOString() };
-  salesData.push(copy);
-  saveData();
-  renderSalesInventory();
-}
-
-function editSale(id) {
-  loadData();
-  const sale = salesData.find(s => s.id === id);
-  if (!sale) return;
-
-  const newQty = prompt("New quantity sold:", sale.quantitySold || 0);
-  if (!newQty || isNaN(newQty)) return;
-
-  const qty = parseInt(newQty);
-
-  // Recalculate profit based on new quantity
-  sale.quantitySold = qty;
-  sale.totalProfit = (sale.profitPerUnit || 0) * qty;
-
-  saveData();
-  renderSalesInventory();
-}
-
-function undoSale(id) {
-  loadData();
-  const sale = salesData.find(s => s.id === id);
-  if (!sale) return;
-
-  // Try to restore inventory if linked
-  if (sale.inventoryId) {
-    const item = inventoryData.find(i => i.id === sale.inventoryId);
-    if (item) {
-      if (sale.type === "BOX") {
-        item.quantityBoxes = (item.quantityBoxes || 0) + (sale.quantitySold || 0);
-      } else if (sale.type === "PACK") {
-        if (item.type === "BOX") {
-          item.manualPacks = (item.manualPacks || 0) + (sale.quantitySold || 0);
-        } else if (item.type === "PACK") {
-          item.quantityPacks = (item.quantityPacks || 0) + (sale.quantitySold || 0);
-        }
-      }
-    }
-  }
-
-  // Remove sale
-  salesData = salesData.filter(s => s.id !== id);
-
-  saveData();
-  renderSalesInventory();
+  recordSale(item, "PACK");
   renderInventory();
 }
 
 // ===============================
 // RENDER SALES PAGE
 // ===============================
-
-function renderSalesInventory() {
+function renderSales() {
   loadData();
 
-  const list = document.getElementById('salesList');
-  if (!list) return;
+  const container = document.getElementById("salesList");
+  if (!container) return;
 
-  list.innerHTML = '';
+  container.innerHTML = "";
 
   if (!salesData || salesData.length === 0) {
-    list.innerHTML = '<p>No sales yet.</p>';
+    container.innerHTML = "<p>No sales recorded yet.</p>";
     return;
   }
 
   salesData.forEach((sale) => {
-    const div = document.createElement('div');
-    div.className = 'sale-card';
+    const card = document.createElement("div");
+    card.className = "sales-card";
 
-    div.innerHTML = `
+    card.innerHTML = `
       <h3>${sale.name} (${sale.type})</h3>
 
       <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
            style="width:120px; border:1px solid #333; margin:10px 0;">
 
-      <div class="sale-meta">
-        <strong>Category:</strong> ${sale.category || "—"}<br>
-        <strong>Supplier:</strong> ${sale.supplier || "—"}<br>
-        <strong>Notes:</strong> ${sale.notes || "—"}
-      </div>
+      <p><strong>Category:</strong> ${sale.category}</p>
+      <p><strong>Supplier:</strong> ${sale.supplier}</p>
+      <p><strong>Notes:</strong> ${sale.notes || "—"}</p>
 
-      <div class="sale-prices">
-        <strong>Buy price:</strong> £${(sale.buyPrice || 0).toFixed(2)}<br>
-        <strong>Sell price:</strong> £${(sale.sellPrice || 0).toFixed(2)}<br>
-        <strong>Market price:</strong> £${(sale.marketPrice || 0).toFixed(2)}
-      </div>
+      <p><strong>Buy price:</strong> £${sale.buyPrice.toFixed(2)}</p>
+      <p><strong>Sell price:</strong> £${sale.sellPrice.toFixed(2)}</p>
+      <p><strong>Market price:</strong> £${sale.marketPrice.toFixed(2)}</p>
 
-      <div class="sale-profit">
-        <strong>Profit per unit:</strong> £${(sale.profitPerUnit || 0).toFixed(2)}<br>
-        <strong>Total profit:</strong> £${(sale.totalProfit || 0).toFixed(2)}
-      </div>
+      <p><strong>Profit per unit:</strong> £${sale.profitPerUnit.toFixed(2)}</p>
+      <p><strong>Total profit:</strong> £${sale.totalProfit.toFixed(2)}</p>
 
-      <div class="sale-meta">
-        <strong>Quantity sold:</strong> ${sale.quantitySold || 0}<br>
-        <strong>Date:</strong> ${sale.date ? new Date(sale.date).toLocaleString() : "—"}
-      </div>
+      <p><strong>Quantity sold:</strong> ${sale.quantitySold}</p>
+      <p><strong>Date:</strong> ${sale.date}</p>
 
-      <div class="sale-actions" style="margin-top:10px;">
-        <button onclick="editSale(${sale.id})">Edit</button>
-        <button onclick="copySale(${sale.id})">Copy</button>
-        <button onclick="deleteSale(${sale.id})">Delete</button>
-        <button onclick="undoSale(${sale.id})">Undo</button>
-      </div>
+      <button onclick="undoSale(${sale.id})">Undo</button>
+      <button onclick="deleteSale(${sale.id})">Delete</button>
     `;
 
-    list.appendChild(div);
+    container.appendChild(card);
   });
 }
+
+// ===============================
+// DELETE SALE
+// ===============================
+function deleteSale(id) {
+  loadData();
+  salesData = salesData.filter(s => s.id !== id);
+  saveData();
+  renderSales();
+}
+
+// ===============================
+// UNDO SALE (restore stock)
+// ===============================
+function undoSale(id) {
+  loadData();
+
+  const sale = salesData.find(s => s.id === id);
+  if (!sale) return;
+
+  const item = inventoryData.find(i => i.id === sale.inventoryId);
+  if (!item) return;
+
+  if (sale.type === "BOX") {
+    item.quantityBoxes += 1;
+  }
+
+  if (sale.type === "PACK") {
+    item.manualPacks += 1;
+  }
+
+  salesData = salesData.filter(s => s.id !== id);
+
+  saveData();
+  renderSales();
+  renderInventory();
+}
+
+// ===============================
+// INITIAL LOAD
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
+  renderSales();
+});
+
