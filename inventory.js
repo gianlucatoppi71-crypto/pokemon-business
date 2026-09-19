@@ -1,9 +1,8 @@
 // ===============================
-// INVENTORY SYSTEM (Unified with sales.js)
-// Uses inventoryData, salesData, loadData(), saveData() from data.js
+// INVENTORY SYSTEM
 // ===============================
 
-let editMode = null; // store ID of item being edited
+let editMode = null;
 
 // ===============================
 // RENDER INVENTORY
@@ -24,8 +23,8 @@ function renderInventory() {
   inventoryData.forEach((item) => {
     const totalPacks =
       item.type === "BOX"
-        ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
-        : (item.quantityPacks || 0);
+        ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
+        : item.quantityPacks;
 
     const card = document.createElement('div');
     card.className = 'inventory-card';
@@ -39,17 +38,14 @@ function renderInventory() {
       <p><strong>Category:</strong> ${item.category || '—'}</p>
       <p><strong>Supplier:</strong> ${item.supplier || '—'}</p>
 
-      <p><strong>Buy price per BOX:</strong> £${(item.buyPriceBox || 0).toFixed(2)}</p>
-      <p><strong>Sell price per BOX:</strong> £${(item.sellPriceBox || 0).toFixed(2)}</p>
-      <p><strong>Sell price per PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</p>
+      <p><strong>Buy price BOX:</strong> £${(item.buyPriceBox || 0).toFixed(2)}</p>
+      <p><strong>Sell price BOX:</strong> £${(item.sellPriceBox || 0).toFixed(2)}</p>
+      <p><strong>Sell price PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</p>
 
       <p><strong>Packs per box:</strong> ${item.packsPerBox || 0}</p>
-      <p><strong>Quantity of BOXES:</strong> ${item.quantityBoxes || 0}</p>
+      <p><strong>Boxes:</strong> ${item.quantityBoxes || 0}</p>
       <p><strong>Loose packs:</strong> ${item.manualPacks || 0}</p>
       <p><strong>Total packs:</strong> ${totalPacks}</p>
-
-      <p><strong>Market price (UK):</strong> £${(item.marketPrice || 0).toFixed(2)}</p>
-      <p><strong>Notes:</strong> ${item.notes || '—'}</p>
 
       <button onclick="sellBox(${item.id})">Sell BOX</button>
       <button onclick="sellPack(${item.id})">Sell PACK</button>
@@ -63,7 +59,7 @@ function renderInventory() {
 }
 
 // ===============================
-// ADD OR UPDATE INVENTORY ITEM
+// ADD / UPDATE ITEM
 // ===============================
 function addInventoryItem(event) {
   event.preventDefault();
@@ -91,7 +87,6 @@ function addInventoryItem(event) {
     quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value) || 0;
     manualPacks = parseInt(document.getElementById('invManualPacks').value) || 0;
 
-    // AUTO-CALCULATE PACK PRICE
     sellPricePack = packsPerBox > 0 ? sellPriceBox / packsPerBox : 0;
   }
 
@@ -113,7 +108,6 @@ function addInventoryItem(event) {
     buyPriceBox,
     sellPriceBox,
     sellPricePack,
-    buyPricePack: 0,
     packsPerBox,
     quantityBoxes,
     manualPacks,
@@ -123,7 +117,6 @@ function addInventoryItem(event) {
     notes
   };
 
-  // UPDATE MODE
   if (editMode) {
     inventoryData = inventoryData.filter(i => i.id !== editMode);
     editMode = null;
@@ -149,7 +142,20 @@ function editItem(id) {
   editMode = id;
   document.getElementById('addBtn').textContent = "Update product";
 
-  document.getElementById('invType').value = item.type;
+  const typeSelect = document.getElementById('invType');
+  const boxFields = document.getElementById('boxFields');
+  const packFields = document.getElementById('packFields');
+
+  typeSelect.value = item.type;
+
+  if (item.type === "BOX") {
+    boxFields.style.display = "block";
+    packFields.style.display = "none";
+  } else {
+    boxFields.style.display = "none";
+    packFields.style.display = "block";
+  }
+
   document.getElementById('invName').value = item.name;
   document.getElementById('invCategory').value = item.category || '';
   document.getElementById('invSupplier').value = item.supplier || '';
