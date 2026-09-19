@@ -7,6 +7,8 @@ body {
     font-family: Arial, sans-serif;
     background: #111;
     color: #eee;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
 .app {
@@ -22,7 +24,8 @@ body {
     width: 260px;
     background: #1a1a1a;
     padding: 20px;
-    box-shadow: 3px 0 10px rgba(0,0,0,0.4);
+    box-shadow: 3px 0 12px rgba(0,0,0,0.5);
+    border-right: 1px solid #333;
 }
 
 .sidebar h2 {
@@ -30,23 +33,25 @@ body {
     color: #ffd700;
     font-size: 24px;
     text-align: center;
+    letter-spacing: 1px;
 }
 
 .sidebar nav button {
     width: 100%;
     padding: 12px;
     margin: 6px 0;
-    background: #333;
+    background: linear-gradient(180deg, #333, #2a2a2a);
     color: #eee;
     border: none;
     border-radius: 6px;
     font-size: 15px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.25s ease;
 }
 
 .sidebar nav button:hover {
     background: #444;
+    transform: translateY(-1px);
 }
 
 .tax-info {
@@ -54,6 +59,7 @@ body {
     padding: 10px;
     background: #222;
     border-radius: 6px;
+    border: 1px solid #333;
 }
 
 /* ============================
@@ -70,6 +76,7 @@ body {
     margin-top: 0;
     font-size: 28px;
     color: #ffd700;
+    letter-spacing: 0.5px;
 }
 
 /* ============================
@@ -84,6 +91,8 @@ body {
     padding: 20px;
     border-radius: 10px;
     margin-bottom: 20px;
+    border: 1px solid #333;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
 
 #inventoryForm input,
@@ -96,6 +105,14 @@ body {
     color: #eee;
     border: 1px solid #333;
     border-radius: 6px;
+    transition: 0.25s ease;
+}
+
+#inventoryForm input:focus,
+#inventoryForm select:focus,
+#inventoryForm textarea:focus {
+    border-color: #ffd700;
+    box-shadow: 0 0 6px rgba(255,215,0,0.4);
 }
 
 #inventoryForm button {
@@ -108,11 +125,13 @@ body {
     font-size: 16px;
     cursor: pointer;
     margin-top: 10px;
-    transition: 0.2s;
+    transition: 0.25s ease;
+    font-weight: bold;
 }
 
 #inventoryForm button:hover {
     background: #e6c200;
+    transform: translateY(-1px);
 }
 
 /* ============================
@@ -130,13 +149,20 @@ body {
     padding: 20px;
     border-radius: 10px;
     border: 1px solid #333;
-    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    box-shadow: 0 0 14px rgba(0,0,0,0.45);
+    transition: 0.25s ease;
+}
+
+.inventory-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 18px rgba(0,0,0,0.55);
 }
 
 .inventory-card h3 {
     margin-top: 0;
     color: #ffd700;
     font-size: 22px;
+    letter-spacing: 0.5px;
 }
 
 .inventory-card p {
@@ -154,11 +180,12 @@ body {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.25s ease;
 }
 
 .inventory-card button:hover {
     background: #444;
+    transform: translateY(-1px);
 }
 
 /* ============================
@@ -172,6 +199,10 @@ body {
 ::-webkit-scrollbar-thumb {
     background: #333;
     border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #444;
 }
 
 ::-webkit-scrollbar-track {
