@@ -89,7 +89,8 @@
         <input type="text" id="invImage" placeholder="Image URL (optional)">
         <textarea id="invNotes" placeholder="Notes (optional)"></textarea>
 
-        <button type="submit">Add to inventory</button>
+        <!-- ⭐ FIXED BUTTON ⭐ -->
+        <button type="submit" id="addBtn">Add to inventory</button>
       </form>
 
       <div id="inventoryList" class="inventory-container"></div>
@@ -174,7 +175,6 @@
   window.onload = () => {
     showPage('inventory');
     renderInventory();
-    renderSalesInventory();
     renderSummary();
     renderTaxSummary();
   };
