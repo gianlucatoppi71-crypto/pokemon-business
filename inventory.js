@@ -1,9 +1,13 @@
-// =========================
-// INVENTORY SYSTEM (BOX + PACK, LINKED TO SALES)
-// Uses inventoryData, loadData(), saveData() from data.js
-// =========================
+// ===============================
+// INVENTORY SYSTEM (Unified with sales.js)
+// Uses inventoryData, salesData, loadData(), saveData() from data.js
+// ===============================
 
-// RENDER INVENTORY LIST
+let editMode = null; // store ID of item being edited
+
+// ===============================
+// RENDER INVENTORY
+// ===============================
 function renderInventory() {
   loadData();
 
@@ -18,13 +22,13 @@ function renderInventory() {
   }
 
   inventoryData.forEach((item) => {
+    const totalPacks =
+      item.type === "BOX"
+        ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
+        : (item.quantityPacks || 0);
+
     const card = document.createElement('div');
     card.className = 'inventory-card';
-
-    const totalPacks =
-      (item.type === "BOX"
-        ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
-        : (item.quantityPacks || 0));
 
     card.innerHTML = `
       <h3>${item.name}</h3>
@@ -58,10 +62,11 @@ function renderInventory() {
   });
 }
 
-// ADD NEW INVENTORY ITEM
+// ===============================
+// ADD OR UPDATE INVENTORY ITEM
+// ===============================
 function addInventoryItem(event) {
   event.preventDefault();
-
   loadData();
 
   const type = document.getElementById('invType').value;
@@ -82,14 +87,12 @@ function addInventoryItem(event) {
   if (type === "BOX") {
     buyPriceBox = parseFloat(document.getElementById('invBuyPriceBox').value) || 0;
     sellPriceBox = parseFloat(document.getElementById('invSellPriceBox').value) || 0;
-    sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
     packsPerBox = parseInt(document.getElementById('invPacksPerBox').value) || 0;
     quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value) || 0;
     manualPacks = parseInt(document.getElementById('invManualPacks').value) || 0;
 
-    if (!sellPricePack && sellPriceBox && packsPerBox) {
-      sellPricePack = sellPriceBox / packsPerBox;
-    }
+    // AUTO-CALCULATE PACK PRICE
+    sellPricePack = packsPerBox > 0 ? sellPriceBox / packsPerBox : 0;
   }
 
   if (type === "PACK") {
@@ -102,7 +105,7 @@ function addInventoryItem(event) {
   const notes = document.getElementById('invNotes').value.trim();
 
   const item = {
-    id: Date.now(),
+    id: editMode ? editMode : Date.now(),
     type,
     name,
     category,
@@ -110,7 +113,7 @@ function addInventoryItem(event) {
     buyPriceBox,
     sellPriceBox,
     sellPricePack,
-    buyPricePack: 0, // optional if you ever buy loose packs
+    buyPricePack: 0,
     packsPerBox,
     quantityBoxes,
     manualPacks,
@@ -120,6 +123,13 @@ function addInventoryItem(event) {
     notes
   };
 
+  // UPDATE MODE
+  if (editMode) {
+    inventoryData = inventoryData.filter(i => i.id !== editMode);
+    editMode = null;
+    document.getElementById('addBtn').textContent = "Add to inventory";
+  }
+
   inventoryData.push(item);
   saveData();
   renderInventory();
@@ -127,12 +137,17 @@ function addInventoryItem(event) {
   document.getElementById('inventoryForm').reset();
 }
 
+// ===============================
 // EDIT ITEM
+// ===============================
 function editItem(id) {
   loadData();
 
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
+
+  editMode = id;
+  document.getElementById('addBtn').textContent = "Update product";
 
   document.getElementById('invType').value = item.type;
   document.getElementById('invName').value = item.name;
@@ -142,7 +157,6 @@ function editItem(id) {
   if (item.type === "BOX") {
     document.getElementById('invBuyPriceBox').value = item.buyPriceBox || 0;
     document.getElementById('invSellPriceBox').value = item.sellPriceBox || 0;
-    document.getElementById('invSellPricePack').value = item.sellPricePack || 0;
     document.getElementById('invPacksPerBox').value = item.packsPerBox || 0;
     document.getElementById('invQuantityBoxes').value = item.quantityBoxes || 0;
     document.getElementById('invManualPacks').value = item.manualPacks || 0;
@@ -156,14 +170,11 @@ function editItem(id) {
   document.getElementById('invMarketPrice').value = item.marketPrice || 0;
   document.getElementById('invImage').value = item.image || '';
   document.getElementById('invNotes').value = item.notes || '';
-
-  // remove old item; when you submit, it will be re‑added with new values
-  inventoryData = inventoryData.filter(i => i.id !== id);
-  saveData();
-  renderInventory();
 }
 
+// ===============================
 // COPY ITEM
+// ===============================
 function copyItem(id) {
   loadData();
 
@@ -176,7 +187,9 @@ function copyItem(id) {
   renderInventory();
 }
 
+// ===============================
 // DELETE ITEM
+// ===============================
 function deleteItem(id) {
   loadData();
 
@@ -185,7 +198,9 @@ function deleteItem(id) {
   renderInventory();
 }
 
-// INITIAL RENDER
+// ===============================
+// INITIAL LOAD
+// ===============================
 document.addEventListener('DOMContentLoaded', () => {
   renderInventory();
 });
