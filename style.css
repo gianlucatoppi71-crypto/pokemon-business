@@ -281,3 +281,33 @@ body {
     color: #e6c200;            /* slightly brighter gold */
     text-decoration: underline;
 }
+/* ============================
+   SALES DASHBOARD
+============================ */
+
+#salesDashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.dashboard-card {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    text-align: center;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
+
+.dashboard-card h3 {
+    color: #ffd700;
+    margin-bottom: 10px;
+}
+
+.dashboard-card p {
+    font-size: 22px;
+    color: #eee;
+    font-weight: bold;
+}
