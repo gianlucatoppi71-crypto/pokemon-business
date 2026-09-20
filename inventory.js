@@ -112,6 +112,7 @@ function addInventoryItem(event) {
     quantityBoxes,
     manualPacks,
     quantityPacks,
+    openedBoxes: 0,
     marketPrice,
     image,
     notes
