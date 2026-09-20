@@ -136,6 +136,7 @@ function renderSales() {
 
   if (!salesData || salesData.length === 0) {
     container.innerHTML = "<p>No sales yet.</p>";
+    renderSalesDashboard();
     return;
   }
 
@@ -160,6 +161,51 @@ function renderSales() {
 
     container.appendChild(card);
   });
+
+  renderSalesDashboard();
+}
+
+// ===============================
+// SALES DASHBOARD
+// ===============================
+function renderSalesDashboard() {
+  loadData();
+
+  let totalSales = salesData.length;
+  let totalRevenue = 0;
+  let totalProfit = 0;
+  let totalExpenses = 0;
+
+  salesData.forEach(sale => {
+    totalRevenue += sale.sellPrice || 0;
+    totalProfit += sale.totalProfit || 0;
+    totalExpenses += sale.buyPrice || 0;
+  });
+
+  const dashboard = document.getElementById("salesDashboard");
+  if (!dashboard) return;
+
+  dashboard.innerHTML = `
+    <div class="dashboard-card">
+      <h3>Total Sales</h3>
+      <p>${totalSales}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Revenue</h3>
+      <p>£${totalRevenue.toFixed(2)}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Expenses</h3>
+      <p>£${totalExpenses.toFixed(2)}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Profit</h3>
+      <p>£${totalProfit.toFixed(2)}</p>
+    </div>
+  `;
 }
 
 // ===============================
