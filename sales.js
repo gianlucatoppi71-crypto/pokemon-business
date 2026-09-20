@@ -68,7 +68,7 @@ function sellBox(id) {
 }
 
 // ===============================
-// SELL PACK (loose first → open box → reduce box only when opened box is empty)
+// SELL PACK
 // ===============================
 function sellPack(id) {
   loadData();
@@ -87,17 +87,13 @@ function sellPack(id) {
     return;
   }
 
-  // 1) reduce loose packs first
   if (loosePacks > 0) {
     loosePacks -= 1;
   } else {
-    // 2) if no loose packs, open a box
     if (openedBoxes > 0) {
-      // opened box already exists → take from it
       loosePacks = packsPerBox - 1;
       openedBoxes -= 1;
     } else {
-      // open a new box
       if (boxes <= 0) {
         alert("No packs left.");
         return;
@@ -108,10 +104,8 @@ function sellPack(id) {
     }
   }
 
-  // 3) if opened box is fully consumed → reduce box count
   if (openedBoxes > 0 && loosePacks === 0) {
     openedBoxes -= 1;
-    // box count already reduced when opened
   }
 
   item.quantityBoxes = boxes;
@@ -137,6 +131,7 @@ function renderSales() {
   if (!salesData || salesData.length === 0) {
     container.innerHTML = "<p>No sales yet.</p>";
     renderSalesDashboard();
+    renderSalesChart();
     return;
   }
 
@@ -163,6 +158,7 @@ function renderSales() {
   });
 
   renderSalesDashboard();
+  renderSalesChart();
 }
 
 // ===============================
@@ -206,6 +202,53 @@ function renderSalesDashboard() {
       <p>£${totalProfit.toFixed(2)}</p>
     </div>
   `;
+}
+
+// ===============================
+// SALES CHART (Revenue vs Expenses)
+// ===============================
+function renderSalesChart() {
+  loadData();
+
+  const canvas = document.getElementById('salesChart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+
+  const labels = salesData.map(s => s.date);
+  const revenue = salesData.map(s => s.sellPrice);
+  const expenses = salesData.map(s => s.buyPrice);
+
+  if (window.salesChartInstance) {
+    window.salesChartInstance.destroy();
+  }
+
+  window.salesChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Revenue (£)',
+          data: revenue,
+          borderColor: '#ffd700',
+          backgroundColor: 'rgba(255,215,0,0.2)',
+          borderWidth: 2
+        },
+        {
+          label: 'Expenses (£)',
+          data: expenses,
+          borderColor: '#ff4444',
+          backgroundColor: 'rgba(255,68,68,0.2)',
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
 }
 
 // ===============================
