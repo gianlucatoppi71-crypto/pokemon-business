@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
   <link rel="stylesheet" href="style.css?v=1002">
+
+  <!-- Chart.js for sales graph -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -37,9 +40,7 @@
     <section id="inventoryPage" class="page">
       <h1>Inventory</h1>
 
-      <!-- ⭐ FIXED FORM ⭐ -->
       <form id="inventoryForm" onsubmit="addInventoryItem(event)">
-
         <select id="invType" required>
           <option value="">Select product type</option>
           <option value="BOX">BOX</option>
@@ -89,7 +90,6 @@
         <input type="text" id="invImage" placeholder="Image URL (optional)">
         <textarea id="invNotes" placeholder="Notes (optional)"></textarea>
 
-        <!-- ⭐ FIXED BUTTON ⭐ -->
         <button type="submit" id="addBtn">Add to inventory</button>
       </form>
 
@@ -99,11 +99,17 @@
     <!-- SALES PAGE -->
     <section id="salesPage" class="page" style="display:none">
       <h1>Sales</h1>
+
+      <!-- FIXED DASHBOARD BAR -->
+      <div class="sales-dashboard-bar">
+        <div id="salesDashboard"></div>
+      </div>
+
+      <!-- Scrollable sales list -->
       <div id="salesList"></div>
 
-      <!-- SALES DASHBOARD -->
-      <h2>Sales Dashboard</h2>
-      <div id="salesDashboard"></div>
+      <!-- Right-side chart -->
+      <canvas id="salesChart" width="400" height="300"></canvas>
     </section>
 
     <!-- SUMMARY PAGE -->
@@ -192,7 +198,7 @@
     if (page === 'trades') renderTrades();
     if (page === 'portfolio') renderPortfolio();
     if (page === 'expenses') renderExpenses();
-    if (page === 'sales') renderSales(); // ensure sales + dashboard load
+    if (page === 'sales') renderSales();
   }
 
   function openCustomerPage() {
