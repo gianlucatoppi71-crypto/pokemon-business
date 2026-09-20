@@ -100,16 +100,18 @@
     <section id="salesPage" class="page" style="display:none">
       <h1>Sales</h1>
 
-      <!-- FIXED DASHBOARD BAR -->
+      <!-- FIXED DASHBOARD BAR WITH CHART INSIDE -->
       <div class="sales-dashboard-bar">
-        <div id="salesDashboard"></div>
+        <div class="sales-dashboard-layout">
+          <div id="salesDashboard"></div>
+          <div class="sales-chart-wrapper">
+            <canvas id="salesChart"></canvas>
+          </div>
+        </div>
       </div>
 
       <!-- Scrollable sales list -->
       <div id="salesList"></div>
-
-      <!-- Right-side chart -->
-      <canvas id="salesChart" width="400" height="300"></canvas>
     </section>
 
     <!-- SUMMARY PAGE -->
