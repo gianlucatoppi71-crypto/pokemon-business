@@ -267,3 +267,17 @@ body {
     background: #444;
     transform: translateY(-1px);
 }
+/* ============================
+   PORTFOLIO LINK FIX
+============================ */
+
+.portfolio-card a {
+    color: #ffd700;            /* gold like your theme */
+    text-decoration: none;     /* remove underline */
+    font-weight: bold;
+}
+
+.portfolio-card a:hover {
+    color: #e6c200;            /* slightly brighter gold */
+    text-decoration: underline;
+}
