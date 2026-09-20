@@ -339,3 +339,27 @@ body {
     text-align: center;
     box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
+/* ============================
+   SALES PAGE LAYOUT FIX
+============================ */
+
+.sales-dashboard-layout {
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+}
+
+.sales-chart-wrapper {
+    width: 350px;
+    height: 180px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
+
+#salesChart {
+    width: 100% !important;
+    height: 100% !important;
+}
