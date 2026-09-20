@@ -100,6 +100,10 @@
     <section id="salesPage" class="page" style="display:none">
       <h1>Sales</h1>
       <div id="salesList"></div>
+
+      <!-- SALES DASHBOARD -->
+      <h2>Sales Dashboard</h2>
+      <div id="salesDashboard"></div>
     </section>
 
     <!-- SUMMARY PAGE -->
@@ -188,6 +192,7 @@
     if (page === 'trades') renderTrades();
     if (page === 'portfolio') renderPortfolio();
     if (page === 'expenses') renderExpenses();
+    if (page === 'sales') renderSales(); // ensure sales + dashboard load
   }
 
   function openCustomerPage() {
