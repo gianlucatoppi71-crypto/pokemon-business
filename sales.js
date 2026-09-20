@@ -1,5 +1,5 @@
 // ===============================
-// SALES SYSTEM (Unified with inventory.js + data.js)
+// SALES SYSTEM
 // ===============================
 
 // RECORD SALE
@@ -10,30 +10,31 @@ function recordSale(item, type) {
   const dateString = now.toLocaleString("en-GB");
 
   let profitPerUnit = 0;
-  let totalProfit = 0;
 
   if (type === "BOX") {
     profitPerUnit = (item.sellPriceBox || 0) - (item.buyPriceBox || 0);
-    totalProfit = profitPerUnit;
   }
 
   if (type === "PACK") {
-    profitPerUnit = (item.sellPricePack || 0) - ((item.buyPriceBox || 0) / (item.packsPerBox || 1));
-    totalProfit = profitPerUnit;
+    profitPerUnit =
+      (item.sellPricePack || 0) -
+      ((item.buyPriceBox || 0) / (item.packsPerBox || 1));
   }
 
   const sale = {
     id: Date.now(),
     inventoryId: item.id,
     name: item.name,
-    type: type,
+    type,
     category: item.category || "",
     supplier: item.supplier || "",
-    buyPrice: type === "BOX" ? item.buyPriceBox : item.buyPriceBox / item.packsPerBox,
+    buyPrice: type === "BOX"
+      ? item.buyPriceBox
+      : item.buyPriceBox / item.packsPerBox,
     sellPrice: type === "BOX" ? item.sellPriceBox : item.sellPricePack,
     marketPrice: item.marketPrice || 0,
     profitPerUnit,
-    totalProfit,
+    totalProfit: profitPerUnit,
     quantitySold: 1,
     date: dateString,
     image: item.image || "",
@@ -54,12 +55,11 @@ function sellBox(id) {
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  if ((item.quantityBoxes || 0) <= 0) {
-    alert("No boxes left in stock.");
+  if (item.quantityBoxes <= 0) {
+    alert("No boxes left.");
     return;
   }
 
-  // Reduce box count
   item.quantityBoxes -= 1;
 
   saveData();
@@ -68,7 +68,7 @@ function sellBox(id) {
 }
 
 // ===============================
-// SELL PACK (Option A: reduce packs inside box first)
+// SELL PACK (loose first → open box → reduce box only when opened box is empty)
 // ===============================
 function sellPack(id) {
   loadData();
@@ -76,34 +76,47 @@ function sellPack(id) {
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  // Total packs inside boxes
-  let packsInBoxes = (item.quantityBoxes || 0) * (item.packsPerBox || 0);
-
-  // Loose packs
+  const packsPerBox = item.packsPerBox || 0;
+  let boxes = item.quantityBoxes || 0;
   let loosePacks = item.manualPacks || 0;
+  let openedBoxes = item.openedBoxes || 0;
 
-  // Total packs
-  let totalPacks = packsInBoxes + loosePacks;
-
+  let totalPacks = loosePacks + (openedBoxes * packsPerBox) + (boxes * packsPerBox);
   if (totalPacks <= 0) {
-    alert("No packs left in stock.");
+    alert("No packs left.");
     return;
   }
 
-  // OPTION A: Reduce packs inside boxes first
-  if (packsInBoxes > 0) {
-    packsInBoxes -= 1;
-
-    // Recalculate boxes + leftover packs inside last box
-    const fullBoxes = Math.floor(packsInBoxes / item.packsPerBox);
-    const leftoverPacks = packsInBoxes % item.packsPerBox;
-
-    item.quantityBoxes = fullBoxes;
-    item.manualPacks = leftoverPacks + loosePacks;
+  // 1) reduce loose packs first
+  if (loosePacks > 0) {
+    loosePacks -= 1;
   } else {
-    // If no packs in boxes, reduce loose packs
-    item.manualPacks -= 1;
+    // 2) if no loose packs, open a box
+    if (openedBoxes > 0) {
+      // opened box already exists → take from it
+      loosePacks = packsPerBox - 1;
+      openedBoxes -= 1;
+    } else {
+      // open a new box
+      if (boxes <= 0) {
+        alert("No packs left.");
+        return;
+      }
+      boxes -= 1;
+      openedBoxes += 1;
+      loosePacks = packsPerBox - 1;
+    }
   }
+
+  // 3) if opened box is fully consumed → reduce box count
+  if (openedBoxes > 0 && loosePacks === 0) {
+    openedBoxes -= 1;
+    // box count already reduced when opened
+  }
+
+  item.quantityBoxes = boxes;
+  item.manualPacks = loosePacks;
+  item.openedBoxes = openedBoxes;
 
   saveData();
   recordSale(item, "PACK");
@@ -111,7 +124,7 @@ function sellPack(id) {
 }
 
 // ===============================
-// RENDER SALES PAGE
+// RENDER SALES
 // ===============================
 function renderSales() {
   loadData();
@@ -122,7 +135,7 @@ function renderSales() {
   container.innerHTML = "";
 
   if (!salesData || salesData.length === 0) {
-    container.innerHTML = "<p>No sales recorded yet.</p>";
+    container.innerHTML = "<p>No sales yet.</p>";
     return;
   }
 
@@ -136,18 +149,9 @@ function renderSales() {
       <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
            style="width:120px; border:1px solid #333; margin:10px 0;">
 
-      <p><strong>Category:</strong> ${sale.category}</p>
-      <p><strong>Supplier:</strong> ${sale.supplier}</p>
-      <p><strong>Notes:</strong> ${sale.notes || "—"}</p>
-
-      <p><strong>Buy price:</strong> £${sale.buyPrice.toFixed(2)}</p>
-      <p><strong>Sell price:</strong> £${sale.sellPrice.toFixed(2)}</p>
-      <p><strong>Market price:</strong> £${sale.marketPrice.toFixed(2)}</p>
-
-      <p><strong>Profit per unit:</strong> £${sale.profitPerUnit.toFixed(2)}</p>
-      <p><strong>Total profit:</strong> £${sale.totalProfit.toFixed(2)}</p>
-
-      <p><strong>Quantity sold:</strong> ${sale.quantitySold}</p>
+      <p><strong>Buy:</strong> £${sale.buyPrice.toFixed(2)}</p>
+      <p><strong>Sell:</strong> £${sale.sellPrice.toFixed(2)}</p>
+      <p><strong>Profit:</strong> £${sale.totalProfit.toFixed(2)}</p>
       <p><strong>Date:</strong> ${sale.date}</p>
 
       <button onclick="undoSale(${sale.id})">Undo</button>
@@ -169,7 +173,7 @@ function deleteSale(id) {
 }
 
 // ===============================
-// UNDO SALE (restore stock)
+// UNDO SALE
 // ===============================
 function undoSale(id) {
   loadData();
@@ -201,4 +205,3 @@ function undoSale(id) {
 document.addEventListener("DOMContentLoaded", () => {
   renderSales();
 });
-
