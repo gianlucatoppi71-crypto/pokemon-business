@@ -132,6 +132,7 @@ function renderSales() {
     container.innerHTML = "<p>No sales yet.</p>";
     renderSalesDashboard();
     renderSalesChart();
+    renderSalesProductSummary();
     return;
   }
 
@@ -159,6 +160,7 @@ function renderSales() {
 
   renderSalesDashboard();
   renderSalesChart();
+  renderSalesProductSummary();
 }
 
 // ===============================
@@ -252,6 +254,50 @@ function renderSalesChart() {
 }
 
 // ===============================
+// PRODUCT SUMMARY PANEL
+// ===============================
+function renderSalesProductSummary() {
+  loadData();
+
+  const summaryBox = document.getElementById("salesProductSummary");
+  if (!summaryBox) return;
+
+  const grouped = {};
+
+  salesData.forEach(sale => {
+    if (!grouped[sale.name]) {
+      grouped[sale.name] = {
+        name: sale.name,
+        image: sale.image,
+        quantity: 0,
+        profit: 0,
+        types: new Set()
+      };
+    }
+
+    grouped[sale.name].quantity += sale.quantitySold;
+    grouped[sale.name].profit += sale.totalProfit;
+    grouped[sale.name].types.add(sale.type);
+  });
+
+  summaryBox.innerHTML = `<h3>Products Sold</h3>`;
+
+  Object.values(grouped).forEach(item => {
+    summaryBox.innerHTML += `
+      <div class="sales-product-item">
+        <img src="${item.image || 'Logo.png'}">
+        <div>
+          <p><strong>${item.name}</strong></p>
+          <p>Qty: ${item.quantity}</p>
+          <p>Profit: £${item.profit.toFixed(2)}</p>
+          <p>Type: ${Array.from(item.types).join(', ')}</p>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// ===============================
 // DELETE SALE
 // ===============================
 function deleteSale(id) {
@@ -288,8 +334,6 @@ function undoSale(id) {
   renderInventory();
 }
 
-// ===============================
-// INITIAL LOAD
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
   renderSales();
