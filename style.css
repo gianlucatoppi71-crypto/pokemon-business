@@ -363,3 +363,11 @@ body {
     width: 100% !important;
     height: 100% !important;
 }
+.app-logo {
+    width: 140px;
+    display: block;
+    margin: 0 auto 20px auto;
+    border-radius: 10px;
+    border: 1px solid #333;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
