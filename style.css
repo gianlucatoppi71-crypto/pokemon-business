@@ -371,3 +371,50 @@ body {
     border: 1px solid #333;
     box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
+/* ============================
+   SALES PRODUCT SUMMARY PANEL
+============================ */
+
+.sales-product-summary {
+    position: sticky;
+    top: 220px; /* stays under the chart */
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    width: 350px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
+
+.sales-product-summary h3 {
+    color: #ffd700;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.sales-product-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #222;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+}
+
+.sales-product-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #444;
+}
+
+.sales-product-item p {
+    margin: 0;
+    font-size: 14px;
+    color: #eee;
+}
