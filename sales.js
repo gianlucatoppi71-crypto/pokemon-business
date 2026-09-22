@@ -163,25 +163,93 @@ function sellPack(id) {
 }
 
 // ===============================
-// SALES DASHBOARD
+// RENDER SALES
+// ===============================
+function renderSales() {
+  loadData();
+
+  const container = document.getElementById("salesList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!salesData || salesData.length === 0) {
+    container.innerHTML = "<p>No sales yet.</p>";
+    renderSalesDashboard();
+    renderSalesChart();
+    renderSalesProductSummary();
+    renderPersonalCollectionPanel();
+    return;
+  }
+
+  salesData.forEach((sale) => {
+    const card = document.createElement("div");
+    card.className = "sales-card";
+
+    card.innerHTML = `
+      <h3>${sale.name} (${sale.type})</h3>
+
+      <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
+           style="width:120px; border:1px solid #333; margin:10px 0;">
+
+      <p><strong>Buy:</strong> £${sale.buyPrice.toFixed(2)}</p>
+      <p><strong>Sell:</strong> £${sale.sellPrice.toFixed(2)}</p>
+      <p><strong>Profit:</strong> £${sale.totalProfit.toFixed(2)}</p>
+      <p><strong>Date:</strong> ${sale.date}</p>
+
+      <button onclick="undoSale(${sale.id})">Undo</button>
+      <button onclick="deleteSale(${sale.id})">Delete</button>
+    `;
+
+    container.appendChild(card);
+  });
+
+  renderSalesDashboard();
+  renderSalesChart();
+  renderSalesProductSummary();
+  renderPersonalCollectionPanel();
+}
+
+// ===============================
+// RESTORED FULL DASHBOARD (your old version)
 // ===============================
 function renderSalesDashboard() {
   loadData();
 
+  let totalSales = salesData.length;
+  let totalRevenue = 0;
+  let totalProfit = 0;
+  let totalExpenses = 0;
+
+  salesData.forEach(sale => {
+    totalRevenue += sale.sellPrice || 0;
+    totalProfit += sale.totalProfit || 0;
+    totalExpenses += sale.buyPrice || 0;
+  });
+
   const dashboard = document.getElementById("salesDashboard");
   if (!dashboard) return;
 
-  let totalProfit = 0;
-  let totalSales = salesData.length;
-
-  salesData.forEach(sale => {
-    totalProfit += sale.totalProfit || 0;
-  });
-
   dashboard.innerHTML = `
-    <h3>Sales Dashboard</h3>
-    <p><strong>Total Sales:</strong> ${totalSales}</p>
-    <p><strong>Total Profit:</strong> £${totalProfit.toFixed(2)}</p>
+    <div class="dashboard-card">
+      <h3>Total Sales</h3>
+      <p>${totalSales}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Revenue</h3>
+      <p>£${totalRevenue.toFixed(2)}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Expenses</h3>
+      <p>£${totalExpenses.toFixed(2)}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Profit</h3>
+      <p>£${totalProfit.toFixed(2)}</p>
+    </div>
   `;
 }
 
@@ -191,22 +259,39 @@ function renderSalesDashboard() {
 function renderSalesChart() {
   loadData();
 
-  const ctx = document.getElementById("salesChart");
-  if (!ctx) return;
+  const canvas = document.getElementById('salesChart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
 
   const labels = salesData.map(s => s.date);
-  const profits = salesData.map(s => s.totalProfit);
+  const revenue = salesData.map(s => s.sellPrice);
+  const expenses = salesData.map(s => s.buyPrice);
 
-  new Chart(ctx, {
-    type: "line",
+  if (window.salesChartInstance) {
+    window.salesChartInstance.destroy();
+  }
+
+  window.salesChartInstance = new Chart(ctx, {
+    type: 'line',
     data: {
-      labels: labels,
-      datasets: [{
-        label: "Profit",
-        data: profits,
-        borderColor: "yellow",
-        backgroundColor: "rgba(255,255,0,0.2)"
-      }]
+      labels,
+      datasets: [
+        {
+          label: 'Revenue (£)',
+          data: revenue,
+          borderColor: '#ffd700',
+          backgroundColor: 'rgba(255,215,0,0.2)',
+          borderWidth: 2
+        },
+        {
+          label: 'Expenses (£)',
+          data: expenses,
+          borderColor: '#ff4444',
+          backgroundColor: 'rgba(255,68,68,0.2)',
+          borderWidth: 2
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -216,27 +301,47 @@ function renderSalesChart() {
 }
 
 // ===============================
-// PRODUCT SUMMARY
+// PRODUCT SUMMARY PANEL
 // ===============================
 function renderSalesProductSummary() {
   loadData();
 
-  const summary = document.getElementById("salesProductSummary");
-  if (!summary) return;
+  const summaryBox = document.getElementById("salesProductSummary");
+  if (!summaryBox) return;
 
-  let totalBoxes = 0;
-  let totalPacks = 0;
+  const grouped = {};
 
   salesData.forEach(sale => {
-    if (sale.type === "BOX") totalBoxes++;
-    if (sale.type === "PACK") totalPacks++;
+    if (!grouped[sale.name]) {
+      grouped[sale.name] = {
+        name: sale.name,
+        image: sale.image,
+        quantity: 0,
+        profit: 0,
+        types: new Set()
+      };
+    }
+
+    grouped[sale.name].quantity += sale.quantitySold;
+    grouped[sale.name].profit += sale.totalProfit;
+    grouped[sale.name].types.add(sale.type);
   });
 
-  summary.innerHTML = `
-    <h3>Product Summary</h3>
-    <p><strong>Boxes Sold:</strong> ${totalBoxes}</p>
-    <p><strong>Packs Sold:</strong> ${totalPacks}</p>
-  `;
+  summaryBox.innerHTML = `<h3>Products Sold</h3>`;
+
+  Object.values(grouped).forEach(item => {
+    summaryBox.innerHTML += `
+      <div class="sales-product-item">
+        <img src="${item.image || 'Logo.png'}">
+        <div>
+          <p><strong>${item.name}</strong></p>
+          <p>Qty: ${item.quantity}</p>
+          <p>Profit: £${item.profit.toFixed(2)}</p>
+          <p>Type: ${Array.from(item.types).join(', ')}</p>
+        </div>
+      </div>
+    `;
+  });
 }
 
 // ===============================
@@ -291,54 +396,6 @@ function renderPersonalCollectionPanel() {
       toggleBtn.textContent = "▶ Show Details";
     }
   };
-}
-
-// ===============================
-// RENDER SALES
-// ===============================
-function renderSales() {
-  loadData();
-
-  const container = document.getElementById("salesList");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  if (!salesData || salesData.length === 0) {
-    container.innerHTML = "<p>No sales yet.</p>";
-    renderSalesDashboard();
-    renderSalesChart();
-    renderSalesProductSummary();
-    renderPersonalCollectionPanel();
-    return;
-  }
-
-  salesData.forEach((sale) => {
-    const card = document.createElement("div");
-    card.className = "sales-card";
-
-    card.innerHTML = `
-      <h3>${sale.name} (${sale.type})</h3>
-
-      <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
-           style="width:120px; border:1px solid #333; margin:10px 0;">
-
-      <p><strong>Buy:</strong> £${sale.buyPrice.toFixed(2)}</p>
-      <p><strong>Sell:</strong> £${sale.sellPrice.toFixed(2)}</p>
-      <p><strong>Profit:</strong> £${sale.totalProfit.toFixed(2)}</p>
-      <p><strong>Date:</strong> ${sale.date}</p>
-
-      <button onclick="undoSale(${sale.id})">Undo</button>
-      <button onclick="deleteSale(${sale.id})">Delete</button>
-    `;
-
-    container.appendChild(card);
-  });
-
-  renderSalesDashboard();
-  renderSalesChart();
-  renderSalesProductSummary();
-  renderPersonalCollectionPanel();
 }
 
 // ===============================
