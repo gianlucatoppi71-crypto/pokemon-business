@@ -435,3 +435,7 @@ body {
   max-width: 220px;
   margin-top: 10px;
 }
+#salesDashboard {
+  position: relative;
+  z-index: 10;
+}
