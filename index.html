@@ -14,8 +14,7 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-   <img src="Logo.png" alt="Flux TCG Logo" class="app-logo">
-
+    <img src="Logo.png" alt="Flux TCG Logo" class="app-logo">
 
     <nav>
       <button onclick="showPage('inventory')">Inventory</button>
@@ -25,6 +24,7 @@
       <button onclick="showPage('trades')">Trades</button>
       <button onclick="showPage('portfolio')">Portfolio</button>
       <button onclick="showPage('expenses')">Expenses</button>
+      <button onclick="showPage('invoice')">Invoice</button>
       <button onclick="openCustomerPage()">Customer List</button>
     </nav>
 
@@ -108,7 +108,8 @@
           <div class="sales-chart-wrapper">
             <canvas id="salesChart"></canvas>
             <div id="salesProductSummary" class="sales-product-summary"></div>
-
+            <!-- PERSONAL COLLECTION PANEL (container only, logic in JS) -->
+            <div id="personalCollectionPanel" class="personal-collection-panel"></div>
           </div>
         </div>
       </div>
@@ -168,6 +169,14 @@
       <div id="expensesList"></div>
     </section>
 
+    <!-- INVOICE PAGE (NEW) -->
+    <section id="invoicePage" class="page" style="display:none">
+      <h1>Invoice</h1>
+
+      <!-- We will add the invoice form + list + dashboard later -->
+      <div id="invoiceContent"></div>
+    </section>
+
     <!-- CUSTOMER PAGE -->
     <section id="customerPage" class="page" style="display:none">
       <iframe id="customerFrame" src="" style="width:100%; height:100vh; border:none;"></iframe>
@@ -204,6 +213,7 @@
     if (page === 'portfolio') renderPortfolio();
     if (page === 'expenses') renderExpenses();
     if (page === 'sales') renderSales();
+    // invoice will get its own render function later (renderInvoice)
   }
 
   function openCustomerPage() {
