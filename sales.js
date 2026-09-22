@@ -176,7 +176,6 @@ function renderSales() {
   if (!salesData || salesData.length === 0) {
     container.innerHTML = "<p>No sales yet.</p>";
     renderSalesDashboard();
-    renderSalesChart();
     renderSalesProductSummary();
     renderPersonalCollectionPanel();
     return;
@@ -205,13 +204,12 @@ function renderSales() {
   });
 
   renderSalesDashboard();
-  renderSalesChart();
   renderSalesProductSummary();
   renderPersonalCollectionPanel();
 }
 
 // ===============================
-// RESTORED FULL DASHBOARD (your old version)
+// RESTORED FULL DASHBOARD
 // ===============================
 function renderSalesDashboard() {
   loadData();
@@ -251,53 +249,6 @@ function renderSalesDashboard() {
       <p>£${totalProfit.toFixed(2)}</p>
     </div>
   `;
-}
-
-// ===============================
-// SALES CHART
-// ===============================
-function renderSalesChart() {
-  loadData();
-
-  const canvas = document.getElementById('salesChart');
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-
-  const labels = salesData.map(s => s.date);
-  const revenue = salesData.map(s => s.sellPrice);
-  const expenses = salesData.map(s => s.buyPrice);
-
-  if (window.salesChartInstance) {
-    window.salesChartInstance.destroy();
-  }
-
-  window.salesChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Revenue (£)',
-          data: revenue,
-          borderColor: '#ffd700',
-          backgroundColor: 'rgba(255,215,0,0.2)',
-          borderWidth: 2
-        },
-        {
-          label: 'Expenses (£)',
-          data: expenses,
-          borderColor: '#ff4444',
-          backgroundColor: 'rgba(255,68,68,0.2)',
-          borderWidth: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false
-    }
-  });
 }
 
 // ===============================
@@ -439,3 +390,4 @@ function undoSale(id) {
 document.addEventListener("DOMContentLoaded", () => {
   renderSales();
 });
+
