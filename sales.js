@@ -163,7 +163,84 @@ function sellPack(id) {
 }
 
 // ===============================
-// RENDER PERSONAL COLLECTION PANEL
+// SALES DASHBOARD
+// ===============================
+function renderSalesDashboard() {
+  loadData();
+
+  const dashboard = document.getElementById("salesDashboard");
+  if (!dashboard) return;
+
+  let totalProfit = 0;
+  let totalSales = salesData.length;
+
+  salesData.forEach(sale => {
+    totalProfit += sale.totalProfit || 0;
+  });
+
+  dashboard.innerHTML = `
+    <h3>Sales Dashboard</h3>
+    <p><strong>Total Sales:</strong> ${totalSales}</p>
+    <p><strong>Total Profit:</strong> £${totalProfit.toFixed(2)}</p>
+  `;
+}
+
+// ===============================
+// SALES CHART
+// ===============================
+function renderSalesChart() {
+  loadData();
+
+  const ctx = document.getElementById("salesChart");
+  if (!ctx) return;
+
+  const labels = salesData.map(s => s.date);
+  const profits = salesData.map(s => s.totalProfit);
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Profit",
+        data: profits,
+        borderColor: "yellow",
+        backgroundColor: "rgba(255,255,0,0.2)"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+}
+
+// ===============================
+// PRODUCT SUMMARY
+// ===============================
+function renderSalesProductSummary() {
+  loadData();
+
+  const summary = document.getElementById("salesProductSummary");
+  if (!summary) return;
+
+  let totalBoxes = 0;
+  let totalPacks = 0;
+
+  salesData.forEach(sale => {
+    if (sale.type === "BOX") totalBoxes++;
+    if (sale.type === "PACK") totalPacks++;
+  });
+
+  summary.innerHTML = `
+    <h3>Product Summary</h3>
+    <p><strong>Boxes Sold:</strong> ${totalBoxes}</p>
+    <p><strong>Packs Sold:</strong> ${totalPacks}</p>
+  `;
+}
+
+// ===============================
+// PERSONAL COLLECTION PANEL
 // ===============================
 function renderPersonalCollectionPanel() {
   loadData();
