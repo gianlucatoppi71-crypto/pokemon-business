@@ -176,6 +176,7 @@ function renderSales() {
   if (!salesData || salesData.length === 0) {
     container.innerHTML = "<p>No sales yet.</p>";
     renderSalesDashboard();
+    renderPersonalExpensesPanel();
     renderSalesProductSummary();
     renderPersonalCollectionPanel();
     return;
@@ -204,12 +205,13 @@ function renderSales() {
   });
 
   renderSalesDashboard();
+  renderPersonalExpensesPanel();
   renderSalesProductSummary();
   renderPersonalCollectionPanel();
 }
 
 // ===============================
-// RESTORED FULL DASHBOARD
+// DASHBOARD (4 CARDS)
 // ===============================
 function renderSalesDashboard() {
   loadData();
@@ -247,6 +249,32 @@ function renderSalesDashboard() {
     <div class="dashboard-card">
       <h3>Total Profit</h3>
       <p>£${totalProfit.toFixed(2)}</p>
+    </div>
+  `;
+}
+
+// ===============================
+// NEW BIG PANEL — PERSONAL COLLECTION EXPENSES
+// ===============================
+function renderPersonalExpensesPanel() {
+  loadData();
+
+  const panel = document.getElementById("personalExpensesPanel");
+  if (!panel) return;
+
+  let totalSpent = 0;
+  let totalPacks = 0;
+
+  personalCollectionData.forEach(entry => {
+    totalSpent += entry.buyPrice || 0;
+    totalPacks += entry.packsOpened || 0;
+  });
+
+  panel.innerHTML = `
+    <div class="dashboard-card" style="width:100%; text-align:center;">
+      <h3>Personal Collection Expenses</h3>
+      <p><strong>Total Spent:</strong> £${totalSpent.toFixed(2)}</p>
+      <p><strong>Packs Opened:</strong> ${totalPacks}</p>
     </div>
   `;
 }
@@ -390,4 +418,3 @@ function undoSale(id) {
 document.addEventListener("DOMContentLoaded", () => {
   renderSales();
 });
-
