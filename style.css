@@ -418,3 +418,20 @@ body {
     font-size: 14px;
     color: #eee;
 }
+.sales-chart-wrapper {
+  height: 250px;
+  overflow: hidden;
+}
+
+#salesChart {
+  max-height: 250px;
+}
+
+.sales-product-summary {
+  max-width: 220px;
+}
+
+.personal-collection-panel {
+  max-width: 220px;
+  margin-top: 10px;
+}
