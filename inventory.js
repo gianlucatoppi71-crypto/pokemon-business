@@ -29,6 +29,8 @@ function renderInventory() {
     const card = document.createElement('div');
     card.className = 'inventory-card';
 
+    const saleTypeId = `saleType_${item.id}`;
+
     card.innerHTML = `
       <h3>${item.name}</h3>
 
@@ -46,6 +48,12 @@ function renderInventory() {
       <p><strong>Boxes:</strong> ${item.quantityBoxes || 0}</p>
       <p><strong>Loose packs:</strong> ${item.manualPacks || 0}</p>
       <p><strong>Total packs:</strong> ${totalPacks}</p>
+
+      <label><strong>Sale Type:</strong></label>
+      <select id="${saleTypeId}" class="sale-type-dropdown">
+        <option value="business">Sell to Customer</option>
+        <option value="personal">Add to Personal Collection</option>
+      </select>
 
       <button onclick="sellBox(${item.id})">Sell BOX</button>
       <button onclick="sellPack(${item.id})">Sell PACK</button>
