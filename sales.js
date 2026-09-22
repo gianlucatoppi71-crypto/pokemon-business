@@ -2,11 +2,6 @@
 // SALES SYSTEM
 // ===============================
 
-// PERSONAL COLLECTION DATA (loaded/saved in data.js)
-if (!personalCollectionData) {
-  var personalCollectionData = [];
-}
-
 // RECORD PERSONAL COLLECTION
 function recordPersonalCollection(item, type) {
   loadData();
