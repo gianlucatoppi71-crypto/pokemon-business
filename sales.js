@@ -211,7 +211,7 @@ function renderSales() {
 }
 
 // ===============================
-// DASHBOARD (4 CARDS)
+// DASHBOARD (UPDATED WITH BOX + PACK SALES)
 // ===============================
 function renderSalesDashboard() {
   loadData();
@@ -221,10 +221,16 @@ function renderSalesDashboard() {
   let totalProfit = 0;
   let totalExpenses = 0;
 
+  let boxSales = 0;
+  let packSales = 0;
+
   salesData.forEach(sale => {
     totalRevenue += sale.sellPrice || 0;
     totalProfit += sale.totalProfit || 0;
     totalExpenses += sale.buyPrice || 0;
+
+    if (sale.type === "BOX") boxSales++;
+    if (sale.type === "PACK") packSales++;
   });
 
   const dashboard = document.getElementById("salesDashboard");
@@ -234,6 +240,16 @@ function renderSalesDashboard() {
     <div class="dashboard-card">
       <h3>Total Sales</h3>
       <p>${totalSales}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Box Sales</h3>
+      <p>${boxSales}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Pack Sales</h3>
+      <p>${packSales}</p>
     </div>
 
     <div class="dashboard-card">
@@ -254,7 +270,7 @@ function renderSalesDashboard() {
 }
 
 // ===============================
-// NEW BIG PANEL — PERSONAL COLLECTION EXPENSES
+// PERSONAL COLLECTION EXPENSE PANEL
 // ===============================
 function renderPersonalExpensesPanel() {
   loadData();
