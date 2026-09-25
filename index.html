@@ -25,6 +25,8 @@
       <button onclick="showPage('portfolio')">Portfolio</button>
       <button onclick="showPage('expenses')">Expenses</button>
       <button onclick="showPage('invoice')">Invoice</button>
+
+      <!-- UPDATED BUTTON -->
       <button onclick="openCustomerPage()">Customer List</button>
     </nav>
 
@@ -101,33 +103,21 @@
     <section id="salesPage" class="page" style="display:none">
       <h1>Sales</h1>
 
-      <!-- FIXED DASHBOARD BAR -->
       <div class="sales-dashboard-bar">
         <div class="sales-dashboard-layout">
-
-          <!-- DASHBOARD (4 CARDS) -->
           <div id="salesDashboard"></div>
 
-          <!-- REPLACED CHART AREA WITH PERSONAL EXPENSE PANEL -->
           <div class="sales-chart-wrapper">
-
-            <!-- NEW BIG PANEL -->
             <div id="personalExpensesPanel" class="dashboard-card"
                  style="width:100%; text-align:center; margin-bottom:20px;">
-              <!-- JS will fill this -->
             </div>
 
-            <!-- PRODUCT SUMMARY -->
             <div id="salesProductSummary" class="sales-product-summary"></div>
-
-            <!-- PERSONAL COLLECTION PANEL -->
             <div id="personalCollectionPanel" class="personal-collection-panel"></div>
-
           </div>
         </div>
       </div>
 
-      <!-- Scrollable sales list -->
       <div id="salesList"></div>
     </section>
 
@@ -226,8 +216,9 @@
     if (page === 'sales') renderSales();
   }
 
+  /* UPDATED TO USE simple-list.html */
   function openCustomerPage() {
-    document.getElementById('customerFrame').src = "customer-list.html";
+    document.getElementById('customerFrame').src = "simple-list.html";
     showPage('customer');
   }
 
