@@ -135,58 +135,131 @@ body {
 }
 
 /* ============================
-   INVENTORY CARD STYLE
+   EXCEL-STYLE INVENTORY TABLE
 ============================ */
 
-.inventory-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-    gap: 20px;
-}
-
-.inventory-card {
+.excel-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
     background: #1a1a1a;
-    padding: 20px;
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid #333;
     box-shadow: 0 0 14px rgba(0,0,0,0.45);
-    transition: 0.25s ease;
+    margin-top: 10px;
 }
 
-.inventory-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 18px rgba(0,0,0,0.55);
-}
-
-.inventory-card h3 {
-    margin-top: 0;
-    color: #ffd700;
-    font-size: 22px;
-    letter-spacing: 0.5px;
-}
-
-.inventory-card p {
-    margin: 6px 0;
-    font-size: 14px;
-    color: #ccc;
-}
-
-.inventory-card button {
+.excel-inventory-table {
     width: 100%;
-    padding: 10px;
-    margin-top: 8px;
-    background: #333;
-    color: #eee;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.25s ease;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+    min-width: 1100px; /* Ensures text columns stay legible without crushing content */
 }
 
-.inventory-card button:hover {
-    background: #444;
-    transform: translateY(-1px);
+/* Headers styling matching Excel */
+.excel-inventory-table thead tr {
+    background-color: #262626;
+    border-bottom: 2px solid #3b3b3b;
 }
+
+.excel-inventory-table th {
+    padding: 12px 10px;
+    font-weight: bold;
+    color: #ffd700;
+    letter-spacing: 0.5px;
+    border-right: 1px solid #333;
+    white-space: nowrap;
+}
+
+/* Rows & Data Styling */
+.excel-row {
+    border-bottom: 1px solid #2e2e2e;
+    transition: background-color 0.15s ease;
+}
+
+.excel-row:hover {
+    background-color: #222;
+}
+
+.excel-inventory-table td {
+    padding: 10px;
+    color: #ccc;
+    border-right: 1px solid #2e2e2e;
+    vertical-align: middle;
+}
+
+/* Specific cell typography and spacing helper configurations */
+.cell-center {
+    text-align: center;
+}
+
+.cell-bold {
+    font-weight: bold;
+    color: #fff !important;
+}
+
+.cell-price {
+    font-family: monospace;
+    font-size: 14px;
+    text-align: right;
+    color: #a8ffb2 !important; /* Muted spreadsheet-style numeric text green */
+}
+
+/* Image Thumbnail Formatting */
+.table-thumb {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border: 1px solid #444;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Clean Form Component Overrides inside cells */
+.table-dropdown {
+    background: #2a2a2a;
+    color: #eee;
+    border: 1px solid #444;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.table-dropdown:focus {
+    border-color: #ffd700;
+    outline: none;
+}
+
+/* Interactive cell elements grid layout tracking details */
+.table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    min-width: 150px;
+}
+
+.btn-table {
+    padding: 5px 8px;
+    font-size: 11px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: filter 0.15s linear;
+}
+
+.btn-table:hover {
+    filter: brightness(1.2);
+}
+
+.btn-sell { background-color: #3b3b3b; color: #ffd700; }
+.btn-edit { background-color: #2a52be; color: #fff; }
+.btn-copy { background-color: #4b5320; color: #fff; }
+.btn-delete { background-color: #8b0000; color: #fff; }
 
 /* ============================
    SCROLLBAR
@@ -194,6 +267,7 @@ body {
 
 ::-webkit-scrollbar {
     width: 10px;
+    height: 10px; /* Added height configuration to style horizontal layout overflows cleanly */
 }
 
 ::-webkit-scrollbar-thumb {
@@ -208,6 +282,7 @@ body {
 ::-webkit-scrollbar-track {
     background: #111;
 }
+
 /* ============================
    PORTFOLIO CARD FIX (Collectr style)
 ============================ */
@@ -267,6 +342,7 @@ body {
     background: #444;
     transform: translateY(-1px);
 }
+
 /* ============================
    PORTFOLIO LINK FIX
 ============================ */
@@ -281,6 +357,7 @@ body {
     color: #e6c200;            /* slightly brighter gold */
     text-decoration: underline;
 }
+
 /* ============================
    SALES DASHBOARD
 ============================ */
@@ -311,6 +388,7 @@ body {
     color: #eee;
     font-weight: bold;
 }
+
 /* ============================
    FIXED SALES DASHBOARD BAR
 ============================ */
@@ -339,6 +417,7 @@ body {
     text-align: center;
     box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
+
 /* ============================
    SALES PAGE LAYOUT FIX
 ============================ */
@@ -363,6 +442,7 @@ body {
     width: 100% !important;
     height: 100% !important;
 }
+
 .app-logo {
     width: 140px;
     display: block;
@@ -371,6 +451,7 @@ body {
     border: 1px solid #333;
     box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
+
 /* ============================
    SALES PRODUCT SUMMARY PANEL
 ============================ */
@@ -418,6 +499,7 @@ body {
     font-size: 14px;
     color: #eee;
 }
+
 .sales-chart-wrapper {
   height: 250px;
   overflow: hidden;
@@ -432,10 +514,5 @@ body {
 }
 
 .personal-collection-panel {
-  max-width: 220px;
-  margin-top: 10px;
-}
-#salesDashboard {
-  position: relative;
-  z-index: 10;
-}
+    background: #1a1a1a;
+    border: 1px solid #333;
