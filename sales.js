@@ -9,6 +9,13 @@ function recordPersonalCollection(item, type) {
   const now = new Date();
   const dateString = now.toLocaleString("en-GB");
 
+  let buyPrice = 0;
+  if (item.type === "BOX") {
+    buyPrice = type === "BOX" ? (item.buyPriceBox || 0) : (item.buyPriceBox || 0) / (item.packsPerBox || 1);
+  } else {
+    buyPrice = item.buyPricePack || 0;
+  }
+
   const entry = {
     id: Date.now(),
     inventoryId: item.id,
@@ -16,14 +23,12 @@ function recordPersonalCollection(item, type) {
     type,
     category: item.category || "",
     supplier: item.supplier || "",
-    buyPrice: type === "BOX"
-      ? item.buyPriceBox
-      : item.buyPriceBox / item.packsPerBox,
+    buyPrice: buyPrice,
     marketPrice: item.marketPrice || 0,
     date: dateString,
     image: item.image || "",
     notes: item.notes || "",
-    packsOpened: type === "BOX" ? item.packsPerBox : 1
+    packsOpened: type === "BOX" ? (item.packsPerBox || 0) : 1
   };
 
   personalCollectionData.push(entry);
@@ -39,15 +44,24 @@ function recordSale(item, type) {
   const dateString = now.toLocaleString("en-GB");
 
   let profitPerUnit = 0;
+  let buyPrice = 0;
+  let sellPrice = 0;
 
-  if (type === "BOX") {
-    profitPerUnit = (item.sellPriceBox || 0) - (item.buyPriceBox || 0);
-  }
-
-  if (type === "PACK") {
-    profitPerUnit =
-      (item.sellPricePack || 0) -
-      ((item.buyPriceBox || 0) / (item.packsPerBox || 1));
+  if (item.type === "BOX") {
+    if (type === "BOX") {
+      buyPrice = item.buyPriceBox || 0;
+      sellPrice = item.sellPriceBox || 0;
+      profitPerUnit = sellPrice - buyPrice;
+    } else {
+      buyPrice = (item.buyPriceBox || 0) / (item.packsPerBox || 1);
+      sellPrice = item.sellPricePack || 0;
+      profitPerUnit = sellPrice - buyPrice;
+    }
+  } else {
+    // Isolated logic track for true PACK entries
+    buyPrice = item.buyPricePack || 0;
+    sellPrice = item.sellPricePack || 0;
+    profitPerUnit = sellPrice - buyPrice;
   }
 
   const sale = {
@@ -57,10 +71,8 @@ function recordSale(item, type) {
     type,
     category: item.category || "",
     supplier: item.supplier || "",
-    buyPrice: type === "BOX"
-      ? item.buyPriceBox
-      : item.buyPriceBox / item.packsPerBox,
-    sellPrice: type === "BOX" ? item.sellPriceBox : item.sellPricePack,
+    buyPrice: buyPrice,
+    sellPrice: sellPrice,
     marketPrice: item.marketPrice || 0,
     profitPerUnit,
     totalProfit: profitPerUnit,
@@ -84,15 +96,19 @@ function sellBox(id) {
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
+  if (item.type === "PACK") {
+    alert("This product is registered as a Pack item, it cannot be sold as a Box.");
+    return;
+  }
+
   const saleType = document.getElementById(`saleType_${item.id}`).value;
 
-  if (item.quantityBoxes <= 0) {
+  if ((item.quantityBoxes || 0) <= 0) {
     alert("No boxes left.");
     return;
   }
 
   item.quantityBoxes -= 1;
-
   saveData();
 
   if (saleType === "personal") {
@@ -115,41 +131,52 @@ function sellPack(id) {
 
   const saleType = document.getElementById(`saleType_${item.id}`).value;
 
-  const packsPerBox = item.packsPerBox || 0;
-  let boxes = item.quantityBoxes || 0;
-  let loosePacks = item.manualPacks || 0;
-  let openedBoxes = item.openedBoxes || 0;
-
-  let totalPacks = loosePacks + (openedBoxes * packsPerBox) + (boxes * packsPerBox);
-  if (totalPacks <= 0) {
-    alert("No packs left.");
-    return;
-  }
-
-  if (loosePacks > 0) {
-    loosePacks -= 1;
-  } else {
-    if (openedBoxes > 0) {
-      loosePacks = packsPerBox - 1;
-      openedBoxes -= 1;
-    } else {
-      if (boxes <= 0) {
-        alert("No packs left.");
-        return;
-      }
-      boxes -= 1;
-      openedBoxes += 1;
-      loosePacks = packsPerBox - 1;
+  // Track if item was uploaded natively as a pure PACK product
+  if (item.type === "PACK") {
+    let qtyPacks = parseInt(item.quantityPacks || 0);
+    if (qtyPacks <= 0) {
+      alert("No packs left.");
+      return;
     }
-  }
+    item.quantityPacks = qtyPacks - 1;
+  } else {
+    // Process stock breakout from custom BOX entities
+    const packsPerBox = item.packsPerBox || 0;
+    let boxes = item.quantityBoxes || 0;
+    let loosePacks = item.manualPacks || 0;
+    let openedBoxes = item.openedBoxes || 0;
 
-  if (openedBoxes > 0 && loosePacks === 0) {
-    openedBoxes -= 1;
-  }
+    let totalPacks = loosePacks + (openedBoxes * packsPerBox) + (boxes * packsPerBox);
+    if (totalPacks <= 0) {
+      alert("No packs left.");
+      return;
+    }
 
-  item.quantityBoxes = boxes;
-  item.manualPacks = loosePacks;
-  item.openedBoxes = openedBoxes;
+    if (loosePacks > 0) {
+      loosePacks -= 1;
+    } else {
+      if (openedBoxes > 0) {
+        loosePacks = packsPerBox - 1;
+        openedBoxes -= 1;
+      } else {
+        if (boxes <= 0) {
+          alert("No packs left.");
+          return;
+        }
+        boxes -= 1;
+        openedBoxes += 1;
+        loosePacks = packsPerBox - 1;
+      }
+    }
+
+    if (openedBoxes > 0 && loosePacks === 0) {
+      openedBoxes -= 1;
+    }
+
+    item.quantityBoxes = boxes;
+    item.manualPacks = loosePacks;
+    item.openedBoxes = openedBoxes;
+  }
 
   saveData();
 
@@ -188,15 +215,12 @@ function renderSales() {
 
     card.innerHTML = `
       <h3>${sale.name} (${sale.type})</h3>
-
       <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
            style="width:120px; border:1px solid #333; margin:10px 0;">
-
       <p><strong>Buy:</strong> £${sale.buyPrice.toFixed(2)}</p>
       <p><strong>Sell:</strong> £${sale.sellPrice.toFixed(2)}</p>
       <p><strong>Profit:</strong> £${sale.totalProfit.toFixed(2)}</p>
       <p><strong>Date:</strong> ${sale.date}</p>
-
       <button onclick="undoSale(${sale.id})">Undo</button>
       <button onclick="deleteSale(${sale.id})">Delete</button>
     `;
@@ -211,7 +235,7 @@ function renderSales() {
 }
 
 // ===============================
-// DASHBOARD (UPDATED WITH BOX + PACK SALES)
+// DASHBOARD
 // ===============================
 function renderSalesDashboard() {
   loadData();
@@ -241,27 +265,22 @@ function renderSalesDashboard() {
       <h3>Total Sales</h3>
       <p>${totalSales}</p>
     </div>
-
     <div class="dashboard-card">
       <h3>Box Sales</h3>
       <p>${boxSales}</p>
     </div>
-
     <div class="dashboard-card">
       <h3>Pack Sales</h3>
       <p>${packSales}</p>
     </div>
-
     <div class="dashboard-card">
       <h3>Total Revenue</h3>
       <p>£${totalRevenue.toFixed(2)}</p>
     </div>
-
     <div class="dashboard-card">
       <h3>Total Expenses</h3>
       <p>£${totalExpenses.toFixed(2)}</p>
     </div>
-
     <div class="dashboard-card">
       <h3>Total Profit</h3>
       <p>£${totalProfit.toFixed(2)}</p>
@@ -340,7 +359,7 @@ function renderSalesProductSummary() {
 }
 
 // ===============================
-// PERSONAL COLLECTION PANEL
+// PERSONAL COLLECTION PANEL (COMPLETED FIXED CLOSURE)
 // ===============================
 function renderPersonalCollectionPanel() {
   loadData();
@@ -348,89 +367,23 @@ function renderPersonalCollectionPanel() {
   const panel = document.getElementById("personalCollectionPanel");
   if (!panel) return;
 
-  let totalSpent = 0;
-  let totalPacks = 0;
+  panel.innerHTML = `<h3>Personal Collection</h3>`;
+
+  if (!personalCollectionData || personalCollectionData.length === 0) {
+    panel.innerHTML += `<p>No items added yet.</p>`;
+    return;
+  }
 
   personalCollectionData.forEach(entry => {
-    totalSpent += entry.buyPrice || 0;
-    totalPacks += entry.packsOpened || 0;
-  });
-
-  panel.innerHTML = `
-    <h3>Personal Collection</h3>
-    <p><strong>Total Spent:</strong> £${totalSpent.toFixed(2)}</p>
-    <p><strong>Packs Opened:</strong> ${totalPacks}</p>
-
-    <button id="pcToggleBtn" class="pc-toggle-btn">▶ Show Details</button>
-
-    <div id="pcDetails" style="display:none; margin-top:10px;"></div>
-  `;
-
-  const detailsBox = document.getElementById("pcDetails");
-  const toggleBtn = document.getElementById("pcToggleBtn");
-
-  toggleBtn.onclick = () => {
-    if (detailsBox.style.display === "none") {
-      detailsBox.style.display = "block";
-      toggleBtn.textContent = "▼ Hide Details";
-
-      detailsBox.innerHTML = personalCollectionData.map(entry => `
-        <div class="pc-item">
-          <img src="${entry.image || 'Logo.png'}" style="width:80px; margin-right:10px;">
+    panel.innerHTML += `
+      <div class="sales-product-item">
+        <img src="${entry.image || 'Logo.png'}">
+        <div>
           <p><strong>${entry.name}</strong> (${entry.type})</p>
-          <p>Cost: £${entry.buyPrice.toFixed(2)}</p>
-          <p>Packs Opened: ${entry.packsOpened}</p>
           <p>Date: ${entry.date}</p>
-          <p>Notes: ${entry.notes || '—'}</p>
+          <p>Cost Value: £${(entry.buyPrice || 0).toFixed(2)}</p>
         </div>
-        <hr>
-      `).join("");
-
-    } else {
-      detailsBox.style.display = "none";
-      toggleBtn.textContent = "▶ Show Details";
-    }
-  };
+      </div>
+    `;
+  });
 }
-
-// ===============================
-// DELETE SALE
-// ===============================
-function deleteSale(id) {
-  loadData();
-  salesData = salesData.filter(s => s.id !== id);
-  saveData();
-  renderSales();
-}
-
-// ===============================
-// UNDO SALE
-// ===============================
-function undoSale(id) {
-  loadData();
-
-  const sale = salesData.find(s => s.id === id);
-  if (!sale) return;
-
-  const item = inventoryData.find(i => i.id === sale.inventoryId);
-  if (!item) return;
-
-  if (sale.type === "BOX") {
-    item.quantityBoxes += 1;
-  }
-
-  if (sale.type === "PACK") {
-    item.manualPacks += 1;
-  }
-
-  salesData = salesData.filter(s => s.id !== id);
-
-  saveData();
-  renderSales();
-  renderInventory();
-}
-
-// ===============================
-document.addEventListener("DOMContentLoaded", () => {
-  renderSales();
-});
