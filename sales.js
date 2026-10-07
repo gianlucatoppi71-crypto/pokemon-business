@@ -1,335 +1,199 @@
 // ===============================
-// SALES SYSTEM
+// SALES PAGE LOGIC (BOX + PACK SYSTEM, NEW SYSTEM)
+// ===============================
+// Uses global salesData, inventoryData, loadData(), saveData() from data.js
+// Do NOT redeclare salesData or inventoryData here.
+
+// ===============================
+// RECORD SALE (BOX or PACK)
 // ===============================
 
-// RECORD PERSONAL COLLECTION
-function recordPersonalCollection(item, type) {
-  loadData();
+function recordSale(item, type, quantitySold) {
+  const date = new Date().toISOString();
 
-  const now = new Date();
-  const dateString = now.toLocaleString("en-GB");
-
-  let buyPrice = 0;
-  if (item.type === "BOX") {
-    buyPrice = type === "BOX" ? (item.buyPriceBox || 0) : (item.buyPriceBox || 0) / (item.packsPerBox || 1);
-  } else {
-    buyPrice = item.buyPricePack || 0;
-  }
-
-  const entry = {
-    id: Date.now(),
-    inventoryId: item.id,
-    name: item.name,
-    type,
-    category: item.category || "",
-    supplier: item.supplier || "",
-    buyPrice: buyPrice,
-    marketPrice: item.marketPrice || 0,
-    date: dateString,
-    image: item.image || "",
-    notes: item.notes || "",
-    packsOpened: type === "BOX" ? (item.packsPerBox || 0) : 1
-  };
-
-  personalCollectionData.push(entry);
-  saveData();
-  renderSales();
-}
-
-// RECORD BUSINESS SALE
-function recordSale(item, type) {
-  loadData();
-
-  const now = new Date();
-  const dateString = now.toLocaleString("en-GB");
-
-  let profitPerUnit = 0;
   let buyPrice = 0;
   let sellPrice = 0;
 
-  if (item.type === "BOX") {
-    if (type === "BOX") {
-      buyPrice = item.buyPriceBox || 0;
-      sellPrice = item.sellPriceBox || 0;
-      profitPerUnit = sellPrice - buyPrice;
-    } else {
-      buyPrice = (item.buyPriceBox || 0) / (item.packsPerBox || 1);
-      sellPrice = item.sellPricePack || 0;
-      profitPerUnit = sellPrice - buyPrice;
-    }
+  if (type === "BOX") {
+    buyPrice = item.buyPriceBox || 0;
+    sellPrice = item.sellPriceBox || 0;
   } else {
-    buyPrice = item.buyPricePack || 0;
+    buyPrice = item.type === "BOX"
+      ? (item.packsPerBox > 0 ? (item.buyPriceBox || 0) / item.packsPerBox : 0)
+      : (item.buyPricePack || 0);
+
     sellPrice = item.sellPricePack || 0;
-    profitPerUnit = sellPrice - buyPrice;
   }
 
-  const sale = {
+  const profitPerUnit = sellPrice - buyPrice;
+  const totalProfit = profitPerUnit * quantitySold;
+
+  const saleEntry = {
     id: Date.now(),
-    inventoryId: item.id,
     name: item.name,
+    image: item.image,
+    category: item.category,
+    supplier: item.supplier,
+    notes: item.notes || "—",
+    date,
     type,
-    category: item.category || "",
-    supplier: item.supplier || "",
-    buyPrice: buyPrice,
-    sellPrice: sellPrice,
+    quantitySold,
+    buyPrice,
+    sellPrice,
     marketPrice: item.marketPrice || 0,
     profitPerUnit,
-    totalProfit: profitPerUnit,
-    quantitySold: 1,
-    date: dateString,
-    image: item.image || "",
-    notes: item.notes || ""
+    totalProfit
   };
 
-  salesData.push(sale);
+  salesData.push(saleEntry);
   saveData();
-  renderSales();
+  renderSalesInventory();
 }
 
 // ===============================
 // SELL BOX
 // ===============================
+
 function sellBox(id) {
   loadData();
 
   const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
-
-  if (item.type === "PACK") {
-    alert("This product is registered as a Pack item, it cannot be sold as a Box.");
-    return;
-  }
-
-  const saleType = document.getElementById(`saleType_${item.id}`).value;
+  if (!item || item.type !== "BOX") return;
 
   if ((item.quantityBoxes || 0) <= 0) {
     alert("No boxes left.");
     return;
   }
 
-  item.quantityBoxes -= 1;
-  saveData();
+  // Record sale first
+  recordSale(item, "BOX", 1);
 
-  if (saleType === "personal") {
-    recordPersonalCollection(item, "BOX");
-  } else {
-    recordSale(item, "BOX");
+  // Reduce inventory
+  item.quantityBoxes = (item.quantityBoxes || 0) - 1;
+
+  // If you want boxes to contain packs, you can adjust manualPacks here if needed
+  // For now we leave manualPacks unchanged when selling a box
+
+  // Remove item if empty
+  if ((item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) {
+    inventoryData = inventoryData.filter(i => i.id !== id);
   }
 
+  saveData();
   renderInventory();
 }
 
 // ===============================
 // SELL PACK
 // ===============================
+
 function sellPack(id) {
   loadData();
 
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  const saleType = document.getElementById(`saleType_${item.id}`).value;
+  const qty = prompt("How many packs do you want to sell?");
+  if (!qty || isNaN(qty)) return;
 
-  if (item.type === "PACK") {
-    let qtyPacks = parseInt(item.quantityPacks || 0);
-    if (qtyPacks <= 0) {
-      alert("No packs left.");
-      return;
-    }
-    item.quantityPacks = qtyPacks - 1;
-  } else {
-    const packsPerBox = item.packsPerBox || 0;
-    let boxes = item.quantityBoxes || 0;
-    let loosePacks = item.manualPacks || 0;
-    let openedBoxes = item.openedBoxes || 0;
+  const amount = parseInt(qty);
 
-    let totalPacks = loosePacks + (openedBoxes * packsPerBox) + (boxes * packsPerBox);
-    if (totalPacks <= 0) {
-      alert("No packs left.");
-      return;
-    }
+  let totalPacks = item.type === "BOX"
+    ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
+    : (item.quantityPacks || 0);
 
-    if (loosePacks > 0) {
-      loosePacks -= 1;
-    } else {
-      if (openedBoxes > 0) {
-        loosePacks = packsPerBox - 1;
-        openedBoxes -= 1;
-      } else {
-        if (boxes <= 0) {
-          alert("No packs left.");
-          return;
-        }
-        boxes -= 1;
-        openedBoxes += 1;
-        loosePacks = packsPerBox - 1;
-      }
-    }
-
-    if (openedBoxes > 0 && loosePacks === 0) {
-      openedBoxes -= 1;
-    }
-
-    item.quantityBoxes = boxes;
-    item.manualPacks = loosePacks;
-    item.openedBoxes = openedBoxes;
-  }
-
-  saveData();
-
-  if (saleType === "personal") {
-    recordPersonalCollection(item, "PACK");
-  } else {
-    recordSale(item, "PACK");
-  }
-
-  renderInventory();
-}
-
-// ===============================
-// UNDO SALE (RESTORE INVENTORY)
-// ===============================
-function undoSale(saleId) {
-  loadData();
-
-  const saleIndex = salesData.findIndex(s => s.id === saleId);
-  if (saleIndex === -1) return;
-
-  const sale = salesData[saleIndex];
-  const item = inventoryData.find(i => i.id === sale.inventoryId);
-
-  if (item) {
-    if (sale.type === "BOX") {
-      item.quantityBoxes = (item.quantityBoxes || 0) + 1;
-    } else if (sale.type === "PACK") {
-      if (item.type === "PACK") {
-        item.quantityPacks = (item.quantityPacks || 0) + 1;
-      } else {
-        item.manualPacks = (item.manualPacks || 0) + 1;
-      }
-    }
-  }
-
-  salesData.splice(saleIndex, 1);
-  saveData();
-  renderInventory();
-  renderSales();
-}
-
-// ===============================
-// DELETE SALE RECORD
-// ===============================
-function deleteSale(saleId) {
-  loadData();
-  salesData = salesData.filter(s => s.id !== saleId);
-  saveData();
-  renderSales();
-}
-
-// ===============================
-// RENDER MAIN SALES HISTORY LEDGER
-// ===============================
-function renderSales() {
-  loadData();
-
-  // 1. Clean up or hide the broken chart dashboards to remove the empty gray boxes
-  const dbDashboard = document.getElementById("salesDashboard");
-  if (dbDashboard) {
-    let totalSalesProfit = 0;
-    let businessSalesCount = salesData.length;
-    
-    salesData.forEach(s => {
-      totalSalesProfit += (s.totalProfit || 0);
-    });
-
-    dbDashboard.innerHTML = `
-      <div class="dashboard-card" style="padding:15px; background:#1c1c21; border:1px solid #333; border-radius:6px; color:#fff; font-family:sans-serif; text-align:center;">
-        <h3 style="margin:0 0 10px 0; color:#ffd700; font-size:16px;">Sales Summary Metrics</h3>
-        <p style="margin:5px 0; font-size:14px; color:#aaa;">Recorded Orders: <strong style="color:#fff;">${businessSalesCount}</strong></p>
-        <p style="margin:5px 0; font-size:14px; color:#aaa;">Net Realized Profit: <strong style="color:#00ff88;">£${totalSalesProfit.toFixed(2)}</strong></p>
-      </div>
-    `;
-    dbDashboard.style.border = "none";
-    dbDashboard.style.background = "transparent";
-  }
-
-  // Hide the auxiliary non-functional chart panels gracefully
-  const expPanel = document.getElementById("personalExpensesPanel");
-  if (expPanel) expPanel.style.display = "none";
-
-  const prodSummary = document.getElementById("salesProductSummary");
-  if (prodSummary) prodSummary.style.display = "none";
-
-  const collectionPanel = document.getElementById("personalCollectionPanel");
-  if (collectionPanel) collectionPanel.style.display = "none";
-
-  // 2. Render Main Sales Ledger Grid View
-  const container = document.getElementById("salesList");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  if (!salesData || salesData.length === 0) {
-    container.innerHTML = "<p style='color:#bbb; padding:15px; font-family:sans-serif;'>No business sales logs recorded yet.</p>";
+  if (amount > totalPacks) {
+    alert("Not enough packs available.");
     return;
   }
 
-  const tableWrapper = document.createElement('div');
-  tableWrapper.className = 'excel-table-wrapper';
+  // BOX PRODUCT PACK REDUCTION
+  if (item.type === "BOX") {
+    let packsFromBoxes = (item.quantityBoxes || 0) * (item.packsPerBox || 0);
 
-  const table = document.createElement('table');
-  table.className = 'excel-inventory-table';
+    if (amount <= packsFromBoxes) {
+      const boxesUsed = Math.floor(amount / (item.packsPerBox || 1));
+      item.quantityBoxes = (item.quantityBoxes || 0) - boxesUsed;
 
-  table.innerHTML = `
-    <thead>
-      <tr>
-        <th>Image</th>
-        <th>Product Name</th>
-        <th>Sale Type</th>
-        <th>Category</th>
-        <th>Supplier</th>
-        <th>Cost Price</th>
-        <th>Sale Price</th>
-        <th>Net Profit</th>
-        <th>Date & Time</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="excelSalesTableBody"></tbody>
-  `;
+      const leftover = amount % (item.packsPerBox || 1);
+      item.manualPacks = (item.manualPacks || 0) - leftover;
+    } else {
+      item.manualPacks = (item.manualPacks || 0) - (amount - packsFromBoxes);
+      item.quantityBoxes = 0;
+    }
 
-  tableWrapper.appendChild(table);
-  container.appendChild(tableWrapper);
+    if (item.manualPacks < 0) item.manualPacks = 0;
+  }
 
-  const tbody = document.getElementById('excelSalesTableBody');
+  // PACK PRODUCT REDUCTION
+  if (item.type === "PACK") {
+    item.quantityPacks = (item.quantityPacks || 0) - amount;
+    if (item.quantityPacks < 0) item.quantityPacks = 0;
+  }
+
+  // Record sale
+  recordSale(item, "PACK", amount);
+
+  // Remove item if empty
+  if ((item.type === "BOX" && (item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) ||
+      (item.type === "PACK" && (item.quantityPacks || 0) <= 0)) {
+    inventoryData = inventoryData.filter(i => i.id !== id);
+  }
+
+  saveData();
+  renderInventory();
+}
+
+// ===============================
+// RENDER SALES PAGE
+// ===============================
+
+function renderSalesInventory() {
+  loadData();
+
+  const list = document.getElementById('salesList');
+  if (!list) return;
+
+  list.innerHTML = '';
+
+  if (!salesData || salesData.length === 0) {
+    list.innerHTML = '<p>No sales yet.</p>';
+    return;
+  }
 
   salesData.forEach((sale) => {
-    const row = document.createElement('tr');
-    row.className = 'excel-row';
+    const div = document.createElement('div');
+    div.className = 'sale-card';
 
-    const profitClass = sale.totalProfit > 0 ? 'cell-price' : 'cell-price cell-bold';
-    const profitStyle = sale.totalProfit <= 0 ? 'style="color: #ff8a8a !important;"' : '';
+    div.innerHTML = `
+      <h3>${sale.name} (${sale.type})</h3>
 
-    row.innerHTML = `
-      <td class="cell-center">
-        <img src="${sale.image || 'Logo.png'}" alt="${sale.name}" class="table-thumb" style="width:40px; height:40px; object-fit:contain; border-radius:4px;" onerror="this.src='Logo.png'">
-      </td>
-      <td class="cell-bold">${sale.name}</td>
-      <td class="cell-center"><span class="btn-table btn-sell" style="padding: 3px 6px; pointer-events: none; border-radius:4px; font-size:12px;">${sale.type}</span></td>
-      <td>${sale.category || '—'}</td>
-      <td>${sale.supplier || '—'}</td>
-      <td class="cell-price" style="color: #ccc !important;">£${(sale.buyPrice || 0).toFixed(2)}</td>
-      <td class="cell-price">£${(sale.sellPrice || 0).toFixed(2)}</td>
-      <td class="${profitClass}" ${profitStyle}>£${(sale.totalProfit || 0).toFixed(2)}</td>
-      <td class="cell-center" style="font-size: 13px; font-family: monospace;">${sale.date}</td>
-      <td>
-        <div class="table-actions" style="display:flex; gap:6px;">
-          <button class="btn-table btn-copy" onclick="undoSale(${sale.id})" style="background-color: #2e7d32; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Undo</button>
-          <button class="btn-table btn-delete" onclick="deleteSale(${sale.id})" style="background-color: #d32f2f; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Delete</button>
-        </div>
-      </td>
+      <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
+           style="width:120px; border:1px solid #333; margin:10px 0;">
+
+      <div class="sale-meta">
+        <strong>Category:</strong> ${sale.category || "—"}<br>
+        <strong>Supplier:</strong> ${sale.supplier || "—"}<br>
+        <strong>Notes:</strong> ${sale.notes || "—"}
+      </div>
+
+      <div class="sale-prices">
+        <strong>Buy price:</strong> £${(sale.buyPrice || 0).toFixed(2)}<br>
+        <strong>Sell price:</strong> £${(sale.sellPrice || 0).toFixed(2)}<br>
+        <strong>Market price:</strong> £${(sale.marketPrice || 0).toFixed(2)}
+      </div>
+
+      <div class="sale-profit">
+        <strong>Profit per unit:</strong> £${(sale.profitPerUnit || 0).toFixed(2)}<br>
+        <strong>Total profit:</strong> £${(sale.totalProfit || 0).toFixed(2)}
+      </div>
+
+      <div class="sale-meta">
+        <strong>Quantity sold:</strong> ${sale.quantitySold || 0}<br>
+        <strong>Date:</strong> ${sale.date ? new Date(sale.date).toLocaleString() : "—"}
+      </div>
     `;
 
-    tbody.appendChild(row);
+    list.appendChild(div);
   });
 }

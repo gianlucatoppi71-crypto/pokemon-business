@@ -2,11 +2,8 @@
 // FULL TRADE BUILDER SYSTEM (BOX + PACK SUPPORT)
 // ===============================
 
-// IMPORTANT: tradesData is already declared in data.js
-// REMOVE the duplicate declaration here.
-
-// Load trades from data.js
-// tradesData is already available globally
+// Load trades
+let tradesData = JSON.parse(localStorage.getItem("tradesData") || "[]");
 
 function saveTrades() {
   localStorage.setItem("tradesData", JSON.stringify(tradesData));
