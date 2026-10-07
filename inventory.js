@@ -20,49 +20,83 @@ function renderInventory() {
     return;
   }
 
+  // Create Excel-Style Table Wrapper
+  const tableWrapper = document.createElement('div');
+  tableWrapper.className = 'excel-table-wrapper';
+
+  const table = document.createElement('table');
+  table.className = 'excel-inventory-table';
+
+  // Table Headers
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Product Name</th>
+        <th>Category</th>
+        <th>Supplier</th>
+        <th>Buy Price Box</th>
+        <th>Sell Price Box</th>
+        <th>Sell Price Pack</th>
+        <th>Packs/Box</th>
+        <th>Boxes</th>
+        <th>Loose Packs</th>
+        <th>Total Packs</th>
+        <th>Sale Type</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="excelTableBody"></tbody>
+  `;
+
+  tableWrapper.appendChild(table);
+  container.appendChild(tableWrapper);
+
+  const tbody = document.getElementById('excelTableBody');
+
   inventoryData.forEach((item) => {
     const totalPacks =
       item.type === "BOX"
         ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
         : item.quantityPacks;
 
-    const card = document.createElement('div');
-    card.className = 'inventory-card';
+    const row = document.createElement('tr');
+    row.className = 'excel-row';
 
     const saleTypeId = `saleType_${item.id}`;
 
-    card.innerHTML = `
-      <h3>${item.name}</h3>
-
-      <img src="${item.image || 'Logo.png'}" alt="${item.name}"
-           style="width:120px; border:1px solid #333; margin:10px 0;">
-
-      <p><strong>Category:</strong> ${item.category || '—'}</p>
-      <p><strong>Supplier:</strong> ${item.supplier || '—'}</p>
-
-      <p><strong>Buy price BOX:</strong> £${(item.buyPriceBox || 0).toFixed(2)}</p>
-      <p><strong>Sell price BOX:</strong> £${(item.sellPriceBox || 0).toFixed(2)}</p>
-      <p><strong>Sell price PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</p>
-
-      <p><strong>Packs per box:</strong> ${item.packsPerBox || 0}</p>
-      <p><strong>Boxes:</strong> ${item.quantityBoxes || 0}</p>
-      <p><strong>Loose packs:</strong> ${item.manualPacks || 0}</p>
-      <p><strong>Total packs:</strong> ${totalPacks}</p>
-
-      <label><strong>Sale Type:</strong></label>
-      <select id="${saleTypeId}" class="sale-type-dropdown">
-        <option value="business">Sell to Customer</option>
-        <option value="personal">Add to Personal Collection</option>
-      </select>
-
-      <button onclick="sellBox(${item.id})">Sell BOX</button>
-      <button onclick="sellPack(${item.id})">Sell PACK</button>
-      <button onclick="editItem(${item.id})">Edit</button>
-      <button onclick="copyItem(${item.id})">Copy</button>
-      <button onclick="deleteItem(${item.id})">Delete</button>
+    row.innerHTML = `
+      <td class="cell-center">
+        <img src="${item.image || 'Logo.png'}" alt="${item.name}" class="table-thumb">
+      </td>
+      <td class="cell-bold">${item.name}</td>
+      <td>${item.category || '—'}</td>
+      <td>${item.supplier || '—'}</td>
+      <td class="cell-price">£${(item.buyPriceBox || 0).toFixed(2)}</td>
+      <td class="cell-price">£${(item.sellPriceBox || 0).toFixed(2)}</td>
+      <td class="cell-price">£${(item.sellPricePack || 0).toFixed(2)}</td>
+      <td class="cell-center">${item.packsPerBox || 0}</td>
+      <td class="cell-center">${item.quantityBoxes || 0}</td>
+      <td class="cell-center">${item.manualPacks || 0}</td>
+      <td class="cell-center cell-bold">${totalPacks}</td>
+      <td>
+        <select id="${saleTypeId}" class="table-dropdown">
+          <option value="business">Sell to Customer</option>
+          <option value="personal">Add to Personal Collection</option>
+        </select>
+      </td>
+      <td>
+        <div class="table-actions">
+          <button class="btn-table btn-sell" onclick="sellBox(${item.id})">Sell BOX</button>
+          <button class="btn-table btn-sell" onclick="sellPack(${item.id})">Sell PACK</button>
+          <button class="btn-table btn-edit" onclick="editItem(${item.id})">Edit</button>
+          <button class="btn-table btn-copy" onclick="copyItem(${item.id})">Copy</button>
+          <button class="btn-table btn-delete" onclick="deleteItem(${item.id})">Delete</button>
+        </div>
+      </td>
     `;
 
-    container.appendChild(card);
+    tbody.appendChild(row);
   });
 }
 
