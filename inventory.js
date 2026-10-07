@@ -1,351 +1,284 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=1004">
-  <!-- Stable Chart.js library to prevent network runtime blocks -->
-  <script src="https://jsdelivr.net"></script>
-</head>
-<body>
+// ===============================
+// INVENTORY SYSTEM
+// ===============================
 
-<div class="app">
+let editMode = null;
 
-  <!-- SIDEBAR NAVIGATION -->
-  <aside class="sidebar">
-    <img src="Logo.png" alt="Flux TCG Logo" class="app-logo">
+// ===============================
+// RENDER INVENTORY
+// ===============================
+function renderInventory() {
+  loadData();
 
-    <nav>
-      <button onclick="showPage('inventory')">Inventory</button>
-      <button onclick="showPage('sales')">Sales</button>
-      <button onclick="showPage('summary')">Summary</button>
-      <button onclick="showPage('suppliers')">Suppliers</button>
-      <button onclick="showPage('trades')">Trades</button>
-      <button onclick="showPage('portfolio')">Portfolio</button>
-      <button onclick="showPage('expenses')">Expenses</button>
-      <button onclick="showPage('invoice')">Invoice</button>
-      <button onclick="openCustomerPage()">Customer List</button>
-    </nav>
+  const container = document.getElementById('inventoryList');
+  if (!container) return;
 
-    <div class="tax-info">
-      <h3>Tax Summary</h3>
-      <div id="taxSummary"></div>
-    </div>
-  </aside>
+  container.innerHTML = '';
 
-  <!-- MAIN APPLICATION VIEWPORT -->
-  <main class="main">
-    <!-- INVENTORY PAGE -->
-    <section id="inventoryPage" class="page">
-      <h1>Inventory Ledger</h1>
+  if (!inventoryData || inventoryData.length === 0) {
+    container.innerHTML = '<p>No inventory yet.</p>';
+    return;
+  }
 
-      <form id="inventoryForm" onsubmit="addInventoryItem(event)">
-        <select id="invType" required>
-          <option value="">Select product type</option>
-          <option value="BOX">BOX</option>
-          <option value="PACK">PACK</option>
+  // Create Excel-Style Table Wrapper
+  const tableWrapper = document.createElement('div');
+  tableWrapper.className = 'excel-table-wrapper';
+
+  const table = document.createElement('table');
+  table.className = 'excel-inventory-table';
+
+  // Table Headers
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Product Name</th>
+        <th>Category</th>
+        <th>Supplier</th>
+        <th>Buy Price Box</th>
+        <th>Sell Price Box</th>
+        <th>Sell Price Pack</th>
+        <th>Packs/Box</th>
+        <th>Boxes</th>
+        <th>Loose Packs</th>
+        <th>Total Packs</th>
+        <th>Sale Type</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="excelTableBody"></tbody>
+  `;
+
+  tableWrapper.appendChild(table);
+  container.appendChild(tableWrapper);
+
+  const tbody = document.getElementById('excelTableBody');
+
+  inventoryData.forEach((item) => {
+    // If it's a PACK type, use quantityPacks as total, otherwise calculate BOX counts
+    const totalPacks =
+      item.type === "BOX"
+        ? (parseInt(item.quantityBoxes) * parseInt(item.packsPerBox || 0)) + parseInt(item.manualPacks || 0)
+        : parseInt(item.quantityPacks || 0);
+
+    const row = document.createElement('tr');
+    row.className = 'excel-row';
+
+    const saleTypeId = `saleType_${item.id}`;
+
+    // Gracefully handle default display values for PACK types vs BOX types
+    const displayBuyPriceBox = item.type === "BOX" ? `£${(item.buyPriceBox || 0).toFixed(2)}` : `£${(item.buyPricePack || 0).toFixed(2)} (Pack)`;
+    const displaySellPriceBox = item.type === "BOX" ? `£${(item.sellPriceBox || 0).toFixed(2)}` : "—";
+
+    row.innerHTML = `
+      <td class="cell-center">
+        <img src="${item.image || 'Logo.png'}" alt="${item.name}" class="table-thumb">
+      </td>
+      <td class="cell-bold">${item.name}</td>
+      <td>${item.category || '—'}</td>
+      <td>${item.supplier || '—'}</td>
+      <td class="cell-price">${displayBuyPriceBox}</td>
+      <td class="cell-price">${displaySellPriceBox}</td>
+      <td class="cell-price">£${(item.sellPricePack || 0).toFixed(2)}</td>
+      <td class="cell-center">${item.packsPerBox || 0}</td>
+      <td class="cell-center">${item.quantityBoxes || 0}</td>
+      <td class="cell-center">${item.manualPacks || 0}</td>
+      <td class="cell-center cell-bold">${totalPacks}</td>
+      <td>
+        <select id="${saleTypeId}" class="table-dropdown">
+          <option value="business">Sell to Customer</option>
+          <option value="personal">Add to Personal Collection</option>
         </select>
-
-        <input type="text" id="invName" placeholder="Product name" required>
-
-        <select id="invCategory" required>
-          <option value="">Select category</option>
-          <option>Booster Box</option>
-          <option>Booster Pack</option>
-          <option>Elite Trainer Box (ETB)</option>
-          <option>Collection Box</option>
-          <option>Premium Collection</option>
-          <option>Special Set</option>
-          <option>Tin</option>
-          <option>Blister</option>
-          <option>Sleeved Pack</option>
-          <option>Promo Pack</option>
-          <option>Japanese Box</option>
-          <option>Korean Box</option>
-          <option>Chinese Box</option>
-          <option>Deck</option>
-          <option>Bundle</option>
-          <option>Other</option>
-        </select>
-
-        <select id="invSupplier" required></select>
-
-        <div id="boxFields" style="display:none">
-          <input type="number" step="0.01" id="invBuyPriceBox" placeholder="Buy price per BOX (£)">
-          <input type="number" id="invPacksPerBox" placeholder="Packs per box">
-          <input type="number" step="0.01" id="invSellPriceBox" placeholder="Sell price per BOX (£)">
-          <input type="number" step="0.01" id="invSellPricePack" placeholder="Sell price per PACK (£)">
-          <input type="number" id="invQuantityBoxes" placeholder="Quantity of BOXES">
-          <input type="number" id="invManualPacks" placeholder="Loose packs (optional)">
+      </td>
+      <td>
+        <div class="table-actions">
+          <button class="btn-table btn-sell" onclick="sellBox(${item.id})">Sell BOX</button>
+          <button class="btn-table btn-sell" onclick="sellPack(${item.id})">Sell PACK</button>
+          <button class="btn-table btn-edit" onclick="editItem(${item.id})">Edit</button>
+          <button class="btn-table btn-copy" onclick="copyItem(${item.id})">Copy</button>
+          <button class="btn-table btn-delete" onclick="deleteItem(${item.id})">Delete</button>
         </div>
+      </td>
+    `;
 
-        <div id="packFields" style="display:none">
-          <input type="number" step="0.01" id="invBuyPricePack" placeholder="Buy price per PACK (£)">
-          <input type="number" step="0.01" id="invSellPricePack" placeholder="Sell price per PACK (£)">
-          <input type="number" id="invQuantityPacks" placeholder="Quantity of PACKS">
-        </div>
+    tbody.appendChild(row);
+  });
+}
 
-        <input type="number" step="0.01" id="invMarketPrice" placeholder="UK market price (£)">
-        <input type="text" id="invImage" placeholder="Image URL (optional)">
-        <textarea id="invNotes" placeholder="Notes (optional)"></textarea>
+// ===============================
+// ADD / UPDATE ITEM
+// ===============================
+function addInventoryItem(event) {
+  event.preventDefault();
+  loadData();
 
-        <button type="submit" id="addBtn">Add to inventory</button>
-      </form>
+  const type = document.getElementById('invType').value;
+  const name = document.getElementById('invName').value.trim();
+  const category = document.getElementById('invCategory').value.trim();
+  const supplier = document.getElementById('invSupplier').value.trim();
 
-      <div id="inventoryList" class="inventory-container"></div>
-    </section>
+  if (!name || !type) return;
 
-    <!-- SALES PAGE -->
-    <section id="salesPage" class="page" style="display:none">
-      <h1>Sales Ledger History</h1>
-      <div class="sales-dashboard-bar">
-        <div class="sales-dashboard-layout">
-          <div id="salesDashboard"></div>
-          <div class="sales-chart-wrapper">
-            <div id="personalExpensesPanel" class="dashboard-card" style="width:100%; text-align:center; margin-bottom:20px;"></div>
-            <div id="salesProductSummary" class="sales-product-summary"></div>
-            <div id="personalCollectionPanel" class="personal-collection-panel"></div>
-          </div>
-        </div>
-      </div>
-      <div id="salesList"></div>
-    </section>
+  let buyPriceBox = 0;
+  let buyPricePack = 0;
+  let sellPriceBox = 0;
+  let sellPricePack = 0;
+  let packsPerBox = 0;
+  let quantityBoxes = 0;
+  let manualPacks = 0;
+  let quantityPacks = 0;
 
-    <!-- SUMMARY PAGE -->
-    <section id="summaryPage" class="page" style="display:none">
-      <h1>Summary Dashboard</h1>
-      <div id="summaryContent"></div>
-    </section>
+  if (type === "BOX") {
+    buyPriceBox = parseFloat(document.getElementById('invBuyPriceBox').value) || 0;
+    sellPriceBox = parseFloat(document.getElementById('invSellPriceBox').value) || 0;
+    packsPerBox = parseInt(document.getElementById('invPacksPerBox').value) || 0;
+    quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value) || 0;
+    manualPacks = parseInt(document.getElementById('invManualPacks').value) || 0;
 
-    <!-- SUPPLIERS PAGE -->
-    <section id="suppliersPage" class="page" style="display:none">
-      <h1>Suppliers</h1>
-      <form id="supplierForm" onsubmit="addSupplier(event)">
-        <input type="text" id="supName" placeholder="Supplier name" required>
-        <input type="text" id="supAddress" placeholder="Address (optional)">
-        <input type="text" id="supWebsite" placeholder="Website URL (optional)">
-        <textarea id="supNotes" placeholder="Notes (optional)"></textarea>
-        <button type="submit">Add Supplier</button>
-      </form>
-      <div id="supplierList" class="supplier-container"></div>
-    </section>
-
-    <!-- TRADES PAGE -->
-    <section id="tradesPage" class="page" style="display:none">
-      <h1>Trades Management</h1>
-      <div id="tradesList"></div>
-    </section>
-
-    <!-- PORTFOLIO PAGE -->
-    <section id="portfolioPage" class="page" style="display:none">
-      <h1>Portfolio Tracking</h1>
-      <form id="portfolioForm" onsubmit="addPortfolio(event)">
-        <input type="text" id="portName" placeholder="Portfolio name" required>
-        <input type="text" id="portDesc" placeholder="Description" required>
-        <input type="text" id="portImage" placeholder="Image URL" required>
-        <input type="text" id="portLink" placeholder="Link to app" required>
-        <button type="submit">Add Portfolio</button>
-      </form>
-      <div id="portfolioList" class="portfolio-container"></div>
-    </section>
-
-    <!-- EXPENSES PAGE -->
-    <section id="expensesPage" class="page" style="display:none">
-      <h1>Expenses</h1>
-      <form id="expensesForm" onsubmit="addExpense(event)">
-        <input type="text" id="expDesc" placeholder="Expense description" required>
-        <input type="number" step="0.01" id="expAmount" placeholder="Amount (£)" required>
-        <input type="date" id="expDate" required>
-        <input type="text" id="expCategory" placeholder="Category (optional)">
-        <button type="submit">Add Expense</button>
-      </form>
-      <div id="expensesList"></div>
-    </section>
-
-    <!-- INVOICE PAGE -->
-    <section id="invoicePage" class="page" style="display:none">
-      <h1>Invoices</h1>
-      <div id="invoiceContent"></div>
-    </section>
-
-    <!-- CUSTOMER LIST PAGE -->
-    <section id="customerPage" class="page" style="display:none">
-      <iframe id="customerFrame" src="" style="width:100%; height:100vh; border:none;"></iframe>
-    </section>
-
-  </main>
-</div>
-<!-- APPLICATION SCRIPT MODULES -->
-<script src="data.js?v=1004"></script>
-<script src="inventory.js?v=1004"></script>
-<script src="sales.js?v=1004"></script>
-<script src="summary.js?v=1004"></script>
-<script src="suppliers.js?v=1004"></script>
-<script src="trades.js?v=1004"></script>
-<script src="portfolio.js?v=1004"></script>
-<script src="expenses.js?v=1004"></script>
-
-<!-- RUNTIME EXECUTION CONTROLLER -->
-<script>
-  // Fail-Safe State Interfaces
-  if (typeof window.inventoryData === 'undefined') window.inventoryData = JSON.parse(localStorage.getItem('inventoryData')) || [];
-  if (typeof window.suppliersData === 'undefined') window.suppliersData = JSON.parse(localStorage.getItem('suppliersData')) || [];
-
-  window.onload = () => {
-    // Populate suppliers choice selectors on screen mount
-    const supSelect = document.getElementById('invSupplier');
-    if (supSelect) {
-      supSelect.innerHTML = '<option value="None">None</option>';
-      window.suppliersData.forEach(s => {
-        const sName = s.name || s;
-        supSelect.innerHTML += `<option value="${sName}">${sName}</option>`;
-      });
+    // Use query selector safely to read the pack calculation input variant fields if active
+    const boxPackSellInput = document.querySelector('#boxFields #invSellPricePack');
+    if (boxPackSellInput && boxPackSellInput.value) {
+      sellPricePack = parseFloat(boxPackSellInput.value) || 0;
+    } else {
+      sellPricePack = packsPerBox > 0 ? sellPriceBox / packsPerBox : 0;
     }
-    showPage('inventory');
+  }
+
+  if (type === "PACK") {
+    buyPricePack = parseFloat(document.getElementById('invBuyPricePack').value) || 0;
+    
+    // Safely look up the second sell field hidden inside packFields container wrap
+    const packFieldsContainer = document.getElementById('packFields');
+    const packSellInput = packFieldsContainer ? packFieldsContainer.querySelector('#invSellPricePack') : null;
+    sellPricePack = packSellInput ? parseFloat(packSellInput.value) || 0 : 0;
+    
+    quantityPacks = parseInt(document.getElementById('invQuantityPacks').value) || 0;
+  }
+
+  const marketPrice = parseFloat(document.getElementById('invMarketPrice').value) || 0;
+  const image = document.getElementById('invImage').value.trim();
+  const notes = document.getElementById('invNotes').value.trim();
+
+  const item = {
+    id: editMode ? editMode : Date.now(),
+    type,
+    name,
+    category,
+    supplier,
+    buyPriceBox,
+    buyPricePack,
+    sellPriceBox,
+    sellPricePack,
+    packsPerBox,
+    quantityBoxes,
+    manualPacks,
+    quantityPacks,
+    openedBoxes: 0,
+    marketPrice,
+    image,
+    notes
   };
 
-  function showPage(page) {
-    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-    const targetPage = document.getElementById(page + 'Page');
-    if (targetPage) targetPage.style.display = 'block';
-
-    try {
-      if (page === 'inventory') {
-        if (typeof renderInventory === 'function') renderInventory();
-        else internalInventoryGridFallback();
-      }
-      if (page === 'sales' && typeof renderSales === 'function') renderSales();
-      if (page === 'summary' && typeof renderSummary === 'function') renderSummary();
-      if (page === 'suppliers' && typeof renderSuppliers === 'function') renderSuppliers();
-      if (page === 'trades' && typeof renderTrades === 'function') renderTrades();
-      if (page === 'portfolio' && typeof renderPortfolio === 'function') renderPortfolio();
-      if (page === 'expenses' && typeof renderExpenses === 'function') renderExpenses();
-    } catch (e) {
-      console.warn("External module execution fault trapped:", e);
-      if (page === 'inventory') internalInventoryGridFallback();
-    }
-
-    if (typeof renderTaxSummary === 'function') {
-      try { renderTaxSummary(); } catch(err) { updateTaxUIFallback(); }
-    } else {
-      updateTaxUIFallback();
-    }
+  if (editMode) {
+    inventoryData = inventoryData.filter(i => i.id !== editMode);
+    editMode = null;
+    document.getElementById('addBtn').textContent = "Add to inventory";
   }
 
-  function updateTaxUIFallback() {
-    const ts = document.getElementById('taxSummary');
-    if (ts) ts.innerHTML = `<div style="font-family:sans-serif; font-size:13px; color:#999;">Ledger Storage Protection Armed</div>`;
+  inventoryData.push(item);
+  saveData();
+  renderInventory();
+
+  document.getElementById('inventoryForm').reset();
+  
+  // Force reset visibility of optional structural box fields
+  document.getElementById('boxFields').style.display = "none";
+  document.getElementById('packFields').style.display = "none";
+}
+
+// ===============================
+// EDIT ITEM
+// ===============================
+function editItem(id) {
+  loadData();
+
+  const item = inventoryData.find(i => i.id === id);
+  if (!item) return;
+
+  editMode = id;
+  document.getElementById('addBtn').textContent = "Update product";
+
+  const typeSelect = document.getElementById('invType');
+  const boxFields = document.getElementById('boxFields');
+  const packFields = document.getElementById('packFields');
+
+  typeSelect.value = item.type;
+
+  if (item.type === "BOX") {
+    boxFields.style.display = "block";
+    packFields.style.display = "none";
+  } else {
+    boxFields.style.display = "none";
+    packFields.style.display = "block";
   }
 
-  // Intercept entries and process calculations if inventory.js fails
-  function addInventoryItem(event) {
-    event.preventDefault();
+  document.getElementById('invName').value = item.name;
+  document.getElementById('invCategory').value = item.category || '';
+  document.getElementById('invSupplier').value = item.supplier || '';
 
-    if (window.addInventoryItemAction) {
-      try {
-        window.addInventoryItemAction(event);
-        return;
-      } catch (err) { console.error("External routing error, fallback initialized:", err); }
-    }
-
-    const newItem = {
-      id: Date.now(),
-      type: document.getElementById('invType').value,
-      name: document.getElementById('invName').value,
-      category: document.getElementById('invCategory').value,
-      supplier: document.getElementById('invSupplier').value || 'None',
-      marketPrice: parseFloat(document.getElementById('invMarketPrice').value) || 0,
-      image: document.getElementById('invImage').value || 'Logo.png',
-      notes: document.getElementById('invNotes').value || '',
-      buyPriceBox: parseFloat(document.getElementById('invBuyPriceBox')?.value) || 0,
-      packsPerBox: parseInt(document.getElementById('invPacksPerBox')?.value) || 1,
-      sellPriceBox: parseFloat(document.getElementById('invSellPriceBox')?.value) || 0,
-      sellPricePack: parseFloat(document.getElementById('invSellPricePack')?.value) || 0,
-      quantityBoxes: parseInt(document.getElementById('invQuantityBoxes')?.value) || 0,
-      manualPacks: parseInt(document.getElementById('invManualPacks')?.value) || 0,
-      buyPricePack: parseFloat(document.getElementById('invBuyPricePack')?.value) || 0,
-      quantityPacks: parseInt(document.getElementById('invQuantityPacks')?.value) || 0
-    };
-
-    window.inventoryData.push(newItem);
-    localStorage.setItem('inventoryData', JSON.stringify(window.inventoryData));
-    document.getElementById('inventoryForm').reset();
-    internalInventoryGridFallback();
+  if (item.type === "BOX") {
+    document.getElementById('invBuyPriceBox').value = item.buyPriceBox || 0;
+    document.getElementById('invSellPriceBox').value = item.sellPriceBox || 0;
+    document.getElementById('invPacksPerBox').value = item.packsPerBox || 0;
+    document.getElementById('invQuantityBoxes').value = item.quantityBoxes || 0;
+    document.getElementById('invManualPacks').value = item.manualPacks || 0;
+    
+    const boxPackSellInput = boxFields.querySelector('#invSellPricePack');
+    if (boxPackSellInput) boxPackSellInput.value = item.sellPricePack || 0;
   }
 
-  // Renders structural data loops to shield the table layout view from internal crashes
-  function internalInventoryGridFallback() {
-    const box = document.getElementById("inventoryList");
-    if (!box) return;
-    box.innerHTML = "";
-
-    if (!window.inventoryData || window.inventoryData.length === 0) {
-      box.innerHTML = "<p style='color:#bbb; padding:20px; font-family:sans-serif;'>Inventory ledger clean. Type entry fields above.</p>";
-      return;
-    }
-
-    let ui = `
-      <div style="overflow-x:auto; margin-top:20px; border:1px solid #333; border-radius:6px;">
-        <table style="width:100%; border-collapse:collapse; background:#18181c; text-align:left; font-family:sans-serif; color:#fff;">
-          <thead>
-            <tr style="background:#242428; border-bottom:2px solid #333;">
-              <th style="padding:12px; font-size:13px; color:#ffd700;">Image</th>
-              <th style="padding:12px; font-size:13px; color:#ffd700;">Product Title</th>
-              <th style="padding:12px; font-size:13px; color:#ffd700;">Type</th>
-              <th style="padding:12px; font-size:13px; color:#ffd700;">Category</th>
-              <th style="padding:12px; font-size:13px; color:#ffd700;">Supplier</th>
-              <th style="padding:12px; font-size:13px; color:#ffd700;">Units Available</th>
-              <th style="padding:12px; font-size:13px; color:#ffd700;">Market price</th>
-            </tr>
-          </thead>
-          <tbody>`;
-
-    window.inventoryData.forEach(item => {
-      const units = item.type === 'BOX' ? `${item.quantityBoxes || 0} Boxes` : `${item.quantityPacks || 0} Packs`;
-      const val = parseFloat(item.marketPrice || 0).toFixed(2);
-      const thumbnail = item.image && item.image.trim() !== "" ? item.image : "Logo.png";
-
-      ui += `
-        <tr style="border-bottom:1px solid #2a2a30; font-size:14px;">
-          <td style="padding:10px;"><img src="${thumbnail}" style="width:40px; height:40px; object-fit:contain; border-radius:4px; background:#222; border:1px solid #444;" onerror="this.src='Logo.png'"></td>
-          <td style="padding:10px; font-weight:bold;">${item.name}</td>
-          <td style="padding:10px; color:#aaa;">${item.type}</td>
-          <td style="padding:10px; color:#aaa;">${item.category}</td>
-          <td style="padding:10px; color:#aaa;">${item.supplier}</td>
-          <td style="padding:10px; font-weight:bold; color:#00ff88;">${units}</td>
-          <td style="padding:10px; font-weight:bold; color:#ffd700;">£${val}</td>
-        </tr>`;
-    });
-
-    ui += `</tbody></table></div>`;
-    box.innerHTML = ui;
+  if (item.type === "PACK") {
+    document.getElementById('invBuyPricePack').value = item.buyPricePack || 0;
+    document.getElementById('invQuantityPacks').value = item.quantityPacks || 0;
+    
+    const packSellInput = packFields.querySelector('#invSellPricePack');
+    if (packSellInput) packSellInput.value = item.sellPricePack || 0;
   }
 
-  function openCustomerPage() {
-    document.getElementById('customerFrame').src = "simple-list.html";
-    showPage('customer');
-  }
+  document.getElementById('invMarketPrice').value = item.marketPrice || 0;
+  document.getElementById('invImage').value = item.image || '';
+  document.getElementById('invNotes').value = item.notes || '';
+}
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const typeSelect = document.getElementById('invType');
-    const boxFields = document.getElementById('boxFields');
-    const packFields = document.getElementById('packFields');
+// ===============================
+// COPY ITEM
+// ===============================
+function copyItem(id) {
+  loadData();
 
-    if (typeSelect && boxFields && packFields) {
-      typeSelect.addEventListener('change', () => {
-        if (typeSelect.value === 'BOX') {
-          boxFields.style.display = 'block';
-          packFields.style.display = 'none';
-        } else if (typeSelect.value === 'PACK') {
-          boxFields.style.display = 'none';
-          packFields.style.display = 'block';
-        } else {
-          boxFields.style.display = 'none';
-          packFields.style.display = 'none';
-        }
-      });
-    }
-  });
-</script>
-</body>
-</html>
+  const item = inventoryData.find(i => i.id === id);
+  if (!item) return;
+
+  const copy = { ...item, id: Date.now() };
+  inventoryData.push(copy);
+  saveData();
+  renderInventory();
+}
+
+// ===============================
+// DELETE ITEM
+// ===============================
+function deleteItem(id) {
+  loadData();
+
+  inventoryData = inventoryData.filter(i => i.id !== id);
+  saveData();
+  renderInventory();
+}
+
+// ===============================
+// INITIAL LOAD
+// ===============================
+document.addEventListener('DOMContentLoaded', () => {
+  renderInventory();
+});
