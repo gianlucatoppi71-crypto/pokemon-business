@@ -200,45 +200,49 @@
   window.onload = () => {
     showPage('inventory');
     renderInventory();
-    renderSummary();
-    renderTaxSummary();
+    if (typeof renderSummary === 'function') renderSummary();
+    if (typeof renderTaxSummary === 'function') renderTaxSummary();
   };
 
   function showPage(page) {
     document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-    document.getElementById(page + 'Page').style.display = 'block';
+    const targetPage = document.getElementById(page + 'Page');
+    if (targetPage) targetPage.style.display = 'block';
 
-    if (page === 'summary') renderSummary();
-    if (page === 'suppliers') renderSuppliers();
-    if (page === 'trades') renderTrades();
-    if (page === 'portfolio') renderPortfolio();
-    if (page === 'expenses') renderExpenses();
-    if (page === 'sales') renderSales();
+    if (page === 'summary' && typeof renderSummary === 'function') renderSummary();
+    if (page === 'suppliers' && typeof renderSuppliers === 'function') renderSuppliers();
+    if (page === 'trades' && typeof renderTrades === 'function') renderTrades();
+    if (page === 'portfolio' && typeof renderPortfolio === 'function') renderPortfolio();
+    if (page === 'expenses' && typeof renderExpenses === 'function') renderExpenses();
+    if (page === 'sales' && typeof renderSales === 'function') renderSales();
   }
 
-  /* UPDATED TO USE simple-list.html */
   function openCustomerPage() {
     document.getElementById('customerFrame').src = "simple-list.html";
     showPage('customer');
   }
 
-  const typeSelect = document.getElementById('invType');
-  const boxFields = document.getElementById('boxFields');
-  const packFields = document.getElementById('packFields');
+  // Safely restore dropdown form visibility changes
+  document.addEventListener('DOMContentLoaded', () => {
+    const typeSelect = document.getElementById('invType');
+    const boxFields = document.getElementById('boxFields');
+    const packFields = document.getElementById('packFields');
 
-  typeSelect.addEventListener('change', () => {
-    if (typeSelect.value === "BOX") {
-      boxFields.style.display = "block";
-      packFields.style.display = "none";
-    } else if (typeSelect.value === "PACK") {
-      boxFields.style.display = "none";
-      packFields.style.display = "block";
-    } else {
-      boxFields.style.display = "none";
-      packFields.style.display = "none";
+    if (typeSelect && boxFields && packFields) {
+      typeSelect.addEventListener('change', () => {
+        if (typeSelect.value === 'BOX') {
+          boxFields.style.display = 'block';
+          packFields.style.display = 'none';
+        } else if (typeSelect.value === 'PACK') {
+          boxFields.style.display = 'none';
+          packFields.style.display = 'block';
+        } else {
+          boxFields.style.display = 'none';
+          packFields.style.display = 'none';
+        }
+      });
     }
   });
 </script>
-
 </body>
 </html>
