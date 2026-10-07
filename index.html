@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=1002">
-
-  <!-- Chart.js (no longer used but kept for safety) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css?v=1003">
 </head>
 <body>
 
@@ -15,7 +12,6 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <img src="Logo.png" alt="Flux TCG Logo" class="app-logo">
-
     <nav>
       <button onclick="showPage('inventory')">Inventory</button>
       <button onclick="showPage('sales')">Sales</button>
@@ -25,33 +21,23 @@
       <button onclick="showPage('portfolio')">Portfolio</button>
       <button onclick="showPage('expenses')">Expenses</button>
       <button onclick="showPage('invoice')">Invoice</button>
-
-      <!-- UPDATED BUTTON -->
       <button onclick="openCustomerPage()">Customer List</button>
     </nav>
-
-    <div class="tax-info">
-      <h3>Tax Summary</h3>
-      <div id="taxSummary"></div>
-    </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN CONTENT AREA -->
   <main class="main">
 
     <!-- INVENTORY PAGE -->
     <section id="inventoryPage" class="page">
-      <h1>Inventory</h1>
-
+      <h1>Inventory Ledger</h1>
       <form id="inventoryForm" onsubmit="addInventoryItem(event)">
         <select id="invType" required>
           <option value="">Select product type</option>
           <option value="BOX">BOX</option>
           <option value="PACK">PACK</option>
         </select>
-
         <input type="text" id="invName" placeholder="Product name" required>
-
         <select id="invCategory" required>
           <option value="">Select category</option>
           <option>Booster Box</option>
@@ -65,13 +51,8 @@
           <option>Sleeved Pack</option>
           <option>Promo Pack</option>
           <option>Japanese Box</option>
-          <option>Korean Box</option>
-          <option>Chinese Box</option>
-          <option>Deck</option>
-          <option>Bundle</option>
           <option>Other</option>
         </select>
-
         <select id="invSupplier" required></select>
 
         <div id="boxFields" style="display:none">
@@ -92,93 +73,24 @@
         <input type="number" step="0.01" id="invMarketPrice" placeholder="UK market price (£)">
         <input type="text" id="invImage" placeholder="Image URL (optional)">
         <textarea id="invNotes" placeholder="Notes (optional)"></textarea>
-
         <button type="submit" id="addBtn">Add to inventory</button>
       </form>
-
       <div id="inventoryList" class="inventory-container"></div>
     </section>
 
     <!-- SALES PAGE -->
     <section id="salesPage" class="page" style="display:none">
-      <h1>Sales</h1>
-
-      <div class="sales-dashboard-bar">
-        <div class="sales-dashboard-layout">
-          <div id="salesDashboard"></div>
-
-          <div class="sales-chart-wrapper">
-            <div id="personalExpensesPanel" class="dashboard-card"
-                 style="width:100%; text-align:center; margin-bottom:20px;">
-            </div>
-
-            <div id="salesProductSummary" class="sales-product-summary"></div>
-            <div id="personalCollectionPanel" class="personal-collection-panel"></div>
-          </div>
-        </div>
-      </div>
-
+      <h1>Sales Ledger History</h1>
       <div id="salesList"></div>
     </section>
 
-    <!-- SUMMARY PAGE -->
-    <section id="summaryPage" class="page" style="display:none"></section>
-
-    <!-- SUPPLIERS PAGE -->
-    <section id="suppliersPage" class="page" style="display:none">
-      <h1>Suppliers</h1>
-
-      <form id="supplierForm" onsubmit="addSupplier(event)">
-        <input type="text" id="supName" placeholder="Supplier name" required>
-        <input type="text" id="supAddress" placeholder="Address (optional)">
-        <input type="text" id="supWebsite" placeholder="Website URL (optional)">
-        <textarea id="supNotes" placeholder="Notes (optional)"></textarea>
-        <button type="submit">Add Supplier</button>
-      </form>
-
-      <div id="supplierList" class="supplier-container"></div>
-    </section>
-
-    <!-- TRADES PAGE -->
-    <section id="tradesPage" class="page" style="display:none"></section>
-
-    <!-- PORTFOLIO PAGE -->
-    <section id="portfolioPage" class="page" style="display:none">
-      <h1>Portfolio</h1>
-
-      <form id="portfolioForm" onsubmit="addPortfolio(event)">
-        <input type="text" id="portName" placeholder="Portfolio name" required>
-        <input type="text" id="portDesc" placeholder="Description" required>
-        <input type="text" id="portImage" placeholder="Image URL" required>
-        <input type="text" id="portLink" placeholder="Link to app" required>
-        <button type="submit">Add Portfolio</button>
-      </form>
-
-      <div id="portfolioList" class="portfolio-container"></div>
-    </section>
-
-    <!-- EXPENSES PAGE -->
-    <section id="expensesPage" class="page" style="display:none">
-      <h1>Expenses</h1>
-
-      <form id="expensesForm" onsubmit="addExpense(event)">
-        <input type="text" id="expDesc" placeholder="Expense description" required>
-        <input type="number" step="0.01" id="expAmount" placeholder="Amount (£)" required>
-        <input type="date" id="expDate" required>
-        <input type="text" id="expCategory" placeholder="Category (optional)">
-        <button type="submit">Add Expense</button>
-      </form>
-
-      <div id="expensesList"></div>
-    </section>
-
-    <!-- INVOICE PAGE -->
-    <section id="invoicePage" class="page" style="display:none">
-      <h1>Invoice</h1>
-      <div id="invoiceContent"></div>
-    </section>
-
-    <!-- CUSTOMER PAGE -->
+    <!-- OTHER PLACEHOLDER PAGES -->
+    <section id="summaryPage" class="page" style="display:none"><h1>Summary Dashboard</h1></section>
+    <section id="suppliersPage" class="page" style="display:none"><h1>Suppliers</h1></section>
+    <section id="tradesPage" class="page" style="display:none"><h1>Trades</h1></section>
+    <section id="portfolioPage" class="page" style="display:none"><h1>Portfolio</h1></section>
+    <section id="expensesPage" class="page" style="display:none"><h1>Expenses</h1></section>
+    <section id="invoicePage" class="page" style="display:none"><h1>Invoices</h1></section>
     <section id="customerPage" class="page" style="display:none">
       <iframe id="customerFrame" src="" style="width:100%; height:100vh; border:none;"></iframe>
     </section>
@@ -186,22 +98,20 @@
   </main>
 </div>
 
-<!-- SCRIPTS -->
-<script src="data.js?v=1002"></script>
-<script src="inventory.js?v=1002"></script>
-<script src="sales.js?v=1002"></script>
-<script src="summary.js?v=1002"></script>
-<script src="suppliers.js?v=1002"></script>
-<script src="trades.js?v=1002"></script>
-<script src="portfolio.js?v=1002"></script>
-<script src="expenses.js?v=1002"></script>
+<!-- COMPILING HOOKS -->
+<script src="data.js?v=1003"></script>
+<script src="inventory.js?v=1003"></script>
+<script src="sales.js?v=1003"></script>
+<script src="summary.js?v=1003"></script>
+<script src="suppliers.js?v=1003"></script>
+<script src="trades.js?v=1003"></script>
+<script src="portfolio.js?v=1003"></script>
+<script src="expenses.js?v=1003"></script>
 
 <script>
   window.onload = () => {
     showPage('inventory');
-    renderInventory();
-    if (typeof renderSummary === 'function') renderSummary();
-    if (typeof renderTaxSummary === 'function') renderTaxSummary();
+    if (typeof renderInventory === 'function') renderInventory();
   };
 
   function showPage(page) {
@@ -209,11 +119,7 @@
     const targetPage = document.getElementById(page + 'Page');
     if (targetPage) targetPage.style.display = 'block';
 
-    if (page === 'summary' && typeof renderSummary === 'function') renderSummary();
-    if (page === 'suppliers' && typeof renderSuppliers === 'function') renderSuppliers();
-    if (page === 'trades' && typeof renderTrades === 'function') renderTrades();
-    if (page === 'portfolio' && typeof renderPortfolio === 'function') renderPortfolio();
-    if (page === 'expenses' && typeof renderExpenses === 'function') renderExpenses();
+    if (page === 'inventory' && typeof renderInventory === 'function') renderInventory();
     if (page === 'sales' && typeof renderSales === 'function') renderSales();
   }
 
@@ -222,7 +128,6 @@
     showPage('customer');
   }
 
-  // Safely restore dropdown form visibility changes
   document.addEventListener('DOMContentLoaded', () => {
     const typeSelect = document.getElementById('invType');
     const boxFields = document.getElementById('boxFields');
