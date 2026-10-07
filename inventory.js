@@ -55,15 +55,20 @@ function renderInventory() {
   const tbody = document.getElementById('excelTableBody');
 
   inventoryData.forEach((item) => {
+    // If it's a PACK type, use quantityPacks as total, otherwise calculate BOX counts
     const totalPacks =
       item.type === "BOX"
-        ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
-        : item.quantityPacks;
+        ? (parseInt(item.quantityBoxes) * parseInt(item.packsPerBox || 0)) + parseInt(item.manualPacks || 0)
+        : parseInt(item.quantityPacks || 0);
 
     const row = document.createElement('tr');
     row.className = 'excel-row';
 
     const saleTypeId = `saleType_${item.id}`;
+
+    // Gracefully handle default display values for PACK types vs BOX types
+    const displayBuyPriceBox = item.type === "BOX" ? `£${(item.buyPriceBox || 0).toFixed(2)}` : `£${(item.buyPricePack || 0).toFixed(2)} (Pack)`;
+    const displaySellPriceBox = item.type === "BOX" ? `£${(item.sellPriceBox || 0).toFixed(2)}` : "—";
 
     row.innerHTML = `
       <td class="cell-center">
@@ -72,8 +77,8 @@ function renderInventory() {
       <td class="cell-bold">${item.name}</td>
       <td>${item.category || '—'}</td>
       <td>${item.supplier || '—'}</td>
-      <td class="cell-price">£${(item.buyPriceBox || 0).toFixed(2)}</td>
-      <td class="cell-price">£${(item.sellPriceBox || 0).toFixed(2)}</td>
+      <td class="cell-price">${displayBuyPriceBox}</td>
+      <td class="cell-price">${displaySellPriceBox}</td>
       <td class="cell-price">£${(item.sellPricePack || 0).toFixed(2)}</td>
       <td class="cell-center">${item.packsPerBox || 0}</td>
       <td class="cell-center">${item.quantityBoxes || 0}</td>
@@ -115,6 +120,7 @@ function addInventoryItem(event) {
   if (!name || !type) return;
 
   let buyPriceBox = 0;
+  let buyPricePack = 0;
   let sellPriceBox = 0;
   let sellPricePack = 0;
   let packsPerBox = 0;
@@ -129,11 +135,23 @@ function addInventoryItem(event) {
     quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value) || 0;
     manualPacks = parseInt(document.getElementById('invManualPacks').value) || 0;
 
-    sellPricePack = packsPerBox > 0 ? sellPriceBox / packsPerBox : 0;
+    // Use query selector safely to read the pack calculation input variant fields if active
+    const boxPackSellInput = document.querySelector('#boxFields #invSellPricePack');
+    if (boxPackSellInput && boxPackSellInput.value) {
+      sellPricePack = parseFloat(boxPackSellInput.value) || 0;
+    } else {
+      sellPricePack = packsPerBox > 0 ? sellPriceBox / packsPerBox : 0;
+    }
   }
 
   if (type === "PACK") {
-    sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
+    buyPricePack = parseFloat(document.getElementById('invBuyPricePack').value) || 0;
+    
+    // Safely look up the second sell field hidden inside packFields container wrap
+    const packFieldsContainer = document.getElementById('packFields');
+    const packSellInput = packFieldsContainer ? packFieldsContainer.querySelector('#invSellPricePack') : null;
+    sellPricePack = packSellInput ? parseFloat(packSellInput.value) || 0 : 0;
+    
     quantityPacks = parseInt(document.getElementById('invQuantityPacks').value) || 0;
   }
 
@@ -148,6 +166,7 @@ function addInventoryItem(event) {
     category,
     supplier,
     buyPriceBox,
+    buyPricePack,
     sellPriceBox,
     sellPricePack,
     packsPerBox,
@@ -171,6 +190,10 @@ function addInventoryItem(event) {
   renderInventory();
 
   document.getElementById('inventoryForm').reset();
+  
+  // Force reset visibility of optional structural box fields
+  document.getElementById('boxFields').style.display = "none";
+  document.getElementById('packFields').style.display = "none";
 }
 
 // ===============================
@@ -209,11 +232,17 @@ function editItem(id) {
     document.getElementById('invPacksPerBox').value = item.packsPerBox || 0;
     document.getElementById('invQuantityBoxes').value = item.quantityBoxes || 0;
     document.getElementById('invManualPacks').value = item.manualPacks || 0;
+    
+    const boxPackSellInput = boxFields.querySelector('#invSellPricePack');
+    if (boxPackSellInput) boxPackSellInput.value = item.sellPricePack || 0;
   }
 
   if (item.type === "PACK") {
-    document.getElementById('invSellPricePack').value = item.sellPricePack || 0;
+    document.getElementById('invBuyPricePack').value = item.buyPricePack || 0;
     document.getElementById('invQuantityPacks').value = item.quantityPacks || 0;
+    
+    const packSellInput = packFields.querySelector('#invSellPricePack');
+    if (packSellInput) packSellInput.value = item.sellPricePack || 0;
   }
 
   document.getElementById('invMarketPrice').value = item.marketPrice || 0;
