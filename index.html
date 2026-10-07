@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=1002">
-
-  <!-- Chart.js (no longer used but kept for safety) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css?v=1004">
+  <!-- Chart.js placeholder for safety -->
+  <script src="https://jsdelivr.net"></script>
 </head>
 <body>
 
@@ -25,8 +24,6 @@
       <button onclick="showPage('portfolio')">Portfolio</button>
       <button onclick="showPage('expenses')">Expenses</button>
       <button onclick="showPage('invoice')">Invoice</button>
-
-      <!-- UPDATED BUTTON -->
       <button onclick="openCustomerPage()">Customer List</button>
     </nav>
 
@@ -36,12 +33,12 @@
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN CONTENT AREA -->
   <main class="main">
 
     <!-- INVENTORY PAGE -->
     <section id="inventoryPage" class="page">
-      <h1>Inventory</h1>
+      <h1>Inventory Ledger</h1>
 
       <form id="inventoryForm" onsubmit="addInventoryItem(event)">
         <select id="invType" required>
@@ -101,17 +98,14 @@
 
     <!-- SALES PAGE -->
     <section id="salesPage" class="page" style="display:none">
-      <h1>Sales</h1>
+      <h1>Sales Ledger History</h1>
 
       <div class="sales-dashboard-bar">
         <div class="sales-dashboard-layout">
           <div id="salesDashboard"></div>
 
           <div class="sales-chart-wrapper">
-            <div id="personalExpensesPanel" class="dashboard-card"
-                 style="width:100%; text-align:center; margin-bottom:20px;">
-            </div>
-
+            <div id="personalExpensesPanel" class="dashboard-card" style="width:100%; text-align:center; margin-bottom:20px;"></div>
             <div id="salesProductSummary" class="sales-product-summary"></div>
             <div id="personalCollectionPanel" class="personal-collection-panel"></div>
           </div>
@@ -122,7 +116,10 @@
     </section>
 
     <!-- SUMMARY PAGE -->
-    <section id="summaryPage" class="page" style="display:none"></section>
+    <section id="summaryPage" class="page" style="display:none">
+      <h1>Summary Dashboard</h1>
+      <div id="summaryContent"></div>
+    </section>
 
     <!-- SUPPLIERS PAGE -->
     <section id="suppliersPage" class="page" style="display:none">
@@ -140,11 +137,14 @@
     </section>
 
     <!-- TRADES PAGE -->
-    <section id="tradesPage" class="page" style="display:none"></section>
+    <section id="tradesPage" class="page" style="display:none">
+      <h1>Trades Management</h1>
+      <div id="tradesList"></div>
+    </section>
 
     <!-- PORTFOLIO PAGE -->
     <section id="portfolioPage" class="page" style="display:none">
-      <h1>Portfolio</h1>
+      <h1>Portfolio Tracking</h1>
 
       <form id="portfolioForm" onsubmit="addPortfolio(event)">
         <input type="text" id="portName" placeholder="Portfolio name" required>
@@ -174,11 +174,11 @@
 
     <!-- INVOICE PAGE -->
     <section id="invoicePage" class="page" style="display:none">
-      <h1>Invoice</h1>
+      <h1>Invoices</h1>
       <div id="invoiceContent"></div>
     </section>
 
-    <!-- CUSTOMER PAGE -->
+    <!-- CUSTOMER LIST PAGE -->
     <section id="customerPage" class="page" style="display:none">
       <iframe id="customerFrame" src="" style="width:100%; height:100vh; border:none;"></iframe>
     </section>
@@ -186,59 +186,63 @@
   </main>
 </div>
 
-<!-- SCRIPTS -->
-<script src="data.js?v=1002"></script>
-<script src="inventory.js?v=1002"></script>
-<script src="sales.js?v=1002"></script>
-<script src="summary.js?v=1002"></script>
-<script src="suppliers.js?v=1002"></script>
-<script src="trades.js?v=1002"></script>
-<script src="portfolio.js?v=1002"></script>
-<script src="expenses.js?v=1002"></script>
+<!-- COMPILING HOOKS -->
+<script src="data.js?v=1004"></script>
+<script src="inventory.js?v=1004"></script>
+<script src="sales.js?v=1004"></script>
+<script src="summary.js?v=1004"></script>
+<script src="suppliers.js?v=1004"></script>
+<script src="trades.js?v=1004"></script>
+<script src="portfolio.js?v=1004"></script>
+<script src="expenses.js?v=1004"></script>
 
 <script>
   window.onload = () => {
     showPage('inventory');
-    renderInventory();
-    renderSummary();
-    renderTaxSummary();
+    if (typeof renderInventory === 'function') renderInventory();
+    if (typeof renderSummary === 'function') renderSummary();
+    if (typeof renderTaxSummary === 'function') renderTaxSummary();
   };
 
   function showPage(page) {
     document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-    document.getElementById(page + 'Page').style.display = 'block';
+    const targetPage = document.getElementById(page + 'Page');
+    if (targetPage) targetPage.style.display = 'block';
 
-    if (page === 'summary') renderSummary();
-    if (page === 'suppliers') renderSuppliers();
-    if (page === 'trades') renderTrades();
-    if (page === 'portfolio') renderPortfolio();
-    if (page === 'expenses') renderExpenses();
-    if (page === 'sales') renderSales();
+    if (page === 'inventory' && typeof renderInventory === 'function') renderInventory();
+    if (page === 'sales' && typeof renderSales === 'function') renderSales();
+    if (page === 'summary' && typeof renderSummary === 'function') renderSummary();
+    if (page === 'suppliers' && typeof renderSuppliers === 'function') renderSuppliers();
+    if (page === 'trades' && typeof renderTrades === 'function') renderTrades();
+    if (page === 'portfolio' && typeof renderPortfolio === 'function') renderPortfolio();
+    if (page === 'expenses' && typeof renderExpenses === 'function') renderExpenses();
   }
 
-  /* UPDATED TO USE simple-list.html */
   function openCustomerPage() {
     document.getElementById('customerFrame').src = "simple-list.html";
     showPage('customer');
   }
 
-  const typeSelect = document.getElementById('invType');
-  const boxFields = document.getElementById('boxFields');
-  const packFields = document.getElementById('packFields');
+  document.addEventListener('DOMContentLoaded', () => {
+    const typeSelect = document.getElementById('invType');
+    const boxFields = document.getElementById('boxFields');
+    const packFields = document.getElementById('packFields');
 
-  typeSelect.addEventListener('change', () => {
-    if (typeSelect.value === "BOX") {
-      boxFields.style.display = "block";
-      packFields.style.display = "none";
-    } else if (typeSelect.value === "PACK") {
-      boxFields.style.display = "none";
-      packFields.style.display = "block";
-    } else {
-      boxFields.style.display = "none";
-      packFields.style.display = "none";
+    if (typeSelect && boxFields && packFields) {
+      typeSelect.addEventListener('change', () => {
+        if (typeSelect.value === 'BOX') {
+          boxFields.style.display = 'block';
+          packFields.style.display = 'none';
+        } else if (typeSelect.value === 'PACK') {
+          boxFields.style.display = 'none';
+          packFields.style.display = 'block';
+        } else {
+          boxFields.style.display = 'none';
+          packFields.style.display = 'none';
+        }
+      });
     }
   });
 </script>
-
 </body>
 </html>
