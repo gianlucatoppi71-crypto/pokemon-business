@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=1003">
+  <link rel="stylesheet" href="style.css?v=1004">
 </head>
 <body>
 
@@ -23,6 +23,12 @@
       <button onclick="showPage('invoice')">Invoice</button>
       <button onclick="openCustomerPage()">Customer List</button>
     </nav>
+
+    <!-- CRITICAL FIX: Restored missing taxSummary box to prevent loading freeze -->
+    <div class="tax-info" style="margin-top: 20px; padding: 10px; background: #1e1e1e; border-radius: 6px;">
+      <h3>Tax Summary</h3>
+      <div id="taxSummary"></div>
+    </div>
   </aside>
 
   <!-- MAIN CONTENT AREA -->
@@ -81,16 +87,71 @@
     <!-- SALES PAGE -->
     <section id="salesPage" class="page" style="display:none">
       <h1>Sales Ledger History</h1>
-      <div id="salesList"></div>
+      
+      <!-- CRITICAL FIX: Restored side panel sections to align with sales functions -->
+      <div style="display: flex; gap: 20px; align-items: start; margin-top: 20px;">
+        <div id="salesList" style="flex: 1;"></div>
+        <div style="width: 360px; display: flex; flex-direction: column; gap: 20px;">
+          <div id="salesDashboard"></div>
+          <div id="personalExpensesPanel"></div>
+          <div id="salesProductSummary"></div>
+          <div id="personalCollectionPanel"></div>
+        </div>
+      </div>
     </section>
 
-    <!-- OTHER PLACEHOLDER PAGES -->
-    <section id="summaryPage" class="page" style="display:none"><h1>Summary Dashboard</h1></section>
-    <section id="suppliersPage" class="page" style="display:none"><h1>Suppliers</h1></section>
-    <section id="tradesPage" class="page" style="display:none"><h1>Trades</h1></section>
-    <section id="portfolioPage" class="page" style="display:none"><h1>Portfolio</h1></section>
-    <section id="expensesPage" class="page" style="display:none"><h1>Expenses</h1></section>
-    <section id="invoicePage" class="page" style="display:none"><h1>Invoices</h1></section>
+    <!-- FULLY FUNCTIONAL SUBPAGES (RESTORED FROM BACKUP SCHEMAS) -->
+    <section id="summaryPage" class="page" style="display:none">
+      <h1>Business Analytics Summary</h1>
+      <div id="summaryContent"></div>
+    </section>
+
+    <section id="suppliersPage" class="page" style="display:none">
+      <h1>Suppliers</h1>
+      <form id="supplierForm" onsubmit="addSupplier(event)">
+        <input type="text" id="supName" placeholder="Supplier name" required>
+        <input type="text" id="supAddress" placeholder="Address (optional)">
+        <input type="text" id="supWebsite" placeholder="Website URL (optional)">
+        <textarea id="supNotes" placeholder="Notes (optional)"></textarea>
+        <button type="submit">Add Supplier</button>
+      </form>
+      <div id="supplierList" class="supplier-container"></div>
+    </section>
+
+    <section id="tradesPage" class="page" style="display:none">
+      <h1>Trades Management</h1>
+      <div id="tradesList"></div>
+    </section>
+
+    <section id="portfolioPage" class="page" style="display:none">
+      <h1>Portfolio Tracking</h1>
+      <form id="portfolioForm" onsubmit="addPortfolio(event)">
+        <input type="text" id="portName" placeholder="Portfolio name" required>
+        <input type="text" id="portDesc" placeholder="Description" required>
+        <input type="text" id="portImage" placeholder="Image URL" required>
+        <input type="text" id="portLink" placeholder="Link to app" required>
+        <button type="submit">Add Portfolio</button>
+      </form>
+      <div id="portfolioList" class="portfolio-container"></div>
+    </section>
+
+    <section id="expensesPage" class="page" style="display:none">
+      <h1>Expenses</h1>
+      <form id="expensesForm" onsubmit="addExpense(event)">
+        <input type="text" id="expDesc" placeholder="Expense description" required>
+        <input type="number" step="0.01" id="expAmount" placeholder="Amount (£)" required>
+        <input type="date" id="expDate" required>
+        <input type="text" id="expCategory" placeholder="Category (optional)">
+        <button type="submit">Add Expense</button>
+      </form>
+      <div id="expensesList"></div>
+    </section>
+
+    <section id="invoicePage" class="page" style="display:none">
+      <h1>Invoices</h1>
+      <div id="invoiceContent"></div>
+    </section>
+
     <section id="customerPage" class="page" style="display:none">
       <iframe id="customerFrame" src="" style="width:100%; height:100vh; border:none;"></iframe>
     </section>
@@ -99,19 +160,21 @@
 </div>
 
 <!-- COMPILING HOOKS -->
-<script src="data.js?v=1003"></script>
-<script src="inventory.js?v=1003"></script>
-<script src="sales.js?v=1003"></script>
-<script src="summary.js?v=1003"></script>
-<script src="suppliers.js?v=1003"></script>
-<script src="trades.js?v=1003"></script>
-<script src="portfolio.js?v=1003"></script>
-<script src="expenses.js?v=1003"></script>
+<script src="data.js?v=1004"></script>
+<script src="inventory.js?v=1004"></script>
+<script src="sales.js?v=1004"></script>
+<script src="summary.js?v=1004"></script>
+<script src="suppliers.js?v=1004"></script>
+<script src="trades.js?v=1004"></script>
+<script src="portfolio.js?v=1004"></script>
+<script src="expenses.js?v=1004"></script>
 
 <script>
   window.onload = () => {
     showPage('inventory');
     if (typeof renderInventory === 'function') renderInventory();
+    if (typeof renderSummary === 'function') renderSummary();
+    if (typeof renderTaxSummary === 'function') renderTaxSummary();
   };
 
   function showPage(page) {
@@ -121,6 +184,11 @@
 
     if (page === 'inventory' && typeof renderInventory === 'function') renderInventory();
     if (page === 'sales' && typeof renderSales === 'function') renderSales();
+    if (page === 'summary' && typeof renderSummary === 'function') renderSummary();
+    if (page === 'suppliers' && typeof renderSuppliers === 'function') renderSuppliers();
+    if (page === 'trades' && typeof renderTrades === 'function') renderTrades();
+    if (page === 'portfolio' && typeof renderPortfolio === 'function') renderPortfolio();
+    if (page === 'expenses' && typeof renderExpenses === 'function') renderExpenses();
   }
 
   function openCustomerPage() {
