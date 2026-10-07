@@ -175,6 +175,7 @@ function renderInventory() {
               <button onclick="if(typeof sellBox==='function') sellBox(\${item.id}); else alert('Sales system link offline')" style="background:#ffd700; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">Sell Box</button>
             ` : ''}
             <button onclick="if(typeof sellPack==='function') sellPack(${item.id}); else alert('Sales system link offline')" style="background:#00ff88; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">Sell Pack</button>
+            <button onclick="deleteInventoryItem(${item.id})" style="background:#d32f2f; color:#fff; padding:4px 8px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">Delete</button>
           </div>
         </td>
       </tr>`;
@@ -184,5 +185,15 @@ function renderInventory() {
   container.innerHTML = html;
 }
 
+// Global data utility to remove items directly from the ledger row list view
+function deleteInventoryItem(id) {
+  if (confirm("Are you sure you want to remove this item from your inventory?")) {
+    window.inventoryData = window.inventoryData.filter(i => i.id !== id);
+    saveInventoryState();
+    renderInventory();
+  }
+}
+
 // Global window registration map
 window.renderInventory = renderInventory;
+window.deleteInventoryItem = deleteInventoryItem;
