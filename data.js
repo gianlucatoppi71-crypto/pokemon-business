@@ -10,6 +10,7 @@ let suppliersData = [];
 let tradesData = [];
 let portfolioData = [];
 let customerData = [];
+let personalCollectionData = [];   // ⭐ NEW — personal collection storage
 
 // Business settings
 let annualIncome = 37000;        // default UK income
@@ -28,6 +29,7 @@ function loadData() {
     tradesData    = JSON.parse(localStorage.getItem("tradesData"))    || [];
     portfolioData = JSON.parse(localStorage.getItem("portfolioData")) || [];
     customerData  = JSON.parse(localStorage.getItem("customerData"))  || [];
+    personalCollectionData = JSON.parse(localStorage.getItem("personalCollectionData")) || []; // ⭐ NEW
 
     annualIncome      = parseFloat(localStorage.getItem("annualIncome"))      || 37000;
     tradingAllowance  = parseFloat(localStorage.getItem("tradingAllowance"))  || 1000;
@@ -49,6 +51,7 @@ function saveData() {
     localStorage.setItem("tradesData",    JSON.stringify(tradesData));
     localStorage.setItem("portfolioData", JSON.stringify(portfolioData));
     localStorage.setItem("customerData",  JSON.stringify(customerData));
+    localStorage.setItem("personalCollectionData", JSON.stringify(personalCollectionData)); // ⭐ NEW
 
     localStorage.setItem("annualIncome",     annualIncome.toString());
     localStorage.setItem("tradingAllowance", tradingAllowance.toString());

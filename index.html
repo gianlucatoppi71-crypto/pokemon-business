@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Flux TCG Collector App</title>
-  <link rel="stylesheet" href="style.css?v=999">
+  <link rel="stylesheet" href="style.css?v=1002">
+
+  <!-- Chart.js (no longer used but kept for safety) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -11,7 +14,7 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h2>Flux TCG</h2>
+    <img src="Logo.png" alt="Flux TCG Logo" class="app-logo">
 
     <nav>
       <button onclick="showPage('inventory')">Inventory</button>
@@ -21,6 +24,9 @@
       <button onclick="showPage('trades')">Trades</button>
       <button onclick="showPage('portfolio')">Portfolio</button>
       <button onclick="showPage('expenses')">Expenses</button>
+      <button onclick="showPage('invoice')">Invoice</button>
+
+      <!-- UPDATED BUTTON -->
       <button onclick="openCustomerPage()">Customer List</button>
     </nav>
 
@@ -37,8 +43,7 @@
     <section id="inventoryPage" class="page">
       <h1>Inventory</h1>
 
-      <form id="inventoryForm">
-
+      <form id="inventoryForm" onsubmit="addInventoryItem(event)">
         <select id="invType" required>
           <option value="">Select product type</option>
           <option value="BOX">BOX</option>
@@ -88,7 +93,7 @@
         <input type="text" id="invImage" placeholder="Image URL (optional)">
         <textarea id="invNotes" placeholder="Notes (optional)"></textarea>
 
-        <button type="submit">Add to inventory</button>
+        <button type="submit" id="addBtn">Add to inventory</button>
       </form>
 
       <div id="inventoryList" class="inventory-container"></div>
@@ -97,6 +102,22 @@
     <!-- SALES PAGE -->
     <section id="salesPage" class="page" style="display:none">
       <h1>Sales</h1>
+
+      <div class="sales-dashboard-bar">
+        <div class="sales-dashboard-layout">
+          <div id="salesDashboard"></div>
+
+          <div class="sales-chart-wrapper">
+            <div id="personalExpensesPanel" class="dashboard-card"
+                 style="width:100%; text-align:center; margin-bottom:20px;">
+            </div>
+
+            <div id="salesProductSummary" class="sales-product-summary"></div>
+            <div id="personalCollectionPanel" class="personal-collection-panel"></div>
+          </div>
+        </div>
+      </div>
+
       <div id="salesList"></div>
     </section>
 
@@ -151,6 +172,12 @@
       <div id="expensesList"></div>
     </section>
 
+    <!-- INVOICE PAGE -->
+    <section id="invoicePage" class="page" style="display:none">
+      <h1>Invoice</h1>
+      <div id="invoiceContent"></div>
+    </section>
+
     <!-- CUSTOMER PAGE -->
     <section id="customerPage" class="page" style="display:none">
       <iframe id="customerFrame" src="" style="width:100%; height:100vh; border:none;"></iframe>
@@ -159,21 +186,20 @@
   </main>
 </div>
 
-<!-- SCRIPTS (NEW SYSTEM, CACHE-BUSTED) -->
-<script src="data.js?v=999"></script>
-<script src="inventory.js?v=999"></script>
-<script src="sales.js?v=999"></script>
-<script src="summary.js?v=999"></script>
-<script src="suppliers.js?v=999"></script>
-<script src="trades.js?v=999"></script>
-<script src="portfolio.js?v=999"></script>
-<script src="expenses.js?v=999"></script>
+<!-- SCRIPTS -->
+<script src="data.js?v=1002"></script>
+<script src="inventory.js?v=1002"></script>
+<script src="sales.js?v=1002"></script>
+<script src="summary.js?v=1002"></script>
+<script src="suppliers.js?v=1002"></script>
+<script src="trades.js?v=1002"></script>
+<script src="portfolio.js?v=1002"></script>
+<script src="expenses.js?v=1002"></script>
 
 <script>
   window.onload = () => {
     showPage('inventory');
     renderInventory();
-    renderSalesInventory();
     renderSummary();
     renderTaxSummary();
   };
@@ -187,10 +213,12 @@
     if (page === 'trades') renderTrades();
     if (page === 'portfolio') renderPortfolio();
     if (page === 'expenses') renderExpenses();
+    if (page === 'sales') renderSales();
   }
 
+  /* UPDATED TO USE simple-list.html */
   function openCustomerPage() {
-    document.getElementById('customerFrame').src = "customer-list.html";
+    document.getElementById('customerFrame').src = "simple-list.html";
     showPage('customer');
   }
 

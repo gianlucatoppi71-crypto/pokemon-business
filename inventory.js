@@ -1,296 +1,221 @@
 // ===============================
-// INVENTORY PAGE LOGIC (NEW SYSTEM)
+// INVENTORY SYSTEM
 // ===============================
 
+let editMode = null;
+
+// ===============================
+// RENDER INVENTORY
+// ===============================
 function renderInventory() {
   loadData();
 
   const container = document.getElementById('inventoryList');
   if (!container) return;
 
+  container.innerHTML = '';
+
   if (!inventoryData || inventoryData.length === 0) {
-    container.innerHTML = "<p>No items in inventory yet.</p>";
+    container.innerHTML = '<p>No inventory yet.</p>';
     return;
   }
 
-  container.innerHTML = inventoryData.map(item => {
-    const isBox = item.type === "BOX";
-    const isPack = item.type === "PACK";
+  inventoryData.forEach((item) => {
+    const totalPacks =
+      item.type === "BOX"
+        ? (item.quantityBoxes * item.packsPerBox) + item.manualPacks
+        : item.quantityPacks;
 
-    const totalPacks = isBox
-      ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
-      : (item.quantityPacks || 0);
+    const card = document.createElement('div');
+    card.className = 'inventory-card';
 
-    return `
-      <div class="inventory-card">
+    const saleTypeId = `saleType_${item.id}`;
 
-        <div class="inv-left">
-          <img src="${item.image || 'Logo.png'}" alt="${item.name}">
-        </div>
+    card.innerHTML = `
+      <h3>${item.name}</h3>
 
-        <div class="inv-right">
-          <h3>${item.name}</h3>
+      <img src="${item.image || 'Logo.png'}" alt="${item.name}"
+           style="width:120px; border:1px solid #333; margin:10px 0;">
 
-          <div class="inv-meta">
-            <span><strong>Category:</strong> ${item.category}</span>
-            <span><strong>Supplier:</strong> ${item.supplier}</span>
-          </div>
+      <p><strong>Category:</strong> ${item.category || '—'}</p>
+      <p><strong>Supplier:</strong> ${item.supplier || '—'}</p>
 
-          <div class="inv-prices">
-            ${isBox ? `
-              <span><strong>Buy price per BOX:</strong> £${(item.buyPriceBox || 0).toFixed(2)}</span>
-              <span><strong>Sell price per BOX:</strong> £${(item.sellPriceBox || 0).toFixed(2)}</span>
-              <span><strong>Sell price per PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</span>
-              <span><strong>Packs per box:</strong> ${item.packsPerBox || 0}</span>
-            ` : `
-              <span><strong>Buy price per PACK:</strong> £${(item.buyPricePack || 0).toFixed(2)}</span>
-              <span><strong>Sell price per PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</span>
-            `}
-          </div>
+      <p><strong>Buy price BOX:</strong> £${(item.buyPriceBox || 0).toFixed(2)}</p>
+      <p><strong>Sell price BOX:</strong> £${(item.sellPriceBox || 0).toFixed(2)}</p>
+      <p><strong>Sell price PACK:</strong> £${(item.sellPricePack || 0).toFixed(2)}</p>
 
-          <div class="inv-prices">
-            ${isBox ? `
-              <span><strong>Quantity of BOXES:</strong> ${item.quantityBoxes || 0}</span>
-              <span><strong>Loose packs:</strong> ${item.manualPacks || 0}</span>
-            ` : `
-              <span><strong>Quantity of PACKS:</strong> ${item.quantityPacks || 0}</span>
-            `}
-            <span><strong>Total packs:</strong> ${totalPacks}</span>
-            <span><strong>Market price (UK):</strong> £${item.marketPrice || 0}</span>
-          </div>
+      <p><strong>Packs per box:</strong> ${item.packsPerBox || 0}</p>
+      <p><strong>Boxes:</strong> ${item.quantityBoxes || 0}</p>
+      <p><strong>Loose packs:</strong> ${item.manualPacks || 0}</p>
+      <p><strong>Total packs:</strong> ${totalPacks}</p>
 
-          <div class="inv-meta">
-            <span><strong>Notes:</strong> ${item.notes || "—"}</span>
-          </div>
+      <label><strong>Sale Type:</strong></label>
+      <select id="${saleTypeId}" class="sale-type-dropdown">
+        <option value="business">Sell to Customer</option>
+        <option value="personal">Add to Personal Collection</option>
+      </select>
 
-          <div class="inv-actions">
-            ${isBox ? `<button onclick="sellBox(${item.id})">Sell BOX</button>` : ""}
-            <button onclick="sellPack(${item.id})">Sell PACK</button>
-            <button onclick="editItem(${item.id})">Edit</button>
-            <button onclick="copyItem(${item.id})">Copy</button>
-            <button onclick="addQuantity(${item.id})">Add Qty</button>
-            <button onclick="deleteItem(${item.id})">Delete</button>
-          </div>
-        </div>
-
-      </div>
+      <button onclick="sellBox(${item.id})">Sell BOX</button>
+      <button onclick="sellPack(${item.id})">Sell PACK</button>
+      <button onclick="editItem(${item.id})">Edit</button>
+      <button onclick="copyItem(${item.id})">Copy</button>
+      <button onclick="deleteItem(${item.id})">Delete</button>
     `;
-  }).join("");
+
+    container.appendChild(card);
+  });
 }
 
 // ===============================
-// ADD ITEM
+// ADD / UPDATE ITEM
 // ===============================
-
-document.getElementById('inventoryForm').addEventListener('submit', function (event) {
+function addInventoryItem(event) {
   event.preventDefault();
+  loadData();
 
   const type = document.getElementById('invType').value;
-  const name = document.getElementById('invName').value;
-  const category = document.getElementById('invCategory').value;
-  const supplier = document.getElementById('invSupplier').value;
-  const image = document.getElementById('invImage').value;
-  const notes = document.getElementById('invNotes').value;
-  const marketPrice = parseFloat(document.getElementById('invMarketPrice').value) || 0;
+  const name = document.getElementById('invName').value.trim();
+  const category = document.getElementById('invCategory').value.trim();
+  const supplier = document.getElementById('invSupplier').value.trim();
 
-  let newItem = {
-    id: Date.now(),
+  if (!name || !type) return;
+
+  let buyPriceBox = 0;
+  let sellPriceBox = 0;
+  let sellPricePack = 0;
+  let packsPerBox = 0;
+  let quantityBoxes = 0;
+  let manualPacks = 0;
+  let quantityPacks = 0;
+
+  if (type === "BOX") {
+    buyPriceBox = parseFloat(document.getElementById('invBuyPriceBox').value) || 0;
+    sellPriceBox = parseFloat(document.getElementById('invSellPriceBox').value) || 0;
+    packsPerBox = parseInt(document.getElementById('invPacksPerBox').value) || 0;
+    quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value) || 0;
+    manualPacks = parseInt(document.getElementById('invManualPacks').value) || 0;
+
+    sellPricePack = packsPerBox > 0 ? sellPriceBox / packsPerBox : 0;
+  }
+
+  if (type === "PACK") {
+    sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
+    quantityPacks = parseInt(document.getElementById('invQuantityPacks').value) || 0;
+  }
+
+  const marketPrice = parseFloat(document.getElementById('invMarketPrice').value) || 0;
+  const image = document.getElementById('invImage').value.trim();
+  const notes = document.getElementById('invNotes').value.trim();
+
+  const item = {
+    id: editMode ? editMode : Date.now(),
     type,
     name,
     category,
     supplier,
+    buyPriceBox,
+    sellPriceBox,
+    sellPricePack,
+    packsPerBox,
+    quantityBoxes,
+    manualPacks,
+    quantityPacks,
+    openedBoxes: 0,
+    marketPrice,
     image,
-    notes,
-    marketPrice
+    notes
   };
 
-  if (type === "BOX") {
-    newItem.buyPriceBox = parseFloat(document.getElementById('invBuyPriceBox').value) || 0;
-    newItem.sellPriceBox = parseFloat(document.getElementById('invSellPriceBox').value) || 0;
-    newItem.sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
-    newItem.packsPerBox = parseInt(document.getElementById('invPacksPerBox').value) || 0;
-    newItem.quantityBoxes = parseInt(document.getElementById('invQuantityBoxes').value) || 0;
-    newItem.manualPacks = parseInt(document.getElementById('invManualPacks').value) || 0;
+  if (editMode) {
+    inventoryData = inventoryData.filter(i => i.id !== editMode);
+    editMode = null;
+    document.getElementById('addBtn').textContent = "Add to inventory";
   }
 
-  if (type === "PACK") {
-    newItem.buyPricePack = parseFloat(document.getElementById('invBuyPricePack').value) || 0;
-    newItem.sellPricePack = parseFloat(document.getElementById('invSellPricePack').value) || 0;
-    newItem.quantityPacks = parseInt(document.getElementById('invQuantityPacks').value) || 0;
-  }
-
-  inventoryData.push(newItem);
+  inventoryData.push(item);
   saveData();
   renderInventory();
 
-  event.target.reset();
-});
+  document.getElementById('inventoryForm').reset();
+}
 
 // ===============================
-// DELETE ITEM
+// EDIT ITEM
 // ===============================
+function editItem(id) {
+  loadData();
 
-function deleteItem(id) {
-  inventoryData = inventoryData.filter(item => item.id !== id);
-  saveData();
-  renderInventory();
+  const item = inventoryData.find(i => i.id === id);
+  if (!item) return;
+
+  editMode = id;
+  document.getElementById('addBtn').textContent = "Update product";
+
+  const typeSelect = document.getElementById('invType');
+  const boxFields = document.getElementById('boxFields');
+  const packFields = document.getElementById('packFields');
+
+  typeSelect.value = item.type;
+
+  if (item.type === "BOX") {
+    boxFields.style.display = "block";
+    packFields.style.display = "none";
+  } else {
+    boxFields.style.display = "none";
+    packFields.style.display = "block";
+  }
+
+  document.getElementById('invName').value = item.name;
+  document.getElementById('invCategory').value = item.category || '';
+  document.getElementById('invSupplier').value = item.supplier || '';
+
+  if (item.type === "BOX") {
+    document.getElementById('invBuyPriceBox').value = item.buyPriceBox || 0;
+    document.getElementById('invSellPriceBox').value = item.sellPriceBox || 0;
+    document.getElementById('invPacksPerBox').value = item.packsPerBox || 0;
+    document.getElementById('invQuantityBoxes').value = item.quantityBoxes || 0;
+    document.getElementById('invManualPacks').value = item.manualPacks || 0;
+  }
+
+  if (item.type === "PACK") {
+    document.getElementById('invSellPricePack').value = item.sellPricePack || 0;
+    document.getElementById('invQuantityPacks').value = item.quantityPacks || 0;
+  }
+
+  document.getElementById('invMarketPrice').value = item.marketPrice || 0;
+  document.getElementById('invImage').value = item.image || '';
+  document.getElementById('invNotes').value = item.notes || '';
 }
 
 // ===============================
 // COPY ITEM
 // ===============================
-
 function copyItem(id) {
+  loadData();
+
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  const copy = JSON.parse(JSON.stringify(item));
-  copy.id = Date.now();
-
+  const copy = { ...item, id: Date.now() };
   inventoryData.push(copy);
   saveData();
   renderInventory();
 }
 
 // ===============================
-// EDIT ITEM
+// DELETE ITEM
 // ===============================
-
-function editItem(id) {
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
-
-  document.getElementById('invType').value = item.type;
-  document.getElementById('invName').value = item.name;
-  document.getElementById('invCategory').value = item.category;
-  document.getElementById('invSupplier').value = item.supplier;
-  document.getElementById('invImage').value = item.image;
-  document.getElementById('invNotes').value = item.notes || "";
-  document.getElementById('invMarketPrice').value = item.marketPrice || 0;
-
-  if (item.type === "BOX") {
-    document.getElementById('invBuyPriceBox').value = item.buyPriceBox;
-    document.getElementById('invSellPriceBox').value = item.sellPriceBox;
-    document.getElementById('invSellPricePack').value = item.sellPricePack;
-    document.getElementById('invPacksPerBox').value = item.packsPerBox;
-    document.getElementById('invQuantityBoxes').value = item.quantityBoxes;
-    document.getElementById('invManualPacks').value = item.manualPacks;
-  }
-
-  if (item.type === "PACK") {
-    document.getElementById('invBuyPricePack').value = item.buyPricePack;
-    document.getElementById('invSellPricePack').value = item.sellPricePack;
-    document.getElementById('invQuantityPacks').value = item.quantityPacks;
-  }
-}
-
-// ===============================
-// ADD QUANTITY
-// ===============================
-
-function addQuantity(id) {
-  const qty = prompt("Enter quantity to add:");
-  if (!qty || isNaN(qty)) return;
-
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
-
-  if (item.type === "BOX") {
-    item.quantityBoxes += parseInt(qty);
-  } else {
-    item.quantityPacks += parseInt(qty);
-  }
-
-  saveData();
-  renderInventory();
-}
-
-// ===============================
-// SELL PACK (NEW SYSTEM)
-// ===============================
-
-function sellPack(id) {
+function deleteItem(id) {
   loadData();
 
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
-
-  const qty = prompt("How many packs to sell?");
-  if (!qty || isNaN(qty)) return;
-
-  const amount = parseInt(qty);
-
-  let totalPacks = item.type === "BOX"
-    ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
-    : (item.quantityPacks || 0);
-
-  if (amount > totalPacks) {
-    alert("Not enough packs in inventory.");
-    return;
-  }
-
-  // Reduce inventory
-  if (item.type === "BOX") {
-    let packsFromBoxes = (item.quantityBoxes || 0) * (item.packsPerBox || 0);
-
-    if (amount <= packsFromBoxes) {
-      const boxesUsed = Math.floor(amount / (item.packsPerBox || 1));
-      item.quantityBoxes -= boxesUsed;
-
-      const leftover = amount % (item.packsPerBox || 1);
-      item.manualPacks -= leftover;
-    } else {
-      item.manualPacks -= (amount - packsFromBoxes);
-      item.quantityBoxes = 0;
-    }
-
-    if (item.manualPacks < 0) item.manualPacks = 0;
-  }
-
-  if (item.type === "PACK") {
-    item.quantityPacks -= amount;
-    if (item.quantityPacks < 0) item.quantityPacks = 0;
-  }
-
-  // Record sale using NEW SYSTEM
-  recordSale(item, "PACK", amount);
-
-  // Remove item if empty
-  if ((item.type === "BOX" && (item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) ||
-      (item.type === "PACK" && (item.quantityPacks || 0) <= 0)) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
-  }
-
+  inventoryData = inventoryData.filter(i => i.id !== id);
   saveData();
   renderInventory();
 }
 
 // ===============================
-// SELL BOX (NEW SYSTEM)
+// INITIAL LOAD
 // ===============================
-
-function sellBox(id) {
-  loadData();
-
-  const item = inventoryData.find(i => i.id === id);
-  if (!item || item.type !== "BOX") return;
-
-  if ((item.quantityBoxes || 0) <= 0) {
-    alert("No boxes left.");
-    return;
-  }
-
-  // Record sale using NEW SYSTEM
-  recordSale(item, "BOX", 1);
-
-  // Reduce inventory
-  item.quantityBoxes -= 1;
-
-  // Remove item if empty
-  if ((item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
-  }
-
-  saveData();
+document.addEventListener('DOMContentLoaded', () => {
   renderInventory();
-}
+});

@@ -1,199 +1,436 @@
 // ===============================
-// SALES PAGE LOGIC (BOX + PACK SYSTEM, NEW SYSTEM)
-// ===============================
-// Uses global salesData, inventoryData, loadData(), saveData() from data.js
-// Do NOT redeclare salesData or inventoryData here.
-
-// ===============================
-// RECORD SALE (BOX or PACK)
+// SALES SYSTEM
 // ===============================
 
-function recordSale(item, type, quantitySold) {
-  const date = new Date().toISOString();
+// RECORD PERSONAL COLLECTION
+function recordPersonalCollection(item, type) {
+  loadData();
 
-  let buyPrice = 0;
-  let sellPrice = 0;
+  const now = new Date();
+  const dateString = now.toLocaleString("en-GB");
 
-  if (type === "BOX") {
-    buyPrice = item.buyPriceBox || 0;
-    sellPrice = item.sellPriceBox || 0;
-  } else {
-    buyPrice = item.type === "BOX"
-      ? (item.packsPerBox > 0 ? (item.buyPriceBox || 0) / item.packsPerBox : 0)
-      : (item.buyPricePack || 0);
-
-    sellPrice = item.sellPricePack || 0;
-  }
-
-  const profitPerUnit = sellPrice - buyPrice;
-  const totalProfit = profitPerUnit * quantitySold;
-
-  const saleEntry = {
+  const entry = {
     id: Date.now(),
+    inventoryId: item.id,
     name: item.name,
-    image: item.image,
-    category: item.category,
-    supplier: item.supplier,
-    notes: item.notes || "—",
-    date,
     type,
-    quantitySold,
-    buyPrice,
-    sellPrice,
+    category: item.category || "",
+    supplier: item.supplier || "",
+    buyPrice: type === "BOX"
+      ? item.buyPriceBox
+      : item.buyPriceBox / item.packsPerBox,
     marketPrice: item.marketPrice || 0,
-    profitPerUnit,
-    totalProfit
+    date: dateString,
+    image: item.image || "",
+    notes: item.notes || "",
+    packsOpened: type === "BOX" ? item.packsPerBox : 1
   };
 
-  salesData.push(saleEntry);
+  personalCollectionData.push(entry);
   saveData();
-  renderSalesInventory();
+  renderSales();
+}
+
+// RECORD BUSINESS SALE
+function recordSale(item, type) {
+  loadData();
+
+  const now = new Date();
+  const dateString = now.toLocaleString("en-GB");
+
+  let profitPerUnit = 0;
+
+  if (type === "BOX") {
+    profitPerUnit = (item.sellPriceBox || 0) - (item.buyPriceBox || 0);
+  }
+
+  if (type === "PACK") {
+    profitPerUnit =
+      (item.sellPricePack || 0) -
+      ((item.buyPriceBox || 0) / (item.packsPerBox || 1));
+  }
+
+  const sale = {
+    id: Date.now(),
+    inventoryId: item.id,
+    name: item.name,
+    type,
+    category: item.category || "",
+    supplier: item.supplier || "",
+    buyPrice: type === "BOX"
+      ? item.buyPriceBox
+      : item.buyPriceBox / item.packsPerBox,
+    sellPrice: type === "BOX" ? item.sellPriceBox : item.sellPricePack,
+    marketPrice: item.marketPrice || 0,
+    profitPerUnit,
+    totalProfit: profitPerUnit,
+    quantitySold: 1,
+    date: dateString,
+    image: item.image || "",
+    notes: item.notes || ""
+  };
+
+  salesData.push(sale);
+  saveData();
+  renderSales();
 }
 
 // ===============================
 // SELL BOX
 // ===============================
-
 function sellBox(id) {
   loadData();
 
   const item = inventoryData.find(i => i.id === id);
-  if (!item || item.type !== "BOX") return;
+  if (!item) return;
 
-  if ((item.quantityBoxes || 0) <= 0) {
+  const saleType = document.getElementById(`saleType_${item.id}`).value;
+
+  if (item.quantityBoxes <= 0) {
     alert("No boxes left.");
     return;
   }
 
-  // Record sale first
-  recordSale(item, "BOX", 1);
-
-  // Reduce inventory
-  item.quantityBoxes = (item.quantityBoxes || 0) - 1;
-
-  // If you want boxes to contain packs, you can adjust manualPacks here if needed
-  // For now we leave manualPacks unchanged when selling a box
-
-  // Remove item if empty
-  if ((item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
-  }
+  item.quantityBoxes -= 1;
 
   saveData();
+
+  if (saleType === "personal") {
+    recordPersonalCollection(item, "BOX");
+  } else {
+    recordSale(item, "BOX");
+  }
+
   renderInventory();
 }
 
 // ===============================
 // SELL PACK
 // ===============================
-
 function sellPack(id) {
   loadData();
 
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  const qty = prompt("How many packs do you want to sell?");
-  if (!qty || isNaN(qty)) return;
+  const saleType = document.getElementById(`saleType_${item.id}`).value;
 
-  const amount = parseInt(qty);
+  const packsPerBox = item.packsPerBox || 0;
+  let boxes = item.quantityBoxes || 0;
+  let loosePacks = item.manualPacks || 0;
+  let openedBoxes = item.openedBoxes || 0;
 
-  let totalPacks = item.type === "BOX"
-    ? ((item.quantityBoxes || 0) * (item.packsPerBox || 0)) + (item.manualPacks || 0)
-    : (item.quantityPacks || 0);
-
-  if (amount > totalPacks) {
-    alert("Not enough packs available.");
+  let totalPacks = loosePacks + (openedBoxes * packsPerBox) + (boxes * packsPerBox);
+  if (totalPacks <= 0) {
+    alert("No packs left.");
     return;
   }
 
-  // BOX PRODUCT PACK REDUCTION
-  if (item.type === "BOX") {
-    let packsFromBoxes = (item.quantityBoxes || 0) * (item.packsPerBox || 0);
-
-    if (amount <= packsFromBoxes) {
-      const boxesUsed = Math.floor(amount / (item.packsPerBox || 1));
-      item.quantityBoxes = (item.quantityBoxes || 0) - boxesUsed;
-
-      const leftover = amount % (item.packsPerBox || 1);
-      item.manualPacks = (item.manualPacks || 0) - leftover;
+  if (loosePacks > 0) {
+    loosePacks -= 1;
+  } else {
+    if (openedBoxes > 0) {
+      loosePacks = packsPerBox - 1;
+      openedBoxes -= 1;
     } else {
-      item.manualPacks = (item.manualPacks || 0) - (amount - packsFromBoxes);
-      item.quantityBoxes = 0;
+      if (boxes <= 0) {
+        alert("No packs left.");
+        return;
+      }
+      boxes -= 1;
+      openedBoxes += 1;
+      loosePacks = packsPerBox - 1;
     }
-
-    if (item.manualPacks < 0) item.manualPacks = 0;
   }
 
-  // PACK PRODUCT REDUCTION
-  if (item.type === "PACK") {
-    item.quantityPacks = (item.quantityPacks || 0) - amount;
-    if (item.quantityPacks < 0) item.quantityPacks = 0;
+  if (openedBoxes > 0 && loosePacks === 0) {
+    openedBoxes -= 1;
   }
 
-  // Record sale
-  recordSale(item, "PACK", amount);
-
-  // Remove item if empty
-  if ((item.type === "BOX" && (item.quantityBoxes || 0) <= 0 && (item.manualPacks || 0) <= 0) ||
-      (item.type === "PACK" && (item.quantityPacks || 0) <= 0)) {
-    inventoryData = inventoryData.filter(i => i.id !== id);
-  }
+  item.quantityBoxes = boxes;
+  item.manualPacks = loosePacks;
+  item.openedBoxes = openedBoxes;
 
   saveData();
+
+  if (saleType === "personal") {
+    recordPersonalCollection(item, "PACK");
+  } else {
+    recordSale(item, "PACK");
+  }
+
   renderInventory();
 }
 
 // ===============================
-// RENDER SALES PAGE
+// RENDER SALES
 // ===============================
-
-function renderSalesInventory() {
+function renderSales() {
   loadData();
 
-  const list = document.getElementById('salesList');
-  if (!list) return;
+  const container = document.getElementById("salesList");
+  if (!container) return;
 
-  list.innerHTML = '';
+  container.innerHTML = "";
 
   if (!salesData || salesData.length === 0) {
-    list.innerHTML = '<p>No sales yet.</p>';
+    container.innerHTML = "<p>No sales yet.</p>";
+    renderSalesDashboard();
+    renderPersonalExpensesPanel();
+    renderSalesProductSummary();
+    renderPersonalCollectionPanel();
     return;
   }
 
   salesData.forEach((sale) => {
-    const div = document.createElement('div');
-    div.className = 'sale-card';
+    const card = document.createElement("div");
+    card.className = "sales-card";
 
-    div.innerHTML = `
+    card.innerHTML = `
       <h3>${sale.name} (${sale.type})</h3>
 
       <img src="${sale.image || 'Logo.png'}" alt="${sale.name}"
            style="width:120px; border:1px solid #333; margin:10px 0;">
 
-      <div class="sale-meta">
-        <strong>Category:</strong> ${sale.category || "—"}<br>
-        <strong>Supplier:</strong> ${sale.supplier || "—"}<br>
-        <strong>Notes:</strong> ${sale.notes || "—"}
-      </div>
+      <p><strong>Buy:</strong> £${sale.buyPrice.toFixed(2)}</p>
+      <p><strong>Sell:</strong> £${sale.sellPrice.toFixed(2)}</p>
+      <p><strong>Profit:</strong> £${sale.totalProfit.toFixed(2)}</p>
+      <p><strong>Date:</strong> ${sale.date}</p>
 
-      <div class="sale-prices">
-        <strong>Buy price:</strong> £${(sale.buyPrice || 0).toFixed(2)}<br>
-        <strong>Sell price:</strong> £${(sale.sellPrice || 0).toFixed(2)}<br>
-        <strong>Market price:</strong> £${(sale.marketPrice || 0).toFixed(2)}
-      </div>
-
-      <div class="sale-profit">
-        <strong>Profit per unit:</strong> £${(sale.profitPerUnit || 0).toFixed(2)}<br>
-        <strong>Total profit:</strong> £${(sale.totalProfit || 0).toFixed(2)}
-      </div>
-
-      <div class="sale-meta">
-        <strong>Quantity sold:</strong> ${sale.quantitySold || 0}<br>
-        <strong>Date:</strong> ${sale.date ? new Date(sale.date).toLocaleString() : "—"}
-      </div>
+      <button onclick="undoSale(${sale.id})">Undo</button>
+      <button onclick="deleteSale(${sale.id})">Delete</button>
     `;
 
-    list.appendChild(div);
+    container.appendChild(card);
+  });
+
+  renderSalesDashboard();
+  renderPersonalExpensesPanel();
+  renderSalesProductSummary();
+  renderPersonalCollectionPanel();
+}
+
+// ===============================
+// DASHBOARD (UPDATED WITH BOX + PACK SALES)
+// ===============================
+function renderSalesDashboard() {
+  loadData();
+
+  let totalSales = salesData.length;
+  let totalRevenue = 0;
+  let totalProfit = 0;
+  let totalExpenses = 0;
+
+  let boxSales = 0;
+  let packSales = 0;
+
+  salesData.forEach(sale => {
+    totalRevenue += sale.sellPrice || 0;
+    totalProfit += sale.totalProfit || 0;
+    totalExpenses += sale.buyPrice || 0;
+
+    if (sale.type === "BOX") boxSales++;
+    if (sale.type === "PACK") packSales++;
+  });
+
+  const dashboard = document.getElementById("salesDashboard");
+  if (!dashboard) return;
+
+  dashboard.innerHTML = `
+    <div class="dashboard-card">
+      <h3>Total Sales</h3>
+      <p>${totalSales}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Box Sales</h3>
+      <p>${boxSales}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Pack Sales</h3>
+      <p>${packSales}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Revenue</h3>
+      <p>£${totalRevenue.toFixed(2)}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Expenses</h3>
+      <p>£${totalExpenses.toFixed(2)}</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Total Profit</h3>
+      <p>£${totalProfit.toFixed(2)}</p>
+    </div>
+  `;
+}
+
+// ===============================
+// PERSONAL COLLECTION EXPENSE PANEL
+// ===============================
+function renderPersonalExpensesPanel() {
+  loadData();
+
+  const panel = document.getElementById("personalExpensesPanel");
+  if (!panel) return;
+
+  let totalSpent = 0;
+  let totalPacks = 0;
+
+  personalCollectionData.forEach(entry => {
+    totalSpent += entry.buyPrice || 0;
+    totalPacks += entry.packsOpened || 0;
+  });
+
+  panel.innerHTML = `
+    <div class="dashboard-card" style="width:100%; text-align:center;">
+      <h3>Personal Collection Expenses</h3>
+      <p><strong>Total Spent:</strong> £${totalSpent.toFixed(2)}</p>
+      <p><strong>Packs Opened:</strong> ${totalPacks}</p>
+    </div>
+  `;
+}
+
+// ===============================
+// PRODUCT SUMMARY PANEL
+// ===============================
+function renderSalesProductSummary() {
+  loadData();
+
+  const summaryBox = document.getElementById("salesProductSummary");
+  if (!summaryBox) return;
+
+  const grouped = {};
+
+  salesData.forEach(sale => {
+    if (!grouped[sale.name]) {
+      grouped[sale.name] = {
+        name: sale.name,
+        image: sale.image,
+        quantity: 0,
+        profit: 0,
+        types: new Set()
+      };
+    }
+
+    grouped[sale.name].quantity += sale.quantitySold;
+    grouped[sale.name].profit += sale.totalProfit;
+    grouped[sale.name].types.add(sale.type);
+  });
+
+  summaryBox.innerHTML = `<h3>Products Sold</h3>`;
+
+  Object.values(grouped).forEach(item => {
+    summaryBox.innerHTML += `
+      <div class="sales-product-item">
+        <img src="${item.image || 'Logo.png'}">
+        <div>
+          <p><strong>${item.name}</strong></p>
+          <p>Qty: ${item.quantity}</p>
+          <p>Profit: £${item.profit.toFixed(2)}</p>
+          <p>Type: ${Array.from(item.types).join(', ')}</p>
+        </div>
+      </div>
+    `;
   });
 }
+
+// ===============================
+// PERSONAL COLLECTION PANEL
+// ===============================
+function renderPersonalCollectionPanel() {
+  loadData();
+
+  const panel = document.getElementById("personalCollectionPanel");
+  if (!panel) return;
+
+  let totalSpent = 0;
+  let totalPacks = 0;
+
+  personalCollectionData.forEach(entry => {
+    totalSpent += entry.buyPrice || 0;
+    totalPacks += entry.packsOpened || 0;
+  });
+
+  panel.innerHTML = `
+    <h3>Personal Collection</h3>
+    <p><strong>Total Spent:</strong> £${totalSpent.toFixed(2)}</p>
+    <p><strong>Packs Opened:</strong> ${totalPacks}</p>
+
+    <button id="pcToggleBtn" class="pc-toggle-btn">▶ Show Details</button>
+
+    <div id="pcDetails" style="display:none; margin-top:10px;"></div>
+  `;
+
+  const detailsBox = document.getElementById("pcDetails");
+  const toggleBtn = document.getElementById("pcToggleBtn");
+
+  toggleBtn.onclick = () => {
+    if (detailsBox.style.display === "none") {
+      detailsBox.style.display = "block";
+      toggleBtn.textContent = "▼ Hide Details";
+
+      detailsBox.innerHTML = personalCollectionData.map(entry => `
+        <div class="pc-item">
+          <img src="${entry.image || 'Logo.png'}" style="width:80px; margin-right:10px;">
+          <p><strong>${entry.name}</strong> (${entry.type})</p>
+          <p>Cost: £${entry.buyPrice.toFixed(2)}</p>
+          <p>Packs Opened: ${entry.packsOpened}</p>
+          <p>Date: ${entry.date}</p>
+          <p>Notes: ${entry.notes || '—'}</p>
+        </div>
+        <hr>
+      `).join("");
+
+    } else {
+      detailsBox.style.display = "none";
+      toggleBtn.textContent = "▶ Show Details";
+    }
+  };
+}
+
+// ===============================
+// DELETE SALE
+// ===============================
+function deleteSale(id) {
+  loadData();
+  salesData = salesData.filter(s => s.id !== id);
+  saveData();
+  renderSales();
+}
+
+// ===============================
+// UNDO SALE
+// ===============================
+function undoSale(id) {
+  loadData();
+
+  const sale = salesData.find(s => s.id === id);
+  if (!sale) return;
+
+  const item = inventoryData.find(i => i.id === sale.inventoryId);
+  if (!item) return;
+
+  if (sale.type === "BOX") {
+    item.quantityBoxes += 1;
+  }
+
+  if (sale.type === "PACK") {
+    item.manualPacks += 1;
+  }
+
+  salesData = salesData.filter(s => s.id !== id);
+
+  saveData();
+  renderSales();
+  renderInventory();
+}
+
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
+  renderSales();
+});
