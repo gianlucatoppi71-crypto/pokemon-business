@@ -232,13 +232,45 @@ function deleteSale(saleId) {
 function renderSales() {
   loadData();
 
+  // 1. Clean up or hide the broken chart dashboards to remove the empty gray boxes
+  const dbDashboard = document.getElementById("salesDashboard");
+  if (dbDashboard) {
+    let totalSalesProfit = 0;
+    let businessSalesCount = salesData.length;
+    
+    salesData.forEach(s => {
+      totalSalesProfit += (s.totalProfit || 0);
+    });
+
+    dbDashboard.innerHTML = `
+      <div class="dashboard-card" style="padding:15px; background:#1c1c21; border:1px solid #333; border-radius:6px; color:#fff; font-family:sans-serif; text-align:center;">
+        <h3 style="margin:0 0 10px 0; color:#ffd700; font-size:16px;">Sales Summary Metrics</h3>
+        <p style="margin:5px 0; font-size:14px; color:#aaa;">Recorded Orders: <strong style="color:#fff;">${businessSalesCount}</strong></p>
+        <p style="margin:5px 0; font-size:14px; color:#aaa;">Net Realized Profit: <strong style="color:#00ff88;">£${totalSalesProfit.toFixed(2)}</strong></p>
+      </div>
+    `;
+    dbDashboard.style.border = "none";
+    dbDashboard.style.background = "transparent";
+  }
+
+  // Hide the auxiliary non-functional chart panels gracefully
+  const expPanel = document.getElementById("personalExpensesPanel");
+  if (expPanel) expPanel.style.display = "none";
+
+  const prodSummary = document.getElementById("salesProductSummary");
+  if (prodSummary) prodSummary.style.display = "none";
+
+  const collectionPanel = document.getElementById("personalCollectionPanel");
+  if (collectionPanel) collectionPanel.style.display = "none";
+
+  // 2. Render Main Sales Ledger Grid View
   const container = document.getElementById("salesList");
   if (!container) return;
 
   container.innerHTML = "";
 
   if (!salesData || salesData.length === 0) {
-    container.innerHTML = "<p>No sales recorded yet.</p>";
+    container.innerHTML = "<p style='color:#bbb; padding:15px; font-family:sans-serif;'>No business sales logs recorded yet.</p>";
     return;
   }
 
@@ -280,10 +312,10 @@ function renderSales() {
 
     row.innerHTML = `
       <td class="cell-center">
-        <img src="${sale.image || 'Logo.png'}" alt="${sale.name}" class="table-thumb">
+        <img src="${sale.image || 'Logo.png'}" alt="${sale.name}" class="table-thumb" style="width:40px; height:40px; object-fit:contain; border-radius:4px;" onerror="this.src='Logo.png'">
       </td>
       <td class="cell-bold">${sale.name}</td>
-      <td class="cell-center"><span class="btn-table btn-sell" style="padding: 3px 6px; pointer-events: none;">${sale.type}</span></td>
+      <td class="cell-center"><span class="btn-table btn-sell" style="padding: 3px 6px; pointer-events: none; border-radius:4px; font-size:12px;">${sale.type}</span></td>
       <td>${sale.category || '—'}</td>
       <td>${sale.supplier || '—'}</td>
       <td class="cell-price" style="color: #ccc !important;">£${(sale.buyPrice || 0).toFixed(2)}</td>
@@ -291,9 +323,9 @@ function renderSales() {
       <td class="${profitClass}" ${profitStyle}>£${(sale.totalProfit || 0).toFixed(2)}</td>
       <td class="cell-center" style="font-size: 13px; font-family: monospace;">${sale.date}</td>
       <td>
-        <div class="table-actions">
-          <button class="btn-table btn-copy" onclick="undoSale(${sale.id})" style="background-color: #2e7d32;">Undo</button>
-          <button class="btn-table btn-delete" onclick="deleteSale(${sale.id})">Delete</button>
+        <div class="table-actions" style="display:flex; gap:6px;">
+          <button class="btn-table btn-copy" onclick="undoSale(${sale.id})" style="background-color: #2e7d32; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Undo</button>
+          <button class="btn-table btn-delete" onclick="deleteSale(${sale.id})" style="background-color: #d32f2f; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Delete</button>
         </div>
       </td>
     `;
