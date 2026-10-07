@@ -116,7 +116,10 @@
     </section>
 
     <!-- SUMMARY PAGE -->
-    <section id="summaryPage" class="page" style="display:none"></section>
+    <section id="summaryPage" class="page" style="display:none">
+      <h1>Summary Dashboard</h1>
+      <div id="summaryContent"></div>
+    </section>
 
     <!-- SUPPLIERS PAGE -->
     <section id="suppliersPage" class="page" style="display:none">
@@ -134,7 +137,10 @@
     </section>
 
     <!-- TRADES PAGE -->
-    <section id="tradesPage" class="page" style="display:none"></section>
+    <section id="tradesPage" class="page" style="display:none">
+      <h1>Trades Management</h1>
+      <div id="tradesList"></div>
+    </section>
 
     <!-- PORTFOLIO PAGE -->
     <section id="portfolioPage" class="page" style="display:none">
@@ -203,12 +209,13 @@
     const targetPage = document.getElementById(page + 'Page');
     if (targetPage) targetPage.style.display = 'block';
 
+    if (page === 'inventory' && typeof renderInventory === 'function') renderInventory();
+    if (page === 'sales' && typeof renderSales === 'function') renderSales();
     if (page === 'summary' && typeof renderSummary === 'function') renderSummary();
     if (page === 'suppliers' && typeof renderSuppliers === 'function') renderSuppliers();
     if (page === 'trades' && typeof renderTrades === 'function') renderTrades();
     if (page === 'portfolio' && typeof renderPortfolio === 'function') renderPortfolio();
     if (page === 'expenses' && typeof renderExpenses === 'function') renderExpenses();
-    if (page === 'sales' && typeof renderSales === 'function') renderSales();
   }
 
   function openCustomerPage() {
