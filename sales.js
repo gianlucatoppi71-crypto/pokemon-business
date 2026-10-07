@@ -217,7 +217,7 @@ function undoSale(saleId) {
 }
 
 // ===============================
-// DELETE SALE RECORD (NO INVENTORY RESTORE)
+// DELETE SALE RECORD
 // ===============================
 function deleteSale(saleId) {
   loadData();
@@ -239,10 +239,6 @@ function renderSales() {
 
   if (!salesData || salesData.length === 0) {
     container.innerHTML = "<p>No sales recorded yet.</p>";
-    renderSalesDashboard();
-    renderPersonalExpensesPanel();
-    renderSalesProductSummary();
-    renderPersonalCollectionPanel();
     return;
   }
 
@@ -304,85 +300,4 @@ function renderSales() {
 
     tbody.appendChild(row);
   });
-
-  renderSalesDashboard();
-  renderPersonalExpensesPanel();
-  renderSalesProductSummary();
-  renderPersonalCollectionPanel();
-  
-  if (typeof renderTaxSummary === "function") renderTaxSummary();
 }
-
-// ===============================
-// DASHBOARD
-// ===============================
-function renderSalesDashboard() {
-  loadData();
-
-  let totalSales = salesData.length;
-  let totalRevenue = 0;
-  let totalProfit = 0;
-  let totalExpenses = 0;
-
-  let boxSales = 0;
-  let packSales = 0;
-
-  salesData.forEach(sale => {
-    totalRevenue += sale.sellPrice || 0;
-    totalProfit += sale.totalProfit || 0;
-    totalExpenses += sale.buyPrice || 0;
-
-    if (sale.type === "BOX") boxSales++;
-    if (sale.type === "PACK") packSales++;
-  });
-
-  const dashboard = document.getElementById("salesDashboard");
-  if (!dashboard) return;
-
-  dashboard.innerHTML = `
-    <div class="dashboard-card">
-      <h3>Total Sales</h3>
-      <p>${totalSales}</p>
-    </div>
-    <div class="dashboard-card">
-      <h3>Box Sales</h3>
-      <p>${boxSales}</p>
-    </div>
-    <div class="dashboard-card">
-      <h3>Pack Sales</h3>
-      <p>${packSales}</p>
-    </div>
-    <div class="dashboard-card">
-      <h3>Total Revenue</h3>
-      <p>£${totalRevenue.toFixed(2)}</p>
-    </div>
-    <div class="dashboard-card">
-      <h3>Total Expenses</h3>
-      <p>£${totalExpenses.toFixed(2)}</p>
-    </div>
-    <div class="dashboard-card">
-      <h3>Total Profit</h3>
-      <p>£${totalProfit.toFixed(2)}</p>
-    </div>
-  `;
-}
-
-// ===============================
-// PERSONAL COLLECTION EXPENSE PANEL
-// ===============================
-function renderPersonalExpensesPanel() {
-  loadData();
-
-  const panel = document.getElementById("personalExpensesPanel");
-  if (!panel) return;
-
-  let totalSpent = 0;
-  let totalPacks = 0;
-
-  personalCollectionData.forEach(entry => {
-    totalSpent += entry.buyPrice || 0;
-    totalPacks += entry.packsOpened || 0;
-  });
-
-  panel.innerHTML = `
-    <div class="dashboard-card" style="width:100%; text-align:center;">
