@@ -1,75 +1,74 @@
-<!-- INVOICE PAGE -->
-<section id="invoicePage" class="page" style="display:none">
+let invoiceData =
+  JSON.parse(localStorage.getItem('invoiceData')) || [];
 
-  <h1>Supplier Invoices</h1>
+function saveInvoice() {
 
-  <div class="dashboard-card">
-    <h3>Total Supplier Spend</h3>
-    <p id="totalInvoiceSpend">£0.00</p>
+  const invoice = {
+    id: Date.now(),
+    supplier: document.getElementById('invoiceSupplier').value,
+    number: document.getElementById('invoiceNumber').value,
+    date: document.getElementById('invoiceDate').value,
+    subtotal: parseFloat(document.getElementById('invoiceSubtotal').value) || 0,
+    shipping: parseFloat(document.getElementById('invoiceShipping').value) || 0,
+    total: parseFloat(document.getElementById('invoiceTotal').value) || 0,
+    notes: document.getElementById('invoiceNotes').value
+  };
 
-    <h3>Invoices Saved</h3>
-    <p id="invoiceCount">0</p>
-  </div>
+  invoiceData.push(invoice);
 
-  <form id="invoiceForm">
+  localStorage.setItem(
+    'invoiceData',
+    JSON.stringify(invoiceData)
+  );
 
-    <input
-      type="text"
-      id="invoiceSupplier"
-      placeholder="Supplier Name"
-      required
-    >
+  document.getElementById('invoiceForm').reset();
 
-    <input
-      type="text"
-      id="invoiceNumber"
-      placeholder="Invoice Number"
-      required
-    >
+  renderInvoices();
+}
 
-    <input
-      type="date"
-      id="invoiceDate"
-      required
-    >
+function renderInvoices() {
 
-    <input
-      type="number"
-      step="0.01"
-      id="invoiceSubtotal"
-      placeholder="Subtotal (£)"
-      required
-    >
+  const list = document.getElementById('invoiceList');
 
-    <input
-      type="number"
-      step="0.01"
-      id="invoiceShipping"
-      placeholder="Shipping (£)"
-    >
+  if (!list) return;
 
-    <input
-      type="number"
-      step="0.01"
-      id="invoiceTotal"
-      placeholder="Total (£)"
-      required
-    >
+  let totalSpend = 0;
 
-    <textarea
-      id="invoiceNotes"
-      placeholder="Notes"
-    ></textarea>
+  invoiceData.forEach(i => {
+    totalSpend += i.total;
+  });
 
-    <button
-      type="button"
-      onclick="saveInvoice()"
-    >
-      Save Invoice
-    </button>
+  const spendBox = document.getElementById('totalInvoiceSpend');
+  const countBox = document.getElementById('invoiceCount');
 
-  </form>
+  if (spendBox)
+    spendBox.textContent = `£${totalSpend.toFixed(2)}`;
 
-  <div id="invoiceList"></div>
+  if (countBox)
+    countBox.textContent = invoiceData.length;
 
-</section>
+  list.innerHTML = '';
+
+  invoiceData.forEach(i => {
+
+    const row = document.createElement('div');
+
+    row.className = 'inventory-card';
+
+    row.innerHTML = `
+      <h3>${i.supplier}</h3>
+
+      <p><strong>Invoice:</strong> ${i.number}</p>
+      <p><strong>Date:</strong> ${i.date}</p>
+      <p><strong>Subtotal:</strong> £${i.subtotal.toFixed(2)}</p>
+      <p><strong>Shipping:</strong> £${i.shipping.toFixed(2)}</p>
+      <p><strong>Total:</strong> £${i.total.toFixed(2)}</p>
+      <p><strong>Notes:</strong> ${i.notes}</p>
+    `;
+
+    list.appendChild(row);
+  });
+
+}
+
+document.addEventListener('DOMContentLoaded', renderInvoices);
