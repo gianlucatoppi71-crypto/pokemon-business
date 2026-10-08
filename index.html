@@ -224,15 +224,48 @@
 <script src="invoice.js?v=1005"></script>
 
 <script>
-  window.onload = () => {
+  function syncInventoryFieldVisibility() {
+    const typeSelect = document.getElementById('invType');
+    const boxFields = document.getElementById('boxFields');
+    const packFields = document.getElementById('packFields');
+
+    if (!typeSelect || !boxFields || !packFields) return;
+
+    if (typeSelect.value === 'BOX') {
+      boxFields.style.display = 'block';
+      packFields.style.display = 'none';
+    } else if (typeSelect.value === 'PACK') {
+      boxFields.style.display = 'none';
+      packFields.style.display = 'block';
+    } else {
+      boxFields.style.display = 'none';
+      packFields.style.display = 'none';
+    }
+  }
+
+  function initApp() {
+    const typeSelect = document.getElementById('invType');
+    if (typeSelect) {
+      typeSelect.removeEventListener('change', syncInventoryFieldVisibility);
+      typeSelect.addEventListener('change', syncInventoryFieldVisibility);
+      syncInventoryFieldVisibility();
+    }
+
     showPage('inventory');
     if (typeof renderInventory === 'function') renderInventory();
     if (typeof renderSummary === 'function') renderSummary();
     if (typeof renderTaxSummary === 'function') renderTaxSummary();
-  };
+    if (typeof renderSuppliers === 'function') renderSuppliers();
+    if (typeof loadSupplierDropdown === 'function') loadSupplierDropdown();
+    if (typeof renderInvoices === 'function') renderInvoices();
+    if (typeof renderSales === 'function') renderSales();
+  }
 
   function showPage(page) {
-    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.page').forEach((p) => {
+      p.style.display = 'none';
+    });
+
     const targetPage = document.getElementById(page + 'Page');
     if (targetPage) targetPage.style.display = 'block';
 
@@ -247,30 +280,12 @@
   }
 
   function openCustomerPage() {
-    document.getElementById('customerFrame').src = 'simple-list.html';
+    const customerFrame = document.getElementById('customerFrame');
+    if (customerFrame) customerFrame.src = 'simple-list.html';
     showPage('customer');
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const typeSelect = document.getElementById('invType');
-    const boxFields = document.getElementById('boxFields');
-    const packFields = document.getElementById('packFields');
-
-    if (typeSelect && boxFields && packFields) {
-      typeSelect.addEventListener('change', () => {
-        if (typeSelect.value === 'BOX') {
-          boxFields.style.display = 'block';
-          packFields.style.display = 'none';
-        } else if (typeSelect.value === 'PACK') {
-          boxFields.style.display = 'none';
-          packFields.style.display = 'block';
-        } else {
-          boxFields.style.display = 'none';
-          packFields.style.display = 'none';
-        }
-      });
-    }
-  });
+  document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>
