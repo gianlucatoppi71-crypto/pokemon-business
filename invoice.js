@@ -34,20 +34,70 @@ function renderInvoices() {
 
   let totalSpend = 0;
 
+  const supplierTotals = {};
+
   invoiceData.forEach(i => {
+
     totalSpend += i.total;
+
+    if (!supplierTotals[i.supplier]) {
+      supplierTotals[i.supplier] = 0;
+    }
+
+    supplierTotals[i.supplier] += i.total;
   });
 
   const spendBox = document.getElementById('totalInvoiceSpend');
   const countBox = document.getElementById('invoiceCount');
 
-  if (spendBox)
+  if (spendBox) {
     spendBox.textContent = `£${totalSpend.toFixed(2)}`;
+  }
 
-  if (countBox)
+  if (countBox) {
     countBox.textContent = invoiceData.length;
+  }
 
-  list.innerHTML = '';
+  let breakdownHtml = `
+    <div class="inventory-card">
+      <h3>Supplier Spend Breakdown</h3>
+  `;
+
+  let topSupplier = '';
+  let topSpend = 0;
+
+  Object.keys(supplierTotals).forEach(name => {
+
+    breakdownHtml += `
+      <p>
+        <strong>${name}</strong> :
+        £${supplierTotals[name].toFixed(2)}
+      </p>
+    `;
+
+    if (supplierTotals[name] > topSpend) {
+      topSpend = supplierTotals[name];
+      topSupplier = name;
+    }
+  });
+
+  if (topSupplier) {
+    breakdownHtml += `
+      <hr>
+      <p>
+        <strong>Top Supplier:</strong>
+        ${topSupplier}
+      </p>
+      <p>
+        <strong>Total Spend:</strong>
+        £${topSpend.toFixed(2)}
+      </p>
+    `;
+  }
+
+  breakdownHtml += `</div>`;
+
+  list.innerHTML = breakdownHtml;
 
   invoiceData.forEach(i => {
 
@@ -59,10 +109,15 @@ function renderInvoices() {
       <h3>${i.supplier}</h3>
 
       <p><strong>Invoice:</strong> ${i.number}</p>
+
       <p><strong>Date:</strong> ${i.date}</p>
+
       <p><strong>Subtotal:</strong> £${i.subtotal.toFixed(2)}</p>
+
       <p><strong>Shipping:</strong> £${i.shipping.toFixed(2)}</p>
+
       <p><strong>Total:</strong> £${i.total.toFixed(2)}</p>
+
       <p><strong>Notes:</strong> ${i.notes}</p>
 
       <button
@@ -99,4 +154,7 @@ function deleteInvoice(id) {
   renderInvoices();
 }
 
-document.addEventListener('DOMContentLoaded', renderInvoices);
+document.addEventListener(
+  'DOMContentLoaded',
+  renderInvoices
+);
