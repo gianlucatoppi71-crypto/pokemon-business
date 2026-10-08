@@ -244,7 +244,7 @@ function renderSales() {
       
       const pName = s.name || "Unknown Product";
       if (!productTotals[pName]) {
-        productTotals[pName] = { boxes: 0, packs: 0 };
+        productTotals[pName] = { boxes: 0, packs: 0, image: s.image || "Logo.png" };
       }
       
       if (s.type === "BOX") {
@@ -254,47 +254,61 @@ function renderSales() {
       }
     });
 
-    // Build the visual inner HTML structure layout
+    // Top Summary banner layout
     let dashboardHtml = `
-      <div class="dashboard-card" style="padding:20px; background:#1c1c21; border:1px solid #333; border-radius:8px; color:#fff; font-family:sans-serif; width:100%; box-sizing:border-box;">
-        <h3 style="margin:0 0 15px 0; color:#ffd700; font-size:18px; border-bottom:1px solid #333; padding-bottom:8px; text-align:center;">Sales Summary Metrics</h3>
-        
-        <div style="display:flex; justify-content:space-around; margin-bottom:20px; border-bottom:1px solid #2a2a30; padding-bottom:15px;">
-          <p style="margin:0; font-size:15px; color:#aaa;">Recorded Orders: <strong style="color:#fff; font-size:16px;">${businessSalesCount}</strong></p>
-          <p style="margin:0; font-size:15px; color:#aaa;">Net Realized Profit: <strong style="color:#00ff88; font-size:16px;">£${totalSalesProfit.toFixed(2)}</strong></p>
+      <div style="width:100%; box-sizing:border-box; font-family:sans-serif; margin-bottom: 20px;">
+        <div class="dashboard-card" style="padding:15px; text-align:center; margin-bottom:20px;">
+          <h3 style="margin:0 0 10px 0; color:#ffd700; font-size:18px;">Sales Summary Metrics</h3>
+          <div style="display:flex; justify-content:space-around;">
+            <p style="margin:0; font-size:14px; color:#aaa;">Recorded Orders: <strong style="color:#fff; font-size:16px;">${businessSalesCount}</strong></p>
+            <p style="margin:0; font-size:14px; color:#aaa;">Net Realized Profit: <strong style="color:#00ff88; font-size:16px;">£${totalSalesProfit.toFixed(2)}</strong></p>
+          </div>
         </div>
 
-        <h4 style="margin:0 0 10px 0; color:#ffd700; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Product Breakdown Summary:</h4>
-        <ul style="margin:0; padding-left:20px; list-style-type:square; color:#ccc; line-height:1.6; font-size:14px;">
+        <h4 style="margin:25px 0 10px 0; color:#ffd700; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Product Stock Volume Sold:</h4>
+        
+        <!-- Horizontal Scrolling Mini Card Container Row -->
+        <div id="productBreakdownCards" style="display:flex; gap:16px; overflow-x:auto; padding:6px 0 18px 0; scrollbar-width:thin;">
     `;
 
     const itemNames = Object.keys(productTotals);
     if (itemNames.length === 0) {
-      dashboardHtml += `<li style="color:#aaa; font-style:italic; list-style:none; padding-left:0;">No items cross-referenced yet.</li>`;
+      dashboardHtml += `
+        <div class="supplier-breakdown-card" style="min-width: 100%; text-align: center; color: #aaa; font-style: italic;">
+          No item volumes cross-referenced yet.
+        </div>
+      `;
     } else {
       itemNames.forEach(name => {
         const counts = productTotals[name];
         let labelDisplay = "";
         
+        // Format layout strings cleanly
         if (counts.boxes > 0 && counts.packs > 0) {
-          labelDisplay = `${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''} / ${counts.packs} Pack${counts.packs > 1 ? 's' : ''}`;
+          labelDisplay = `<div>${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''}</div><div>${counts.packs} Pack${counts.packs > 1 ? 's' : ''}</div>`;
         } else if (counts.boxes > 0) {
-          labelDisplay = `${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''}`;
+          labelDisplay = `<div>${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''}</div>`;
         } else {
-          labelDisplay = `${counts.packs} Pack${counts.packs > 1 ? 's' : ''}`;
+          labelDisplay = `<div>${counts.packs} Pack${counts.packs > 1 ? 's' : ''}</div>`;
         }
         
+        // Generate small micro cards matching your dashboard styles
         dashboardHtml += `
-          <li style="margin-bottom:6px;">
-            <span style="color:#fff; font-weight:bold;">${name}</span> — 
-            <span style="color:#00ff88; font-weight:bold;">Total Sold: ${labelDisplay}</span>
-          </li>
+          <div class="supplier-breakdown-card" style="min-width:240px; max-width:280px; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <img src="${counts.image}" style="width:35px; height:35px; object-fit:contain; background:#222; border-radius:4px; border:1px solid #444;" onerror="this.src='Logo.png'">
+              <h4 style="margin:0; color:#fff; font-size:14px; line-height:1.3; font-weight:700; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${name}</h4>
+            </div>
+            <div class="supplier-total" style="color:#00ff88; font-size:18px; font-weight:700; border-top:1px solid #333; padding-top:8px; margin-top:5px; line-height:1.4;">
+              ${labelDisplay}
+            </div>
+          </div>
         `;
       });
     }
 
     dashboardHtml += `
-        </ul>
+        </div>
       </div>
     `;
 
