@@ -30,6 +30,7 @@ function renderInvoices() {
 
   const list = document.getElementById('invoiceList');
   const breakdown = document.getElementById('supplierBreakdown');
+  const supplierCards = document.getElementById('supplierCards');
 
   if (!list) return;
 
@@ -89,6 +90,74 @@ function renderInvoices() {
 
   if (topSupplierBox) {
     topSupplierBox.textContent = topSupplier;
+  }
+
+  // SUPPLIER CARDS
+
+  if (supplierCards) {
+
+    supplierCards.innerHTML = '';
+
+    Object.keys(supplierTotals)
+      .sort((a, b) => supplierTotals[b] - supplierTotals[a])
+      .forEach(name => {
+
+        const card = document.createElement('div');
+
+        card.style.background = '#1a1a1a';
+        card.style.border = '1px solid #333';
+        card.style.borderRadius = '10px';
+        card.style.padding = '20px';
+        card.style.boxShadow = '0 0 12px rgba(0,0,0,0.4)';
+        card.style.minWidth = '200px';
+
+        const invoiceCount = invoiceData.filter(i => i.supplier === name).length;
+        const percentage = totalSpend > 0 ? ((supplierTotals[name] / totalSpend) * 100).toFixed(1) : 0;
+
+        card.innerHTML = `
+          <h3 style="
+            margin:0 0 15px 0;
+            color:#ffd700;
+            font-size:18px;
+          ">
+            ${name}
+          </h3>
+
+          <div style="
+            margin-bottom:12px;
+            padding-bottom:12px;
+            border-bottom:1px solid #333;
+          ">
+            <strong style="color:#ffd700;">Total Spend</strong><br>
+            <span style="font-size:24px; font-weight:bold;">
+              £${supplierTotals[name].toFixed(2)}
+            </span>
+          </div>
+
+          <div style="
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+            font-size:14px;
+          ">
+
+            <div>
+              <strong>Invoices</strong><br>
+              ${invoiceCount}
+            </div>
+
+            <div>
+              <strong>% of Total</strong><br>
+              ${percentage}%
+            </div>
+
+          </div>
+        `;
+
+        supplierCards.appendChild(card);
+
+      });
+
   }
 
   // SUPPLIER BREAKDOWN
