@@ -61,7 +61,8 @@ function saveInvoice() {
   }
 
   document.getElementById('invoiceForm').reset();
-  renderInvoices();
+loadInvoiceSuppliers();
+renderInvoices();
 }
 
 // ===============================
@@ -249,7 +250,47 @@ function formatDate(dateString) {
 // INITIALIZE ON PAGE LOAD
 // ===============================
 
+function loadInvoiceSuppliers() {
+
+  const supplierSelect =
+    document.getElementById('invoiceSupplier');
+
+  if (!supplierSelect) return;
+
+  supplierSelect.innerHTML = '';
+
+  const defaultOption =
+    document.createElement('option');
+
+  defaultOption.value = '';
+  defaultOption.textContent =
+    'Select supplier';
+
+  supplierSelect.appendChild(defaultOption);
+
+  if (
+    typeof suppliersData !== 'undefined' &&
+    Array.isArray(suppliersData)
+  ) {
+
+    suppliersData.forEach(supplier => {
+
+      const option =
+        document.createElement('option');
+
+      option.value = supplier.name;
+      option.textContent = supplier.name;
+
+      supplierSelect.appendChild(option);
+
+    });
+
+  }
+
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadInvoiceData();
+  loadInvoiceSuppliers();
   renderInvoices();
 });
