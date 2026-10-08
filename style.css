@@ -516,3 +516,103 @@ body {
 .personal-collection-panel {
     background: #1a1a1a;
     border: 1px solid #333;
+   /* ============================
+   INVOICE PAGE
+============================ */
+
+#invoiceForm {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(250px, 1fr));
+    gap: 15px;
+
+    background: #1a1a1a;
+    padding: 20px;
+
+    border-radius: 10px;
+    border: 1px solid #333;
+
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+
+    margin-top: 20px;
+    margin-bottom: 25px;
+}
+
+#invoiceForm input,
+#invoiceForm textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    background: #222;
+    color: #eee;
+
+    border: 1px solid #333;
+    border-radius: 6px;
+
+    padding: 12px;
+}
+
+#invoiceForm textarea {
+    min-height: 100px;
+    resize: vertical;
+
+    grid-column: 1 / -1;
+}
+
+#invoiceForm button {
+    grid-column: 1 / -1;
+
+    background: #ffd700;
+    color: #000;
+
+    border: none;
+    border-radius: 6px;
+
+    padding: 14px;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+#invoiceForm button:hover {
+    background: #e6c200;
+}
+
+#supplierBreakdown {
+    margin-top: 15px;
+}
+
+#supplierBreakdown div {
+    background: #222;
+
+    border: 1px solid #333;
+    border-radius: 6px;
+
+    padding: 10px;
+    margin-bottom: 8px;
+
+    font-size: 14px;
+}
+
+#invoiceList {
+    margin-top: 20px;
+}
+
+#invoiceList .inventory-card {
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+#invoiceList h3 {
+    color: #ffd700;
+    margin-top: 0;
+}
+
+@media (max-width: 900px) {
+
+    #invoiceForm {
+        grid-template-columns: 1fr;
+    }
+
+}
