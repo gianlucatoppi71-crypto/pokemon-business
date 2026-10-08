@@ -1,6 +1,6 @@
-// ===============================
-// SALES SYSTEM
-// ===============================
+// ===============================================
+// FLUX TCG DATA DESK & CORE RECORDING SYSTEM
+// ===============================================
 
 // RECORD PERSONAL COLLECTION
 function recordPersonalCollection(item, type) {
@@ -86,9 +86,9 @@ function recordSale(item, type) {
   renderSales();
 }
 
-// ===============================
-// SELL BOX
-// ===============================
+// ===============================================
+// TRANSACTION ACTION AREA: SELL BOX ENGINE
+// ===============================================
 function sellBox(id) {
   loadData();
 
@@ -118,10 +118,9 @@ function sellBox(id) {
 
   renderInventory();
 }
-
-// ===============================
-// SELL PACK
-// ===============================
+// ===============================================
+// TRANSACTION ACTION AREA: SELL PACK ENGINE
+// ===============================================
 function sellPack(id) {
   loadData();
 
@@ -186,9 +185,9 @@ function sellPack(id) {
   renderInventory();
 }
 
-// ===============================
-// UNDO SALE (RESTORE INVENTORY)
-// ===============================
+// ===============================================
+// DATA OPERATIONS: UNDO RECORD & RESTORE STOCK
+// ===============================================
 function undoSale(saleId) {
   loadData();
 
@@ -216,39 +215,90 @@ function undoSale(saleId) {
   renderSales();
 }
 
-// ===============================
-// DELETE SALE RECORD
-// ===============================
+// ===============================================
+// DATA OPERATIONS: REMOVE TRADING HISTORIES
+// ===============================================
 function deleteSale(saleId) {
   loadData();
   salesData = salesData.filter(s => s.id !== saleId);
   saveData();
   renderSales();
 }
-
-// ===============================
-// RENDER MAIN SALES HISTORY LEDGER
-// ===============================
+// ===============================================
+// DISPLAY ENGINE: RENDER MAIN SALES HISTORY LEDGER
+// ===============================================
 function renderSales() {
   loadData();
 
-  // 1. Clean up or hide the broken chart dashboards to remove the empty gray boxes
+  // 1. Process and Render Summary Metrics & Product Breakdown Panel
   const dbDashboard = document.getElementById("salesDashboard");
   if (dbDashboard) {
     let totalSalesProfit = 0;
     let businessSalesCount = salesData.length;
     
+    // Map to keep track of total quantities sold per unique item name
+    const productTotals = {};
+
     salesData.forEach(s => {
       totalSalesProfit += (s.totalProfit || 0);
+      
+      const pName = s.name || "Unknown Product";
+      if (!productTotals[pName]) {
+        productTotals[pName] = { boxes: 0, packs: 0 };
+      }
+      
+      if (s.type === "BOX") {
+        productTotals[pName].boxes += 1;
+      } else if (s.type === "PACK") {
+        productTotals[pName].packs += 1;
+      }
     });
 
-    dbDashboard.innerHTML = `
-      <div class="dashboard-card" style="padding:15px; background:#1c1c21; border:1px solid #333; border-radius:6px; color:#fff; font-family:sans-serif; text-align:center;">
-        <h3 style="margin:0 0 10px 0; color:#ffd700; font-size:16px;">Sales Summary Metrics</h3>
-        <p style="margin:5px 0; font-size:14px; color:#aaa;">Recorded Orders: <strong style="color:#fff;">${businessSalesCount}</strong></p>
-        <p style="margin:5px 0; font-size:14px; color:#aaa;">Net Realized Profit: <strong style="color:#00ff88;">£${totalSalesProfit.toFixed(2)}</strong></p>
+    // Build the visual inner HTML structure layout
+    let dashboardHtml = `
+      <div class="dashboard-card" style="padding:20px; background:#1c1c21; border:1px solid #333; border-radius:8px; color:#fff; font-family:sans-serif; width:100%; box-sizing:border-box;">
+        <h3 style="margin:0 0 15px 0; color:#ffd700; font-size:18px; border-bottom:1px solid #333; padding-bottom:8px; text-align:center;">Sales Summary Metrics</h3>
+        
+        <div style="display:flex; justify-content:space-around; margin-bottom:20px; border-bottom:1px solid #2a2a30; padding-bottom:15px;">
+          <p style="margin:0; font-size:15px; color:#aaa;">Recorded Orders: <strong style="color:#fff; font-size:16px;">${businessSalesCount}</strong></p>
+          <p style="margin:0; font-size:15px; color:#aaa;">Net Realized Profit: <strong style="color:#00ff88; font-size:16px;">£${totalSalesProfit.toFixed(2)}</strong></p>
+        </div>
+
+        <h4 style="margin:0 0 10px 0; color:#ffd700; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Product Breakdown Summary:</h4>
+        <ul style="margin:0; padding-left:20px; list-style-type:square; color:#ccc; line-height:1.6; font-size:14px;">
+    `;
+
+    const itemNames = Object.keys(productTotals);
+    if (itemNames.length === 0) {
+      dashboardHtml += `<li style="color:#aaa; font-style:italic; list-style:none; padding-left:0;">No items cross-referenced yet.</li>`;
+    } else {
+      itemNames.forEach(name => {
+        const counts = productTotals[name];
+        let labelDisplay = "";
+        
+        if (counts.boxes > 0 && counts.packs > 0) {
+          labelDisplay = `${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''} / ${counts.packs} Pack${counts.packs > 1 ? 's' : ''}`;
+        } else if (counts.boxes > 0) {
+          labelDisplay = `${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''}`;
+        } else {
+          labelDisplay = `${counts.packs} Pack${counts.packs > 1 ? 's' : ''}`;
+        }
+        
+        dashboardHtml += `
+          <li style="margin-bottom:6px;">
+            <span style="color:#fff; font-weight:bold;">${name}</span> — 
+            <span style="color:#00ff88; font-weight:bold;">Total Sold: ${labelDisplay}</span>
+          </li>
+        `;
+      });
+    }
+
+    dashboardHtml += `
+        </ul>
       </div>
     `;
+
+    dbDashboard.innerHTML = dashboardHtml;
     dbDashboard.style.border = "none";
     dbDashboard.style.background = "transparent";
   }
@@ -333,3 +383,8 @@ function renderSales() {
     tbody.appendChild(row);
   });
 }
+
+// Global window registration map hooks
+window.renderSales = renderSales;
+window.undoSale = undoSale;
+window.deleteSale = deleteSale;
