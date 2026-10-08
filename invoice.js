@@ -29,6 +29,7 @@ function saveInvoice() {
 function renderInvoices() {
 
   const list = document.getElementById('invoiceList');
+  const breakdown = document.getElementById('supplierBreakdown');
 
   if (!list) return;
 
@@ -36,111 +37,135 @@ function renderInvoices() {
 
   const supplierTotals = {};
 
-  invoiceData.forEach(i => {
+  invoiceData.forEach(invoice => {
 
-    totalSpend += i.total;
+    totalSpend += invoice.total || 0;
 
-    if (!supplierTotals[i.supplier]) {
-      supplierTotals[i.supplier] = 0;
+    if (!supplierTotals[invoice.supplier]) {
+      supplierTotals[invoice.supplier] = 0;
     }
 
-    supplierTotals[i.supplier] += i.total;
+    supplierTotals[invoice.supplier] += invoice.total || 0;
   });
+
+  // Dashboard
 
   const spendBox = document.getElementById('totalInvoiceSpend');
   const countBox = document.getElementById('invoiceCount');
+  const avgBox = document.getElementById('averageInvoice');
+  const topSupplierBox = document.getElementById('topSupplier');
 
-  if (spendBox) {
-    spendBox.textContent = `£${totalSpend.toFixed(2)}`;
-  }
+  if (spendBox)
+    spendBox.textContent =
+      `£${totalSpend.toFixed(2)}`;
 
-  if (countBox) {
-    countBox.textContent = invoiceData.length;
-  }
+  if (countBox)
+    countBox.textContent =
+      invoiceData.length;
 
-  let breakdownHtml = `
-    <div class="inventory-card">
-      <h3>Supplier Spend Breakdown</h3>
-  `;
+  const averageInvoice =
+    invoiceData.length > 0
+      ? totalSpend / invoiceData.length
+      : 0;
 
-  let topSupplier = '';
-  let topSpend = 0;
+  if (avgBox)
+    avgBox.textContent =
+      `£${averageInvoice.toFixed(2)}`;
+
+  let topSupplier = 'None';
+  let highestSpend = 0;
 
   Object.keys(supplierTotals).forEach(name => {
 
-    breakdownHtml += `
-      <p>
-        <strong>${name}</strong> :
-        £${supplierTotals[name].toFixed(2)}
-      </p>
-    `;
+    if (supplierTotals[name] > highestSpend) {
 
-    if (supplierTotals[name] > topSpend) {
-      topSpend = supplierTotals[name];
+      highestSpend = supplierTotals[name];
       topSupplier = name;
     }
   });
 
-  if (topSupplier) {
-    breakdownHtml += `
-      <hr>
-      <p>
-        <strong>Top Supplier:</strong>
-        ${topSupplier}
-      </p>
-      <p>
-        <strong>Total Spend:</strong>
-        £${topSpend.toFixed(2)}
-      </p>
-    `;
+  if (topSupplierBox)
+    topSupplierBox.textContent =
+      topSupplier;
+
+  // Supplier Breakdown
+
+  if (breakdown) {
+
+    breakdown.innerHTML = '';
+
+    Object.keys(supplierTotals)
+      .sort((a, b) => supplierTotals[b] - supplierTotals[a])
+      .forEach(name => {
+
+        const row = document.createElement('div');
+
+        row.style.padding = '8px 0';
+
+        row.innerHTML = `
+          <strong>${name}</strong>
+          <span style="float:right;">
+            £${supplierTotals[name].toFixed(2)}
+          </span>
+        `;
+
+        breakdown.appendChild(row);
+      });
   }
 
-  breakdownHtml += `</div>`;
+  // Invoice History
 
-  list.innerHTML = breakdownHtml;
+  list.innerHTML = '';
 
-  invoiceData.forEach(i => {
+  invoiceData
+    .sort((a, b) => b.id - a.id)
+    .forEach(i => {
 
-    const row = document.createElement('div');
+      const row = document.createElement('div');
 
-    row.className = 'inventory-card';
+      row.className = 'inventory-card';
 
-    row.innerHTML = `
-      <h3>${i.supplier}</h3>
+      row.style.marginBottom = '15px';
 
-      <p><strong>Invoice:</strong> ${i.number}</p>
+      row.innerHTML = `
+        <h3>${i.supplier}</h3>
 
-      <p><strong>Date:</strong> ${i.date}</p>
+        <p><strong>Invoice:</strong> ${i.number}</p>
 
-      <p><strong>Subtotal:</strong> £${i.subtotal.toFixed(2)}</p>
+        <p><strong>Date:</strong> ${i.date}</p>
 
-      <p><strong>Shipping:</strong> £${i.shipping.toFixed(2)}</p>
+        <p><strong>Subtotal:</strong> £${i.subtotal.toFixed(2)}</p>
 
-      <p><strong>Total:</strong> £${i.total.toFixed(2)}</p>
+        <p><strong>Shipping:</strong> £${i.shipping.toFixed(2)}</p>
 
-      <p><strong>Notes:</strong> ${i.notes}</p>
+        <p><strong>Total:</strong> £${i.total.toFixed(2)}</p>
 
-      <button
-        onclick="deleteInvoice(${i.id})"
-        style="
-          background:#8b0000;
-          color:white;
-          border:none;
-          padding:10px;
-          border-radius:6px;
-          cursor:pointer;
-          margin-top:10px;
-        "
-      >
-        Delete Invoice
-      </button>
-    `;
+        <p><strong>Notes:</strong> ${i.notes}</p>
 
-    list.appendChild(row);
-  });
+        <button
+          onclick="deleteInvoice(${i.id})"
+          style="
+            background:#8b0000;
+            color:white;
+            border:none;
+            padding:10px;
+            border-radius:6px;
+            cursor:pointer;
+          "
+        >
+          Delete Invoice
+        </button>
+      `;
+
+      list.appendChild(row);
+    });
 }
 
 function deleteInvoice(id) {
+
+  if (!confirm('Delete this invoice?')) {
+    return;
+  }
 
   invoiceData = invoiceData.filter(
     invoice => invoice.id !== id
