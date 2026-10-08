@@ -85,9 +85,14 @@ function renderInvoices() {
     topSupplierBox.textContent = topSupplier;
   }
 
-  // SUPPLIER CARDS
+  // SUPPLIER CARDS - HORIZONTAL LAYOUT
   if (supplierCards) {
     supplierCards.innerHTML = '';
+    supplierCards.style.display = 'flex';
+    supplierCards.style.gap = '15px';
+    supplierCards.style.overflowX = 'auto';
+    supplierCards.style.paddingBottom = '10px';
+    supplierCards.style.marginBottom = '30px';
 
     Object.keys(supplierTotals)
       .sort((a, b) => supplierTotals[b] - supplierTotals[a])
@@ -99,8 +104,8 @@ function renderInvoices() {
         card.style.borderRadius = '10px';
         card.style.padding = '20px';
         card.style.boxShadow = '0 0 12px rgba(0,0,0,0.4)';
-        card.style.minWidth = '200px';
-        card.style.flex = '1 1 220px';
+        card.style.minWidth = '280px';
+        card.style.flex = '0 0 280px';
 
         const invoiceCount = invoiceData.filter(i => i.supplier === name).length;
         const percentage = totalSpend > 0 ? ((supplierTotals[name] / totalSpend) * 100).toFixed(1) : '0.0';
@@ -109,34 +114,35 @@ function renderInvoices() {
           <h3 style="
             margin:0 0 15px 0;
             color:#ffd700;
-            font-size:18px;
+            font-size:16px;
+            word-break:break-word;
           ">${name}</h3>
 
           <div style="
-            margin-bottom:12px;
-            padding-bottom:12px;
+            margin-bottom:15px;
+            padding-bottom:15px;
             border-bottom:1px solid #333;
           ">
-            <strong style="color:#ffd700;">Total Spend</strong><br>
-            <span style="font-size:24px; font-weight:bold;">
+            <span style="color:#999; font-size:12px;">Total Spend</span><br>
+            <span style="font-size:22px; font-weight:bold; color:#fff;">
               £${supplierTotals[name].toFixed(2)}
             </span>
           </div>
 
           <div style="
-            display:grid;
-            grid-template-columns:1fr 1fr;
+            display:flex;
+            justify-content:space-between;
+            font-size:13px;
             gap:10px;
-            font-size:14px;
           ">
             <div>
-              <strong>Invoices</strong><br>
-              ${invoiceCount}
+              <span style="color:#999; display:block; margin-bottom:4px;">Invoices</span>
+              <span style="font-weight:bold; color:#ffd700; font-size:16px;">${invoiceCount}</span>
             </div>
 
-            <div>
-              <strong>% of Total</strong><br>
-              ${percentage}%
+            <div style="text-align:right;">
+              <span style="color:#999; display:block; margin-bottom:4px;">% of Total</span>
+              <span style="font-weight:bold; color:#ffd700; font-size:16px;">${percentage}%</span>
             </div>
           </div>
         `;
