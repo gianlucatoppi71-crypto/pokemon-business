@@ -236,7 +236,7 @@ function renderSales() {
     let totalSalesProfit = 0;
     let businessSalesCount = salesData.length;
     
-    // Map to keep track of total quantities sold per unique item name
+    // Map to keep track of total quantities and finances sold per unique item name
     const productTotals = {};
 
     salesData.forEach(s => {
@@ -244,14 +244,27 @@ function renderSales() {
       
       const pName = s.name || "Unknown Product";
       if (!productTotals[pName]) {
-        productTotals[pName] = { boxes: 0, packs: 0, image: s.image || "Logo.png" };
+        productTotals[pName] = { 
+          boxes: 0, 
+          packs: 0, 
+          image: s.image || "Logo.png",
+          totalCost: 0,
+          totalSales: 0,
+          totalProfit: 0
+        };
       }
       
+      // Accumulate item unit volumes
       if (s.type === "BOX") {
         productTotals[pName].boxes += 1;
       } else if (s.type === "PACK") {
         productTotals[pName].packs += 1;
       }
+
+      // Accumulate financial running sums
+      productTotals[pName].totalCost += (s.buyPrice || 0);
+      productTotals[pName].totalSales += (s.sellPrice || 0);
+      productTotals[pName].totalProfit += (s.totalProfit || 0);
     });
 
     // Top Summary banner layout
@@ -265,7 +278,7 @@ function renderSales() {
           </div>
         </div>
 
-        <h4 style="margin:25px 0 10px 0; color:#ffd700; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Product Stock Volume Sold:</h4>
+        <h4 style="margin:25px 0 10px 0; color:#ffd700; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Product Financial & Volume Breakdown:</h4>
         
         <!-- Horizontal Scrolling Mini Card Container Row -->
         <div id="productBreakdownCards" style="display:flex; gap:16px; overflow-x:auto; padding:6px 0 18px 0; scrollbar-width:thin;">
@@ -275,33 +288,57 @@ function renderSales() {
     if (itemNames.length === 0) {
       dashboardHtml += `
         <div class="supplier-breakdown-card" style="min-width: 100%; text-align: center; color: #aaa; font-style: italic;">
-          No item volumes cross-referenced yet.
+          No item metrics cross-referenced yet.
         </div>
       `;
     } else {
       itemNames.forEach(name => {
         const counts = productTotals[name];
-        let labelDisplay = "";
+        let volumeDisplay = "";
         
-        // Format layout strings cleanly
+        // Format volume layout strings cleanly
         if (counts.boxes > 0 && counts.packs > 0) {
-          labelDisplay = `<div>${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''}</div><div>${counts.packs} Pack${counts.packs > 1 ? 's' : ''}</div>`;
+          volumeDisplay = `${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''} / ${counts.packs} Pack${counts.packs > 1 ? 's' : ''}`;
         } else if (counts.boxes > 0) {
-          labelDisplay = `<div>${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''}</div>`;
+          volumeDisplay = `${counts.boxes} Box${counts.boxes > 1 ? 'es' : ''}`;
         } else {
-          labelDisplay = `<div>${counts.packs} Pack${counts.packs > 1 ? 's' : ''}</div>`;
+          volumeDisplay = `${counts.packs} Pack${counts.packs > 1 ? 's' : ''}`;
         }
+
+        const cardProfitColor = counts.totalProfit >= 0 ? '#00ff88' : '#ff4d4d';
         
-        // Generate small micro cards matching your dashboard styles
+        // Generate small micro cards with clear mini-ledger metrics inside
         dashboardHtml += `
-          <div class="supplier-breakdown-card" style="min-width:240px; max-width:280px; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+          <div class="supplier-breakdown-card" style="min-width:280px; max-width:320px; display:flex; flex-direction:column; justify-content:space-between; gap:12px;">
+            
+            <!-- Card Header: Title & Thumbnail -->
             <div style="display:flex; gap:10px; align-items:center;">
-              <img src="${counts.image}" style="width:35px; height:35px; object-fit:contain; background:#222; border-radius:4px; border:1px solid #444;" onerror="this.src='Logo.png'">
-              <h4 style="margin:0; color:#fff; font-size:14px; line-height:1.3; font-weight:700; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${name}</h4>
+              <img src="${counts.image}" style="width:38px; height:38px; object-fit:contain; background:#222; border-radius:4px; border:1px solid #444;" onerror="this.src='Logo.png'">
+              <h4 style="margin:0; color:#fff; font-size:13px; line-height:1.3; font-weight:700; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${name}</h4>
             </div>
-            <div class="supplier-total" style="color:#00ff88; font-size:18px; font-weight:700; border-top:1px solid #333; padding-top:8px; margin-top:5px; line-height:1.4;">
-              ${labelDisplay}
+            
+            <!-- Card Body: Structured Spreadsheet Financial Micro-Rows -->
+            <div style="display:flex; flex-direction:column; gap:4px; border-top:1px solid #333; padding-top:8px; font-size:12px;">
+              <div style="display:flex; justify-content:space-between; color:#aaa;">
+                <span>Total Units Sold:</span>
+                <strong style="color:#fff;">${volumeDisplay}</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; color:#aaa;">
+                <span>Total Cost Price:</span>
+                <span style="color:#ccc;">£${counts.totalCost.toFixed(2)}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; color:#aaa;">
+                <span>Total Sale Price:</span>
+                <span style="color:#fff; font-weight:600;">£${counts.totalSales.toFixed(2)}</span>
+              </div>
             </div>
+
+            <!-- Card Footer: Total Net Profit Margin Highlight -->
+            <div class="supplier-total" style="color:${cardProfitColor}; font-size:16px; font-weight:700; border-top:1px solid #333; padding-top:8px; display:flex; justify-content:space-between; align-items:center; line-height:1;">
+              <span style="font-size:11px; color:#ffd700; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Net Profit:</span>
+              <span>£${counts.totalProfit.toFixed(2)}</span>
+            </div>
+
           </div>
         `;
       });
