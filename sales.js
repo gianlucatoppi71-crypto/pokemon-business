@@ -280,8 +280,9 @@ function renderSales() {
 
         <h4 style="margin:25px 0 10px 0; color:#ffd700; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Product Financial & Volume Breakdown:</h4>
         
-        <!-- Horizontal Scrolling Mini Card Container Row -->
-        <div id="productBreakdownCards" style="display:flex; gap:16px; overflow-x:auto; padding:6px 0 18px 0; scrollbar-width:thin;">
+       <!-- Grid Wrap Mini Card Container Row -->
+<div id="productBreakdownCards" style="display:flex; flex-wrap:wrap; gap:16px; padding:6px 0 18px 0;">
+
     `;
 
     const itemNames = Object.keys(productTotals);
