@@ -289,26 +289,6 @@ body {
   border: 1px solid rgba(255,215,0,0.12);
 }
 
-.invoice-notes {
-  background: rgba(255,215,0,0.04);
-  border: 1px solid rgba(255,215,0,0.12);
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 14px;
-}
-
-.invoice-notes strong {
-  color: #ffd700;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.invoice-notes p {
-  margin: 0;
-  color: #ddd;
-  line-height: 1.5;
-}
-
 @media (max-width: 900px) {
   .main {
     padding: 20px;
