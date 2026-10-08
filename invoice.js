@@ -1,56 +1,121 @@
-let invoiceData =
-  JSON.parse(localStorage.getItem('invoiceData')) || [];
+// ===============================
+// INVOICE DATA MANAGEMENT
+// ===============================
+
+let invoiceData = [];
+
+// Safe data loading with error handling
+function loadInvoiceData() {
+  try {
+    const saved = localStorage.getItem('invoiceData');
+    invoiceData = saved ? JSON.parse(saved) : [];
+    if (!Array.isArray(invoiceData)) {
+      invoiceData = [];
+    }
+  } catch (error) {
+    console.error('Error loading invoice data:', error);
+    localStorage.removeItem('invoiceData');
+    invoiceData = [];
+  }
+}
+
+// ===============================
+// SAVE INVOICE
+// ===============================
 
 function saveInvoice() {
+  
+  // Validation
+  const supplier = document.getElementById('invoiceSupplier').value.trim();
+  const number = document.getElementById('invoiceNumber').value.trim();
+  const date = document.getElementById('invoiceDate').value;
+  const subtotal = parseFloat(document.getElementById('invoiceSubtotal').value) || 0;
+  const shipping = parseFloat(document.getElementById('invoiceShipping').value) || 0;
+  const total = parseFloat(document.getElementById('invoiceTotal').value) || 0;
+  const notes = document.getElementById('invoiceNotes').value.trim();
+  
+  if (!supplier || !number || !date || total <= 0) {
+    alert('Please fill in all required fields (Supplier, Invoice #, Date, Total)');
+    return;
+  }
 
   const invoice = {
     id: Date.now(),
-    supplier: document.getElementById('invoiceSupplier').value,
-    number: document.getElementById('invoiceNumber').value,
-    date: document.getElementById('invoiceDate').value,
-    subtotal: parseFloat(document.getElementById('invoiceSubtotal').value) || 0,
-    shipping: parseFloat(document.getElementById('invoiceShipping').value) || 0,
-    total: parseFloat(document.getElementById('invoiceTotal').value) || 0,
-    notes: document.getElementById('invoiceNotes').value
+    supplier,
+    number,
+    date,
+    subtotal,
+    shipping,
+    total,
+    notes
   };
 
   invoiceData.push(invoice);
 
-  localStorage.setItem(
-    'invoiceData',
-    JSON.stringify(invoiceData)
-  );
+  try {
+    localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
+  } catch (error) {
+    console.error('Error saving invoice:', error);
+    alert('Failed to save invoice');
+    return;
+  }
 
   document.getElementById('invoiceForm').reset();
-
   renderInvoices();
 }
 
+// ===============================
+// RENDER INVOICES
+// ===============================
+
 function renderInvoices() {
-
-  const list = document.getElementById('invoiceList');
-  const breakdown = document.getElementById('supplierBreakdown');
-
-  if (!list) return;
+  
+  loadInvoiceData();
+  
+  const listContainer = document.getElementById('invoiceList');
+  if (!listContainer) return;
 
   let totalSpend = 0;
-
   const supplierTotals = {};
 
+  // Calculate totals
   invoiceData.forEach(invoice => {
-
     totalSpend += invoice.total || 0;
-
     if (!supplierTotals[invoice.supplier]) {
       supplierTotals[invoice.supplier] = 0;
     }
-
     supplierTotals[invoice.supplier] += invoice.total || 0;
-
   });
 
-  // DASHBOARD
+  // Update dashboard
+  updateInvoiceDashboard(totalSpend, supplierTotals);
 
+  // Render invoice list
+  listContainer.innerHTML = '';
+
+  if (invoiceData.length === 0) {
+    listContainer.innerHTML = `
+      <div class="invoice-empty">
+        <p>No invoices yet. Add one to get started.</p>
+      </div>
+    `;
+    return;
+  }
+
+  invoiceData
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .forEach(invoice => {
+      const card = createInvoiceCard(invoice);
+      listContainer.appendChild(card);
+    });
+}
+
+// ===============================
+// UPDATE DASHBOARD
+// ===============================
+
+function updateInvoiceDashboard(totalSpend, supplierTotals) {
+  
   const spendBox = document.getElementById('totalInvoiceSpend');
   const countBox = document.getElementById('invoiceCount');
   const avgBox = document.getElementById('averageInvoice');
@@ -64,11 +129,7 @@ function renderInvoices() {
     countBox.textContent = invoiceData.length;
   }
 
-  const averageInvoice =
-    invoiceData.length > 0
-      ? totalSpend / invoiceData.length
-      : 0;
-
+  const averageInvoice = invoiceData.length > 0 ? totalSpend / invoiceData.length : 0;
   if (avgBox) {
     avgBox.textContent = `£${averageInvoice.toFixed(2)}`;
   }
@@ -77,171 +138,118 @@ function renderInvoices() {
   let highestSpend = 0;
 
   Object.keys(supplierTotals).forEach(name => {
-
     if (supplierTotals[name] > highestSpend) {
-
       highestSpend = supplierTotals[name];
       topSupplier = name;
-
     }
-
   });
 
   if (topSupplierBox) {
     topSupplierBox.textContent = topSupplier;
   }
-
-  // SUPPLIER BREAKDOWN
-
-  if (breakdown) {
-
-    breakdown.innerHTML = '';
-
-    Object.keys(supplierTotals)
-      .sort((a, b) => supplierTotals[b] - supplierTotals[a])
-      .forEach(name => {
-
-        const row = document.createElement('div');
-
-        row.style.padding = '10px';
-        row.style.marginBottom = '8px';
-        row.style.background = '#222';
-        row.style.border = '1px solid #333';
-        row.style.borderRadius = '6px';
-
-        row.innerHTML = `
-          <strong>${name}</strong>
-
-          <span style="float:right;">
-            £${supplierTotals[name].toFixed(2)}
-          </span>
-        `;
-
-        breakdown.appendChild(row);
-
-      });
-
-  }
-
-  // INVOICE HISTORY
-
-  list.innerHTML = '';
-
-  invoiceData
-    .sort((a, b) => b.id - a.id)
-    .forEach(i => {
-
-      const row = document.createElement('div');
-
-      row.style.background = '#1a1a1a';
-      row.style.border = '1px solid #333';
-      row.style.borderRadius = '10px';
-      row.style.padding = '20px';
-      row.style.marginBottom = '20px';
-      row.style.boxShadow = '0 0 12px rgba(0,0,0,0.4)';
-
-      row.innerHTML = `
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          margin-bottom:15px;
-        ">
-
-          <h3 style="
-            margin:0;
-            color:#ffd700;
-          ">
-            ${i.supplier}
-          </h3>
-
-          <button
-            onclick="deleteInvoice(${i.id})"
-            style="
-              background:#8b0000;
-              color:white;
-              border:none;
-              border-radius:6px;
-              padding:8px 14px;
-              cursor:pointer;
-            "
-          >
-            Delete
-          </button>
-
-        </div>
-
-        <div style="
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-          gap:15px;
-        ">
-
-          <div>
-            <strong>Invoice Number</strong><br>
-            ${i.number}
-          </div>
-
-          <div>
-            <strong>Date</strong><br>
-            ${i.date}
-          </div>
-
-          <div>
-            <strong>Total</strong><br>
-            £${i.total.toFixed(2)}
-          </div>
-
-          <div>
-            <strong>Subtotal</strong><br>
-            £${i.subtotal.toFixed(2)}
-          </div>
-
-          <div>
-            <strong>Shipping</strong><br>
-            £${i.shipping.toFixed(2)}
-          </div>
-
-        </div>
-
-        <div style="
-          margin-top:15px;
-          background:#222;
-          padding:12px;
-          border-radius:6px;
-        ">
-
-          <strong>Notes</strong><br>
-          ${i.notes || 'No notes'}
-
-        </div>
-      `;
-
-      list.appendChild(row);
-
-    });
-
 }
 
-function deleteInvoice(id) {
+// ===============================
+// CREATE INVOICE CARD
+// ===============================
 
-  if (!confirm('Delete this invoice?')) {
+function createInvoiceCard(invoice) {
+  
+  const card = document.createElement('div');
+  card.className = 'invoice-card';
+
+  const headerHTML = `
+    <div class="invoice-header">
+      <div class="invoice-title">
+        <h3>${escapeHtml(invoice.supplier)}</h3>
+        <span class="invoice-number">#${escapeHtml(invoice.number)}</span>
+      </div>
+      <button class="invoice-delete-btn" onclick="deleteInvoice(${invoice.id})">
+        Delete
+      </button>
+    </div>
+  `;
+
+  const detailsHTML = `
+    <div class="invoice-details">
+      <div class="detail-row">
+        <span class="detail-label">Date:</span>
+        <span class="detail-value">${formatDate(invoice.date)}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Subtotal:</span>
+        <span class="detail-value">£${invoice.subtotal.toFixed(2)}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Shipping:</span>
+        <span class="detail-value">£${invoice.shipping.toFixed(2)}</span>
+      </div>
+      <div class="detail-row highlight">
+        <span class="detail-label"><strong>Total:</strong></span>
+        <span class="detail-value"><strong>£${invoice.total.toFixed(2)}</strong></span>
+      </div>
+    </div>
+  `;
+
+  const notesHTML = invoice.notes ? `
+    <div class="invoice-notes">
+      <strong>Notes:</strong>
+      <p>${escapeHtml(invoice.notes)}</p>
+    </div>
+  ` : '';
+
+  card.innerHTML = headerHTML + detailsHTML + notesHTML;
+  return card;
+}
+
+// ===============================
+// DELETE INVOICE
+// ===============================
+
+function deleteInvoice(id) {
+  
+  if (!confirm('Are you sure you want to delete this invoice?')) {
     return;
   }
 
-  invoiceData = invoiceData.filter(
-    invoice => invoice.id !== id
-  );
+  invoiceData = invoiceData.filter(invoice => invoice.id !== id);
 
-  localStorage.setItem(
-    'invoiceData',
-    JSON.stringify(invoiceData)
-  );
+  try {
+    localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
+  } catch (error) {
+    console.error('Error deleting invoice:', error);
+    alert('Failed to delete invoice');
+    return;
+  }
 
   renderInvoices();
 }
 
-document.addEventListener(
-  'DOMContentLoaded',
-  renderInvoices
-);
+// ===============================
+// UTILITY FUNCTIONS
+// ===============================
+
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+function formatDate(dateString) {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString('en-GB', options);
+}
+
+// ===============================
+// INITIALIZE ON PAGE LOAD
+// ===============================
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadInvoiceData();
+  renderInvoices();
+});
