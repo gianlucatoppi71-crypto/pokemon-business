@@ -64,11 +64,39 @@ function renderInvoices() {
       <p><strong>Shipping:</strong> £${i.shipping.toFixed(2)}</p>
       <p><strong>Total:</strong> £${i.total.toFixed(2)}</p>
       <p><strong>Notes:</strong> ${i.notes}</p>
+
+      <button
+        onclick="deleteInvoice(${i.id})"
+        style="
+          background:#8b0000;
+          color:white;
+          border:none;
+          padding:10px;
+          border-radius:6px;
+          cursor:pointer;
+          margin-top:10px;
+        "
+      >
+        Delete Invoice
+      </button>
     `;
 
     list.appendChild(row);
   });
+}
 
+function deleteInvoice(id) {
+
+  invoiceData = invoiceData.filter(
+    invoice => invoice.id !== id
+  );
+
+  localStorage.setItem(
+    'invoiceData',
+    JSON.stringify(invoiceData)
+  );
+
+  renderInvoices();
 }
 
 document.addEventListener('DOMContentLoaded', renderInvoices);
