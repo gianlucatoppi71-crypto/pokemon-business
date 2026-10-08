@@ -1,17 +1,20 @@
 let invoiceData =
   JSON.parse(localStorage.getItem('invoiceData')) || [];
 
-function saveInvoice() {
+if (!Array.isArray(invoiceData)) {
+  invoiceData = [];
+}
 
+function saveInvoice() {
   const invoice = {
     id: Date.now(),
-    supplier: document.getElementById('invoiceSupplier').value,
-    number: document.getElementById('invoiceNumber').value,
-    date: document.getElementById('invoiceDate').value,
-    subtotal: parseFloat(document.getElementById('invoiceSubtotal').value) || 0,
-    shipping: parseFloat(document.getElementById('invoiceShipping').value) || 0,
-    total: parseFloat(document.getElementById('invoiceTotal').value) || 0,
-    notes: document.getElementById('invoiceNotes').value
+    supplier: document.getElementById('invoiceSupplier')?.value || '',
+    number: document.getElementById('invoiceNumber')?.value || '',
+    date: document.getElementById('invoiceDate')?.value || '',
+    subtotal: parseFloat(document.getElementById('invoiceSubtotal')?.value) || 0,
+    shipping: parseFloat(document.getElementById('invoiceShipping')?.value) || 0,
+    total: parseFloat(document.getElementById('invoiceTotal')?.value) || 0,
+    notes: document.getElementById('invoiceNotes')?.value || ''
   };
 
   invoiceData.push(invoice);
@@ -21,13 +24,13 @@ function saveInvoice() {
     JSON.stringify(invoiceData)
   );
 
-  document.getElementById('invoiceForm').reset();
+  const invoiceForm = document.getElementById('invoiceForm');
+  if (invoiceForm) invoiceForm.reset();
 
   renderInvoices();
 }
 
 function renderInvoices() {
-
   const list = document.getElementById('invoiceList');
   const breakdown = document.getElementById('supplierBreakdown');
   const supplierCards = document.getElementById('supplierCards');
@@ -35,23 +38,20 @@ function renderInvoices() {
   if (!list) return;
 
   let totalSpend = 0;
-
   const supplierTotals = {};
 
   invoiceData.forEach(invoice => {
-
-    totalSpend += invoice.total || 0;
+    const total = Number(invoice.total) || 0;
+    totalSpend += total;
 
     if (!supplierTotals[invoice.supplier]) {
       supplierTotals[invoice.supplier] = 0;
     }
 
-    supplierTotals[invoice.supplier] += invoice.total || 0;
-
+    supplierTotals[invoice.supplier] += total;
   });
 
   // DASHBOARD
-
   const spendBox = document.getElementById('totalInvoiceSpend');
   const countBox = document.getElementById('invoiceCount');
   const avgBox = document.getElementById('averageInvoice');
@@ -65,10 +65,7 @@ function renderInvoices() {
     countBox.textContent = invoiceData.length;
   }
 
-  const averageInvoice =
-    invoiceData.length > 0
-      ? totalSpend / invoiceData.length
-      : 0;
+  const averageInvoice = invoiceData.length > 0 ? totalSpend / invoiceData.length : 0;
 
   if (avgBox) {
     avgBox.textContent = `£${averageInvoice.toFixed(2)}`;
@@ -78,14 +75,10 @@ function renderInvoices() {
   let highestSpend = 0;
 
   Object.keys(supplierTotals).forEach(name => {
-
     if (supplierTotals[name] > highestSpend) {
-
       highestSpend = supplierTotals[name];
       topSupplier = name;
-
     }
-
   });
 
   if (topSupplierBox) {
@@ -93,15 +86,12 @@ function renderInvoices() {
   }
 
   // SUPPLIER CARDS
-
   if (supplierCards) {
-
     supplierCards.innerHTML = '';
 
     Object.keys(supplierTotals)
       .sort((a, b) => supplierTotals[b] - supplierTotals[a])
       .forEach(name => {
-
         const card = document.createElement('div');
 
         card.style.background = '#1a1a1a';
@@ -110,18 +100,17 @@ function renderInvoices() {
         card.style.padding = '20px';
         card.style.boxShadow = '0 0 12px rgba(0,0,0,0.4)';
         card.style.minWidth = '200px';
+        card.style.flex = '1 1 220px';
 
         const invoiceCount = invoiceData.filter(i => i.supplier === name).length;
-        const percentage = totalSpend > 0 ? ((supplierTotals[name] / totalSpend) * 100).toFixed(1) : 0;
+        const percentage = totalSpend > 0 ? ((supplierTotals[name] / totalSpend) * 100).toFixed(1) : '0.0';
 
         card.innerHTML = `
           <h3 style="
             margin:0 0 15px 0;
             color:#ffd700;
             font-size:18px;
-          ">
-            ${name}
-          </h3>
+          ">${name}</h3>
 
           <div style="
             margin-bottom:12px;
@@ -140,7 +129,6 @@ function renderInvoices() {
             gap:10px;
             font-size:14px;
           ">
-
             <div>
               <strong>Invoices</strong><br>
               ${invoiceCount}
@@ -150,26 +138,20 @@ function renderInvoices() {
               <strong>% of Total</strong><br>
               ${percentage}%
             </div>
-
           </div>
         `;
 
         supplierCards.appendChild(card);
-
       });
-
   }
 
   // SUPPLIER BREAKDOWN
-
   if (breakdown) {
-
     breakdown.innerHTML = '';
 
     Object.keys(supplierTotals)
       .sort((a, b) => supplierTotals[b] - supplierTotals[a])
       .forEach(name => {
-
         const row = document.createElement('div');
 
         row.style.padding = '10px';
@@ -180,26 +162,21 @@ function renderInvoices() {
 
         row.innerHTML = `
           <strong>${name}</strong>
-
           <span style="float:right;">
             £${supplierTotals[name].toFixed(2)}
           </span>
         `;
 
         breakdown.appendChild(row);
-
       });
-
   }
 
   // INVOICE HISTORY
-
   list.innerHTML = '';
 
   invoiceData
     .sort((a, b) => b.id - a.id)
     .forEach(i => {
-
       const row = document.createElement('div');
 
       row.style.background = '#1a1a1a';
@@ -216,13 +193,7 @@ function renderInvoices() {
           align-items:center;
           margin-bottom:15px;
         ">
-
-          <h3 style="
-            margin:0;
-            color:#ffd700;
-          ">
-            ${i.supplier}
-          </h3>
+          <h3 style="margin:0; color:#ffd700;">${i.supplier}</h3>
 
           <button
             onclick="deleteInvoice(${i.id})"
@@ -237,7 +208,6 @@ function renderInvoices() {
           >
             Delete
           </button>
-
         </div>
 
         <div style="
@@ -245,32 +215,11 @@ function renderInvoices() {
           grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
           gap:15px;
         ">
-
-          <div>
-            <strong>Invoice Number</strong><br>
-            ${i.number}
-          </div>
-
-          <div>
-            <strong>Date</strong><br>
-            ${i.date}
-          </div>
-
-          <div>
-            <strong>Total</strong><br>
-            £${i.total.toFixed(2)}
-          </div>
-
-          <div>
-            <strong>Subtotal</strong><br>
-            £${i.subtotal.toFixed(2)}
-          </div>
-
-          <div>
-            <strong>Shipping</strong><br>
-            £${i.shipping.toFixed(2)}
-          </div>
-
+          <div><strong>Invoice Number</strong><br>${i.number}</div>
+          <div><strong>Date</strong><br>${i.date}</div>
+          <div><strong>Total</strong><br>£${(Number(i.total) || 0).toFixed(2)}</div>
+          <div><strong>Subtotal</strong><br>£${(Number(i.subtotal) || 0).toFixed(2)}</div>
+          <div><strong>Shipping</strong><br>£${(Number(i.shipping) || 0).toFixed(2)}</div>
         </div>
 
         <div style="
@@ -279,28 +228,21 @@ function renderInvoices() {
           padding:12px;
           border-radius:6px;
         ">
-
           <strong>Notes</strong><br>
           ${i.notes || 'No notes'}
-
         </div>
       `;
 
       list.appendChild(row);
-
     });
-
 }
 
 function deleteInvoice(id) {
-
   if (!confirm('Delete this invoice?')) {
     return;
   }
 
-  invoiceData = invoiceData.filter(
-    invoice => invoice.id !== id
-  );
+  invoiceData = invoiceData.filter(invoice => invoice.id !== id);
 
   localStorage.setItem(
     'invoiceData',
@@ -310,7 +252,4 @@ function deleteInvoice(id) {
   renderInvoices();
 }
 
-document.addEventListener(
-  'DOMContentLoaded',
-  renderInvoices
-);
+document.addEventListener('DOMContentLoaded', renderInvoices);
