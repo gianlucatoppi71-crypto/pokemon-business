@@ -46,31 +46,32 @@ function renderInvoices() {
     }
 
     supplierTotals[invoice.supplier] += invoice.total || 0;
+
   });
 
-  // Dashboard
+  // DASHBOARD
 
   const spendBox = document.getElementById('totalInvoiceSpend');
   const countBox = document.getElementById('invoiceCount');
   const avgBox = document.getElementById('averageInvoice');
   const topSupplierBox = document.getElementById('topSupplier');
 
-  if (spendBox)
-    spendBox.textContent =
-      `£${totalSpend.toFixed(2)}`;
+  if (spendBox) {
+    spendBox.textContent = `£${totalSpend.toFixed(2)}`;
+  }
 
-  if (countBox)
-    countBox.textContent =
-      invoiceData.length;
+  if (countBox) {
+    countBox.textContent = invoiceData.length;
+  }
 
   const averageInvoice =
     invoiceData.length > 0
       ? totalSpend / invoiceData.length
       : 0;
 
-  if (avgBox)
-    avgBox.textContent =
-      `£${averageInvoice.toFixed(2)}`;
+  if (avgBox) {
+    avgBox.textContent = `£${averageInvoice.toFixed(2)}`;
+  }
 
   let topSupplier = 'None';
   let highestSpend = 0;
@@ -81,14 +82,16 @@ function renderInvoices() {
 
       highestSpend = supplierTotals[name];
       topSupplier = name;
+
     }
+
   });
 
-  if (topSupplierBox)
-    topSupplierBox.textContent =
-      topSupplier;
+  if (topSupplierBox) {
+    topSupplierBox.textContent = topSupplier;
+  }
 
-  // Supplier Breakdown
+  // SUPPLIER BREAKDOWN
 
   if (breakdown) {
 
@@ -100,20 +103,27 @@ function renderInvoices() {
 
         const row = document.createElement('div');
 
-        row.style.padding = '8px 0';
+        row.style.padding = '10px';
+        row.style.marginBottom = '8px';
+        row.style.background = '#222';
+        row.style.border = '1px solid #333';
+        row.style.borderRadius = '6px';
 
         row.innerHTML = `
           <strong>${name}</strong>
+
           <span style="float:right;">
             £${supplierTotals[name].toFixed(2)}
           </span>
         `;
 
         breakdown.appendChild(row);
+
       });
+
   }
 
-  // Invoice History
+  // INVOICE HISTORY
 
   list.innerHTML = '';
 
@@ -123,42 +133,94 @@ function renderInvoices() {
 
       const row = document.createElement('div');
 
-      row.className = 'inventory-card';
-
-      row.style.marginBottom = '15px';
+      row.style.background = '#1a1a1a';
+      row.style.border = '1px solid #333';
+      row.style.borderRadius = '10px';
+      row.style.padding = '20px';
+      row.style.marginBottom = '20px';
+      row.style.boxShadow = '0 0 12px rgba(0,0,0,0.4)';
 
       row.innerHTML = `
-        <h3>${i.supplier}</h3>
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          margin-bottom:15px;
+        ">
 
-        <p><strong>Invoice:</strong> ${i.number}</p>
+          <h3 style="
+            margin:0;
+            color:#ffd700;
+          ">
+            ${i.supplier}
+          </h3>
 
-        <p><strong>Date:</strong> ${i.date}</p>
+          <button
+            onclick="deleteInvoice(${i.id})"
+            style="
+              background:#8b0000;
+              color:white;
+              border:none;
+              border-radius:6px;
+              padding:8px 14px;
+              cursor:pointer;
+            "
+          >
+            Delete
+          </button>
 
-        <p><strong>Subtotal:</strong> £${i.subtotal.toFixed(2)}</p>
+        </div>
 
-        <p><strong>Shipping:</strong> £${i.shipping.toFixed(2)}</p>
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+          gap:15px;
+        ">
 
-        <p><strong>Total:</strong> £${i.total.toFixed(2)}</p>
+          <div>
+            <strong>Invoice Number</strong><br>
+            ${i.number}
+          </div>
 
-        <p><strong>Notes:</strong> ${i.notes}</p>
+          <div>
+            <strong>Date</strong><br>
+            ${i.date}
+          </div>
 
-        <button
-          onclick="deleteInvoice(${i.id})"
-          style="
-            background:#8b0000;
-            color:white;
-            border:none;
-            padding:10px;
-            border-radius:6px;
-            cursor:pointer;
-          "
-        >
-          Delete Invoice
-        </button>
+          <div>
+            <strong>Total</strong><br>
+            £${i.total.toFixed(2)}
+          </div>
+
+          <div>
+            <strong>Subtotal</strong><br>
+            £${i.subtotal.toFixed(2)}
+          </div>
+
+          <div>
+            <strong>Shipping</strong><br>
+            £${i.shipping.toFixed(2)}
+          </div>
+
+        </div>
+
+        <div style="
+          margin-top:15px;
+          background:#222;
+          padding:12px;
+          border-radius:6px;
+        ">
+
+          <strong>Notes</strong><br>
+          ${i.notes || 'No notes'}
+
+        </div>
       `;
 
       list.appendChild(row);
+
     });
+
 }
 
 function deleteInvoice(id) {
