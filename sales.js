@@ -466,7 +466,18 @@ grouped[key].marketValue += item.marketPrice || 0;
 if (item.type === "BOX") grouped[key].boxes += 1;
 if (item.type === "PACK") grouped[key].packs += 1;
 });
-
+Object.values(grouped).forEach(item => {
+  container.innerHTML += `
+    <div class="inventory-card">
+      <h3>${item.name}</h3>
+      <p>Supplier: ${item.supplier || "-"}</p>
+      <p>Holdings: ${item.boxes} Box(es) / ${item.packs} Pack(s)</p>
+      <p>Collection Cost: £${item.cost.toFixed(2)}</p>
+      <p>Market Value: £${item.marketValue.toFixed(2)}</p>
+      <p>Unrealised Gain: £${(item.marketValue - item.cost).toFixed(2)}</p>
+    </div>
+  `;
+});
  
 }
 // Global window registration map hooks
