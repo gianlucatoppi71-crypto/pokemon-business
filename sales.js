@@ -435,8 +435,29 @@ function renderSales() {
     tbody.appendChild(row);
   });
 }
+function renderPersonalCollection() {
+  loadData();
 
+  const container = document.getElementById("collectionList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  personalCollectionData.forEach(item => {
+    container.innerHTML += `
+      <div class="inventory-card">
+        <h3>${item.name}</h3>
+        <p>Type: ${item.type}</p>
+        <p>Supplier: ${item.supplier || "-"}</p>
+        <p>Cost: £${item.buyPrice || 0}</p>
+        <p>Market Value: £${item.marketPrice || 0}</p>
+        <p>Date Added: ${item.date}</p>
+      </div>
+    `;
+  });
+}
 // Global window registration map hooks
 window.renderSales = renderSales;
 window.undoSale = undoSale;
 window.deleteSale = deleteSale;
+window.renderPersonalCollection = renderPersonalCollection;
