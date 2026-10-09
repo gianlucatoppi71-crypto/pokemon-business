@@ -440,6 +440,8 @@ function renderPersonalCollection() {
 
   const container = document.getElementById("collectionList");
   if (!container) return;
+  const dashboard = document.getElementById("collectionDashboard");
+  if (!dashboard) return;
 
   container.innerHTML = "";
 
