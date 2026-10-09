@@ -460,6 +460,11 @@ function renderPersonalCollection() {
       packs: 0
     };
   }
+    grouped[key].cost += item.buyPrice || 0;
+grouped[key].marketValue += item.marketPrice || 0;
+
+if (item.type === "BOX") grouped[key].boxes += 1;
+if (item.type === "PACK") grouped[key].packs += 1;
 });
 
  
