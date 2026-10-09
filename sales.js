@@ -445,6 +445,7 @@ function renderPersonalCollection() {
 
   container.innerHTML = "";
   dashboard.innerHTML = "";
+  const grouped = {};
 
  
 }
