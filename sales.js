@@ -444,6 +444,7 @@ function renderPersonalCollection() {
   if (!dashboard) return;
 
   container.innerHTML = "";
+  dashboard.innerHTML = "";
 
   personalCollectionData.forEach(item => {
     container.innerHTML += `
