@@ -446,6 +446,21 @@ function renderPersonalCollection() {
   container.innerHTML = "";
   dashboard.innerHTML = "";
   const grouped = {};
+  personalCollectionData.forEach(item => {
+  const key = item.name;
+
+  if (!grouped[key]) {
+    grouped[key] = {
+      name: item.name,
+      supplier: item.supplier,
+      image: item.image,
+      marketValue: 0,
+      cost: 0,
+      boxes: 0,
+      packs: 0
+    };
+  }
+});
 
  
 }
