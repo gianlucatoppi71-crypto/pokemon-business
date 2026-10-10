@@ -446,6 +446,8 @@ function renderPersonalCollection() {
   container.innerHTML = "";
   dashboard.innerHTML = "";
   const grouped = {};
+  let totalCost = 0;
+let totalMarketValue = 0;
   personalCollectionData.forEach(item => {
   const key = item.name;
 
@@ -462,6 +464,8 @@ function renderPersonalCollection() {
   }
     grouped[key].cost += item.buyPrice || 0;
 grouped[key].marketValue += item.marketPrice || 0;
+    totalCost += item.buyPrice || 0;
+totalMarketValue += item.marketPrice || 0;
 
 if (item.type === "BOX") grouped[key].boxes += 1;
 if (item.type === "PACK") grouped[key].packs += 1;
