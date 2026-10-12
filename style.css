@@ -934,3 +934,10 @@ form button[type="button"]:hover {
   padding: 18px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.3);
 }
+#collectionList .inventory-card h3 {
+  color: #ffd700;
+  font-size: 18px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
