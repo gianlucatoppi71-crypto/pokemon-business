@@ -186,6 +186,9 @@ form button[type="button"]:hover {
 .excel-inventory-table thead {
   background: #222;
   border-bottom: 2px solid #444;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .excel-inventory-table th {
