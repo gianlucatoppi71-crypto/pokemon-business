@@ -3,6 +3,8 @@
 // ===============================
 
 let editMode = null;
+let currentSort = "name";
+let sortDirection = "asc";
 
 // ===============================
 // RENDER INVENTORY
